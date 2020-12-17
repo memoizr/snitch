@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    maven
 }
 
 group = "com.snitch.undertow"
