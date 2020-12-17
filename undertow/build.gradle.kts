@@ -3,7 +3,7 @@ plugins {
     maven
 }
 
-group = "com.snitch.spark"
+group = "com.snitch.undertow"
 version = "1.0.0"
 
 repositories {
@@ -13,6 +13,5 @@ repositories {
 dependencies {
     implementation(project(":"))
     implementation(kotlin("stdlib"))
-    implementation("com.sparkjava:spark-core:2.9.3")
-    implementation("ch.qos.logback:logback-classic:1.1.7")
+    implementation("io.undertow:undertow-core:2.2.3.Final")
 }

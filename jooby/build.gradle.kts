@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    maven
 }
 
 group = "com.snitch.jooby"
@@ -12,5 +13,6 @@ repositories {
 dependencies {
     implementation(project(":"))
     implementation(kotlin("stdlib"))
-    testImplementation("com.github.jooby-project:jooby:2.9.4")
+    implementation("io.jooby:jooby-utow:2.9.4")
+    implementation("io.jooby:jooby:2.9.4")
 }

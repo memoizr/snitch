@@ -9,7 +9,7 @@ interface SnitchService {
 data class RoutedService(val service: SnitchService, val router: Router) {
     fun startListening(): RoutedService {
         router.endpoints.forEach {
-            val path: String = service.config.basePath + it.endpoint.url.replace("/{", "/:").replace("}", "")
+            val path: String = service.config.basePath + it.endpoint.url//.replace("/{", "/:").replace("}", "")
             service.registerMethod(it, path)
         }
         return this

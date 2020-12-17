@@ -12,7 +12,9 @@ data class RequestHandler<T : Any>
         val request: RequestWrapper,
         val response: ResponseWrapper) {
 
-    val body: T by lazy { _body?.customGson?.parse(request.body, _body.klass)!! }
+    val body: T by lazy { _body?.customGson?.parse(
+        request.body
+        , _body.klass)!! }
 
     inline operator fun <reified T : Any> RequestWrapper.get(param: PathParam<T>): T =
             checkParamIsRegistered(param)

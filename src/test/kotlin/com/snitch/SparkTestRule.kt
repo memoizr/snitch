@@ -1,6 +1,7 @@
 package com.snitch
 
 import ch.qos.logback.classic.Level
+import com.snitch.spark.JoobySnitchService
 import com.snitch.spark.SparkSnitchService
 import org.junit.rules.ExternalResource
 import org.junit.runner.Description
@@ -19,7 +20,7 @@ val config = Config(description = "A test",
 )
 
 open class SparkTestRule(port: Int, val router: Router.() -> Unit = ServerRouter) : ExternalResource() {
-    val server = SparkSnitchService(config.copy(port = port))
+    val server = JoobySnitchService(config.copy(port = port))
 
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
@@ -44,6 +45,6 @@ open class SparkTestRule(port: Int, val router: Router.() -> Unit = ServerRouter
 
     override fun before() {
         server.setRoutes(router)
-        server.http.awaitInitialization()
+//        server.http.awaitInitialization()
     }
 }

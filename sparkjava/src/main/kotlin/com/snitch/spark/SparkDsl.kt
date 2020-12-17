@@ -4,10 +4,11 @@ import com.snitch.*
 import spark.Request
 import spark.Response
 
-class SparkRequestWrapper(override val request: Request) : RequestWrapper {
+class SparkRequestWrapper(val request: Request) : RequestWrapper {
 
-    override val body: String = request.body()
+    override val body: String by lazy { request.body() }
 
+    override fun method(): HTTPMethod = HTTPMethod.fromString(request.requestMethod())
 
     override fun params(name: String): String? = request.params(name)
 

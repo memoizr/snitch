@@ -67,7 +67,7 @@ class ParametersTest : SparkTest() {
 
         GET("sneakyqueryparams") isHandledBy { TestResult(request.get(queryParam)).ok }
         GET("sneakyheaderparams") isHandledBy { TestResult(request.get(headerParam)).ok }
-        GET("sneakypathparams/:path") isHandledBy { TestResult(request.get(pathParam)).ok }
+        GET("sneakypathparams" / pathParam.copy(name = "sneaky")) isHandledBy { TestResult(request.get(pathParam)).ok }
 
         val function: Handler<BodyParam, BodyTestResult> = {
             val sealed = body.sealed

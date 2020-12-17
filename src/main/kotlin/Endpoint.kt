@@ -45,12 +45,12 @@ data class Endpoint<B : Any>(
 }
 
 interface RequestWrapper {
-    val request: Any
-
     val body: String
     fun params(name: String): String?
     fun headers(name: String): String?
     fun queryParams(name: String): String?
+
+    fun method() : HTTPMethod
 
 
     fun getPathParam(param: PathParam<*>): String?
