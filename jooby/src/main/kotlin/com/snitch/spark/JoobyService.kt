@@ -8,9 +8,7 @@ import com.snitch.Router
 import io.jooby.Context
 import io.jooby.Jooby
 import io.jooby.ServerOptions
-import io.jooby.runApp
 import java.io.File
-import java.util.function.Consumer
 import java.util.function.Supplier
 
 

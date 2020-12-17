@@ -2,7 +2,6 @@ package com.snitch
 
 import ch.qos.logback.classic.Level
 import com.snitch.spark.JoobySnitchService
-import com.snitch.spark.SparkSnitchService
 import org.junit.rules.ExternalResource
 import org.junit.runner.Description
 import org.junit.runners.model.Statement

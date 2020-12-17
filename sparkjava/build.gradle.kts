@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":"))
+    implementation(project(":core"))
     implementation(kotlin("stdlib"))
     implementation("com.sparkjava:spark-core:2.9.3")
     implementation("ch.qos.logback:logback-classic:1.1.7")

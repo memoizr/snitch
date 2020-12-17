@@ -1,22 +1,6 @@
 package com.snitch.undertow
 
 
-import RoutedService
-import SnitchService
-import com.snitch.Config
-import com.snitch.HTTPMethod
-import com.snitch.Router
-import com.snitch.path
-import io.undertow.Handlers
-import io.undertow.Undertow
-import io.undertow.server.HttpServerExchange
-import io.undertow.server.RoutingHandler
-import java.io.File
-import java.util.function.Consumer
-import java.util.function.Supplier
-
-
-
 //class JoobySnitchService(override val config: Config) : SnitchService {
 //    val service by lazy { Undertow.builder().addHttpListener(config.port, "localhost")}
 //

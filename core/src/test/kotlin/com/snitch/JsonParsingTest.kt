@@ -1,10 +1,7 @@
 package com.snitch
 
-import com.beust.klaxon.Klaxon
-import com.snitch.extensions.json
 import com.snitch.extensions.parseJson
 import com.snitch.extensions.print
-import com.google.gson.Gson
 import com.memoizr.assertk.expect
 import org.junit.Test
 

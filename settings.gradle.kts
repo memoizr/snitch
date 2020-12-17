@@ -1,2 +1,2 @@
 rootProject.name = "snitch"
-include("sparkjava", "jooby", "undertow")
+include("core", "sparkjava", "jooby", "undertow")
