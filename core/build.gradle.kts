@@ -1,6 +1,5 @@
 plugins {
     kotlin("jvm")
-    maven
 }
 
 group = "com.snitch.core"
