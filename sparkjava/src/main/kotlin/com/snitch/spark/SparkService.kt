@@ -30,6 +30,7 @@ class SparkSnitchService(override val config: Config) : SnitchService {
         if (!tmpDir.exists()) {
             tmpDir.mkdirs()
         }
+        println(tmpDir)
         http.externalStaticFileLocation(tmpDir.absolutePath)
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
         logger.level = config.logLevel
@@ -40,14 +41,15 @@ class SparkSnitchService(override val config: Config) : SnitchService {
     }
 
     override fun registerMethod(it: Router.EndpointBundle<*>, path: String) {
+        val sparkPath = path.replace("{",":").replace("}", "")
         when (it.endpoint.httpMethod) {
-            HTTPMethod.GET -> { http.get(path, it.func) }
-            HTTPMethod.POST -> http.post(path, it.func)
-            HTTPMethod.PUT -> http.put(path, it.func)
-            HTTPMethod.PATCH -> http.patch(path, it.func)
-            HTTPMethod.HEAD -> http.head(path, it.func)
-            HTTPMethod.DELETE -> http.delete(path, it.func)
-            HTTPMethod.OPTIONS -> http.options(path, it.func)
+            HTTPMethod.GET -> { http.get(sparkPath, it.func) }
+            HTTPMethod.POST -> http.post(sparkPath, it.func)
+            HTTPMethod.PUT -> http.put(sparkPath, it.func)
+            HTTPMethod.PATCH -> http.patch(sparkPath, it.func)
+            HTTPMethod.HEAD -> http.head(sparkPath, it.func)
+            HTTPMethod.DELETE -> http.delete(sparkPath, it.func)
+            HTTPMethod.OPTIONS -> http.options(sparkPath, it.func)
         }
     }
 

@@ -6,7 +6,10 @@ import com.snitch.Router
 import com.snitch.extensions.json
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import kotlin.reflect.full.starProjectedType
+import java.nio.file.Path as JPath
 
 fun RoutedService.generateDocs(): Spec {
     val openApi = OpenApi(info = Info(router.config.title, "1.0"), servers = listOf(Server(router.config.host)))
@@ -82,23 +85,23 @@ data class Spec(val spec: String, val router: Router) {
 
     fun writeDocsToStaticFolder() {
         val dest = "/tmp/swagger-ui" + "/docs"
-        copyResourceToFile("favicon-16x16.png", dest)
-        copyResourceToFile("favicon-32x32.png", dest)
-        copyResourceToFile("index.html", dest)
-        copyResourceToFile("oauth2-redirect.html", dest)
-        copyResourceToFile("swagger-ui.css", dest)
-        copyResourceToFile("swagger-ui.css.map", dest)
-        copyResourceToFile("swagger-ui.js", dest)
-        copyResourceToFile("swagger-ui.js.map", dest)
-        copyResourceToFile("swagger-ui-bundle.js", dest)
-        copyResourceToFile("swagger-ui-bundle.js.map", dest)
-        copyResourceToFile("swagger-ui-es-bundle.js", dest)
-        copyResourceToFile("swagger-ui-es-bundle.js.map", dest)
-        copyResourceToFile("swagger-ui-es-bundle-core.js", dest)
-        copyResourceToFile("swagger-ui-es-bundle-core.js.map", dest)
-        copyResourceToFile("swagger-ui-standalone-preset.js", dest)
-        copyResourceToFile("swagger-ui-standalone-preset.js.map", dest)
         writeToFile(spec, "$dest/spec.json")
+        copyResourceToFile("swagger-ui-3.44.0/dist/favicon-16x16.png", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/favicon-32x32.png", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/index.html", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/oauth2-redirect.html", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.css", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.css.map", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.js", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.js.map", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-bundle.js", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-bundle.js.map", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle.js", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle.js.map", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle-core.js", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle-core.js.map", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-standalone-preset.js", dest)
+        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-standalone-preset.js.map", dest)
     }
 }
 
@@ -115,14 +118,24 @@ internal fun writeToFile(content: String, destination: String) {
 }
 
 internal fun copyResourceToFile(resourceName: String, destination: String) {
-    val stream = ClassLoader.getSystemClassLoader().getResourceAsStream(resourceName)
-            ?: throw Exception("Cannot get resource \"$resourceName\" from Jar file.")
-    val s = "$destination/$resourceName"
-    File(destination).apply { if (!exists()) mkdirs() }
-    val resStreamOut = FileOutputStream(s)
-    stream.use { input ->
-        resStreamOut.use { output ->
-            input.copyTo(output)
-        }
+
+    File(ClassLoader.getSystemClassLoader().getResource(resourceName).file).apply {
+        val s = "$destination/$name"
+        copyTo(File(s), true)
+        println(s)
     }
+    //val stream = ClassLoader.getSystemClassLoader().getResourceAsStream(resourceName)
+    //        ?: throw Exception("Cannot get resource \"$resourceName\" from Jar file.")
+    //println(1)
+    //println(s)
+    //Files.copy(JPath.of(ClassLoader.getSystemClassLoader().getResource(resourceName).path), JPath.of(s), StandardCopyOption.REPLACE_EXISTING)
+    //File(destination).apply { if (!exists()) mkdirs() }
+    //File(s).apply { if (!exists()) createNewFile() }
+    //println(2)
+    //val resStreamOut = FileOutputStream(s)
+    //stream.use { input ->
+    //    resStreamOut.use { output ->
+    //        input.copyTo(output)
+    //    }
+    //}
 }

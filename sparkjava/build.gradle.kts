@@ -16,3 +16,6 @@ dependencies {
     implementation("com.sparkjava:spark-core:2.9.3")
     implementation("ch.qos.logback:logback-classic:1.1.7")
 }
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
+    kotlinOptions.jvmTarget = "1.8"
+}
