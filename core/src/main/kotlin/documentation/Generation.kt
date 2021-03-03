@@ -86,22 +86,23 @@ data class Spec(val spec: String, val router: Router) {
     fun writeDocsToStaticFolder() {
         val dest = "/tmp/swagger-ui" + "/docs"
         writeToFile(spec, "$dest/spec.json")
-        copyResourceToFile("swagger-ui-3.44.0/dist/favicon-16x16.png", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/favicon-32x32.png", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/index.html", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/oauth2-redirect.html", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.css", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.css.map", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.js", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.js.map", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-bundle.js", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-bundle.js.map", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle.js", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle.js.map", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle-core.js", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle-core.js.map", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-standalone-preset.js", dest)
-        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-standalone-preset.js.map", dest)
+        File("$dest/index.html").writeText(index)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/favicon-16x16.png", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/favicon-32x32.png", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/index.html", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/oauth2-redirect.html", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.css", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.css.map", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.js", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.js.map", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-bundle.js", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-bundle.js.map", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle.js", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle.js.map", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle-core.js", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle-core.js.map", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-standalone-preset.js", dest)
+//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-standalone-preset.js.map", dest)
     }
 }
 
@@ -139,3 +140,60 @@ internal fun copyResourceToFile(resourceName: String, destination: String) {
     //    }
     //}
 }
+
+val index = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Swagger UI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/swagger-ui.css">
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/favicon-32x32.png" sizes="16x16" />
+    <style>
+      html {
+        box-sizing: border-box;
+        overflow: -moz-scrollbars-vertical;
+        overflow-y: scroll;
+      }
+
+      *, *:before, *:after {
+        box-sizing: inherit;
+      }
+
+      body {
+        margin:0;
+        background: #fafafa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="swagger-ui"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/swagger-ui-standalone-preset.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/swagger-ui-bundle.js"></script>
+    <script>
+    window.onload = function() {
+      // Begin Swagger UI call region
+      const ui = SwaggerUIBundle({
+        url: "./spec.json",
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout"
+      });
+      // End Swagger UI call region
+
+      window.ui = ui;
+    };
+  </script>
+  </body>
+</html>
+"""
