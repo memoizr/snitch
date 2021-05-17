@@ -9,12 +9,12 @@ val root = "home"
 val v1 = "/v1"
 val clips = "clips"
 
-val clipId: PathParam<Int> = path(
+val clipId: PathParam<Int, Int> = path(
         name = "clipId",
         condition = NonNegativeInt,
         description = "The clip id")
 
-val otherPathParam: PathParam<Int> = path(
+val otherPathParam: PathParam<Int, Int> = path(
         name = "otherPathParam",
         condition = NonNegativeInt,
         description = "The clip id")
@@ -50,7 +50,7 @@ private val random = optionalQuery(
         condition = aFoo)
 
 
-object aFoo : Validator<Random> {
+object aFoo : Validator<Random, Random> {
     override val regex: Regex = "/^hello".toRegex()
     override val description: String  = "a ranom parameter"
     override val parse: (String) -> Random = { Random()}

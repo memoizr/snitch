@@ -3,46 +3,46 @@ import com.google.gson.Gson
 import kotlin.reflect.KClass
 import kotlin.text.RegexOption.*
 
-object NonNegativeInt : Validator<Int> {
+object NonNegativeInt : Validator<Int, Int> {
     override val description = "non negative integer"
     override val regex = """^\d+$""".toRegex()
     override val parse: (String) -> Int = { it.toInt() }
 }
 
-object NonEmptyString : Validator<String> {
+object NonEmptyString : Validator<String, String> {
     override val description = "non empty string"
     override val regex = """^.+$""".toRegex(DOT_MATCHES_ALL)
     override val parse: (String) -> String = { it }
 }
 
-object NonEmptySingleLineString : Validator<String> {
+object NonEmptySingleLineString : Validator<String, String> {
     override val description = "non empty single-line string"
     override val regex = """^.+$""".toRegex()
     override val parse: (String) -> String = { it }
 }
 
-object NonEmptyStringSet : Validator<Set<String>> {
+object NonEmptyStringSet : Validator<String, Set<String>> {
     override val description = "non empty string set"
     override val regex = """^(.+,?)*.+$""".toRegex()
     override val parse: (String) -> Set<String> = { it.split(",").toSet() }
 }
 
-object StringSet : Validator<Set<String>> {
+object StringSet : Validator<String, Set<String>> {
     override val description = "string set"
     override val regex = """.*""".toRegex()
     override val parse: (String) -> Set<String> = { it.split(",").toSet() }
 }
 
-interface Validator<T> {
+interface Validator<T, R> {
     val regex: Regex
     val description: String
 
-    val parse: (String) -> T
+    val parse: (String) -> R
 
-    fun optional(): Validator<T?> = this as Validator<T?>
+    fun optional(): Validator<T?, R?> = this as Validator<T?, R?>
 }
 
-class Enum<E : kotlin.Enum<*>>(e: KClass<E>) : Validator<E> {
+class Enum<E : kotlin.Enum<*>>(e: KClass<E>) : Validator<E, E> {
     private val values = e.java.enumConstants.asList().joinToString("|")
     override val description: String = "A string of value: $values"
     override val parse: (String) -> E = { Gson().fromJson(it, e.java) }

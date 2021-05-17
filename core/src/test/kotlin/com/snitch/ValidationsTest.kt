@@ -11,14 +11,25 @@ class ValidationsTest : SparkTest() {
     val allowInvalidHeader = optionalHeader("allowInvalidHeader", "allowInvalid", condition = NonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
     val stringSet = optionalQuery("stringset", "stringset", condition = StringSet)
 
+    val userId = optionalQuery("userId", condition = UserIdValidator)
+
+    data class UserId(val id: String)
+
+    object UserIdValidator : Validator<String, UserId> {
+        override val description = "User id"
+        override val regex = """^.+$""".toRegex(RegexOption.DOT_MATCHES_ALL)
+        override val parse: (String) -> UserId = { UserId(it) }
+    }
+
     @Rule
     @JvmField
     val rule = SparkTestRule(port) {
-        GET("foo" / id) with queries(offset, allowInvalidQuery, stringSet) with headers(allowInvalidHeader) isHandledBy {
+        GET("foo" / id) with queries(offset, allowInvalidQuery, stringSet, userId) with headers(allowInvalidHeader) isHandledBy {
             request[offset]
             request[allowInvalidHeader]
             request[allowInvalidQuery]
             request[stringSet]
+            request[userId]
             "ok".ok
         }
     }
@@ -38,5 +49,6 @@ class ValidationsTest : SparkTest() {
         whenPerform GET "/$root/foo/11?stringset=foo" expectBody """"ok""""
         whenPerform GET "/$root/foo/11?stringset=foo%20bar" expectBody """"ok""""
         whenPerform GET "/$root/foo/11?stringset=foo,bar" expectBody """"ok""""
+        whenPerform GET "/$root/foo/11?userId=nooooo" expectBody """"ok""""
     }
 }

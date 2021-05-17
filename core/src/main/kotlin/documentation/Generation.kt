@@ -106,7 +106,7 @@ data class Spec(val spec: String, val router: Router) {
     }
 }
 
-private fun getDescription(param: Parameter<*>) =
+private fun getDescription(param: Parameter<*,*>) =
         "${param.description} - ${param.pattern.description}${if (param.invalidAsMissing) " - Invalid as Missing" else ""}${if (param.emptyAsMissing) " - Empty as Missing" else ""}"
 
 internal fun writeToFile(content: String, destination: String) {

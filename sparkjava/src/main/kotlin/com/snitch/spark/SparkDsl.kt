@@ -16,14 +16,14 @@ class SparkRequestWrapper(val request: Request) : RequestWrapper {
 
     override fun queryParams(name: String): String? = request.queryParams(name)
 
-    override fun getPathParam(param: PathParam<*>): String? =
+    override fun getPathParam(param: PathParam<*, *>): String? =
         request.params(param.name)
             .let { if (it != null && param.emptyAsMissing && it.isEmpty()) null else it }
 
-    override fun getQueryParam(param: QueryParameter<*>) =
+    override fun getQueryParam(param: QueryParameter<*, *>) =
         request.queryParams(param.name).filterValid(param)
 
-    override fun getHeaderParam(param: HeaderParameter<*>) =
+    override fun getHeaderParam(param: HeaderParameter<*, *>) =
         request.headers(param.name).filterValid(param)
 }
 

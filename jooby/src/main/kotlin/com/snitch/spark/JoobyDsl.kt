@@ -16,14 +16,14 @@ class JoobyRequestWrapper(val context: Context) : RequestWrapper {
 
     override fun queryParams(name: String): String? = context.query(name).valueOrNull()
 
-    override fun getPathParam(param: PathParam<*>): String? =
+    override fun getPathParam(param: PathParam<*, *>): String? =
         context.path(param.name).valueOrNull()
             .let { if (it != null && param.emptyAsMissing && it.isEmpty()) null else it }
 
-    override fun getQueryParam(param: QueryParameter<*>) =
+    override fun getQueryParam(param: QueryParameter<*,*>) =
         context.query(param.name).valueOrNull().filterValid(param)
 
-    override fun getHeaderParam(param: HeaderParameter<*>) =
+    override fun getHeaderParam(param: HeaderParameter<*,*>) =
         context.header(param.name).valueOrNull().filterValid(param)
 }
 
