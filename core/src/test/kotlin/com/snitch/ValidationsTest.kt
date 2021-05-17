@@ -5,12 +5,11 @@ import org.junit.Test
 
 class ValidationsTest : SparkTest() {
 
-    val id = path("id", "the id", NonNegativeInt)
-    val offset = optionalQuery("offset", "offset", condition = NonNegativeInt, default = 20, emptyAsMissing = true)
-    val allowInvalidQuery = optionalQuery("allowInvalidQuery", "allowInvalid", condition = NonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
-    val allowInvalidHeader = optionalHeader("allowInvalidHeader", "allowInvalid", condition = NonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
-    val stringSet = optionalQuery("stringset", "stringset", condition = StringSet)
-
+    val id = path("id", condition= NonNegativeInt)
+    val offset = optionalQuery("offset", condition = NonNegativeInt, default = 20, emptyAsMissing = true)
+    val allowInvalidQuery = optionalQuery("allowInvalidQuery",  condition = NonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
+    val allowInvalidHeader = optionalHeader("allowInvalidHeader", condition = NonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
+    val stringSet = optionalQuery("stringset", condition = StringSet)
     val userId = optionalQuery("userId", condition = UserIdValidator)
 
     data class UserId(val id: String)

@@ -100,7 +100,7 @@ inline fun <reified T, R> optionalQuery(name: String,
         )
 
 inline fun <reified T, R> optionalQuery(name: String,
-                                     description: String,
+                                     description: String ="",
                                      condition: Validator<T,R>,
                                      default: R,
                                      emptyAsMissing: Boolean = false,
@@ -118,7 +118,7 @@ inline fun <reified T, R> optionalQuery(name: String,
         )
 
 inline fun <reified T, R> query(name: String,
-                             description: String,
+                             description: String = "",
                              condition: Validator<T,R>,
                              emptyAsMissing: Boolean = false,
                              invalidAsMissing: Boolean = false,
@@ -135,7 +135,7 @@ inline fun <reified T, R> query(name: String,
 
 inline fun <reified T, R> optionalHeader(
         name: String,
-        description: String,
+        description: String = "",
         condition: Validator<T,R>,
         emptyAsMissing: Boolean = false,
         invalidAsMissing: Boolean = false,
@@ -153,7 +153,7 @@ inline fun <reified T, R> optionalHeader(
 
 inline fun <reified T, R> optionalHeader(
         name: String,
-        description: String,
+        description: String = "",
         condition: Validator<T,R>,
         emptyAsMissing: Boolean = false,
         default: R,
@@ -172,7 +172,7 @@ inline fun <reified T, R> optionalHeader(
 
 inline fun <reified T, R> header(
         name: String,
-        description: String,
+        description: String = "",
         condition: Validator<T,R>,
         emptyAsMissing: Boolean = false,
         invalidAsMissing: Boolean = false,
@@ -187,7 +187,7 @@ inline fun <reified T, R> header(
         visibility = visibility
 )
 
-inline fun <reified T, R> path(name: String, description: String, condition: Validator<T,R>) = PathParam(
+inline fun <reified T, R> path(name: String, description: String = "", condition: Validator<T,R>) = PathParam(
         null,
         T::class.java,
         name,
