@@ -20,7 +20,7 @@ fun RoutedService.generateDocs(): Spec {
                     path.withOperation(
                             bundle.endpoint.httpMethod,
                             Operation(
-                                    tags = bundle.endpoint.url.split("/").drop(1).firstOrNull()?.let { listOf(it) },
+                                    tags = bundle.endpoint.tags,
                                     summary = bundle.endpoint.summary,
                                     description = bundle.endpoint.description,
                                     responses = emptyMap(),
@@ -87,22 +87,6 @@ data class Spec(val spec: String, val router: Router) {
         val dest = "/tmp/swagger-ui" + "/docs"
         writeToFile(spec, "$dest/spec.json")
         File("$dest/index.html").writeText(index)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/favicon-16x16.png", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/favicon-32x32.png", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/index.html", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/oauth2-redirect.html", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.css", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.css.map", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.js", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui.js.map", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-bundle.js", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-bundle.js.map", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle.js", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle.js.map", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle-core.js", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-es-bundle-core.js.map", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-standalone-preset.js", dest)
-//        copyResourceToFile("swagger-ui-3.44.0/dist/swagger-ui-standalone-preset.js.map", dest)
     }
 }
 
@@ -116,29 +100,6 @@ internal fun writeToFile(content: String, destination: String) {
             input.copyTo(output)
         }
     }
-}
-
-internal fun copyResourceToFile(resourceName: String, destination: String) {
-
-    File(ClassLoader.getSystemClassLoader().getResource(resourceName).file).apply {
-        val s = "$destination/$name"
-        copyTo(File(s), true)
-        println(s)
-    }
-    //val stream = ClassLoader.getSystemClassLoader().getResourceAsStream(resourceName)
-    //        ?: throw Exception("Cannot get resource \"$resourceName\" from Jar file.")
-    //println(1)
-    //println(s)
-    //Files.copy(JPath.of(ClassLoader.getSystemClassLoader().getResource(resourceName).path), JPath.of(s), StandardCopyOption.REPLACE_EXISTING)
-    //File(destination).apply { if (!exists()) mkdirs() }
-    //File(s).apply { if (!exists()) createNewFile() }
-    //println(2)
-    //val resStreamOut = FileOutputStream(s)
-    //stream.use { input ->
-    //    resStreamOut.use { output ->
-    //        input.copyTo(output)
-    //    }
-    //}
 }
 
 val index = """

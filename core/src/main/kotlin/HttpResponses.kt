@@ -13,7 +13,9 @@ sealed class HttpResponse<T>() {
     data class ErrorHttpResponse<T, E>(override val statusCode: Int,
                                        val details: E) : HttpResponse<T>()
 }
-
+fun <T, R> HttpResponse<T>.mapSuccessful(fn: (T) -> R): HttpResponse<R> = if (this is SuccessfulHttpResponse) {
+    SuccessfulHttpResponse(statusCode, fn(body), _format)
+} else { this as HttpResponse<R> }
 fun <T> T.success(code: Int = 200): HttpResponse<T> = HttpResponse.SuccessfulHttpResponse(code, this)
 val <T> T.ok: HttpResponse<T> get() = HttpResponse.SuccessfulHttpResponse(200, this)
 val <T> T.created: HttpResponse<T> get() = HttpResponse.SuccessfulHttpResponse(201, this)

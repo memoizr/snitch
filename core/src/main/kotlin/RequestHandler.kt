@@ -16,35 +16,58 @@ data class RequestHandler<T : Any>
         request.body
         , _body.klass)!! }
 
+    fun RequestWrapper.checkParamIsRegistered(param: Parameter<*,*>) = if (!params.contains(param)) throw UnregisteredParamException(param) else this
+
     inline operator fun <reified T : Any, R> RequestWrapper.get(param: PathParam<T, R>): R =
-            checkParamIsRegistered(param)
-                    .params(param.name)
-                    .let { param.pattern.parse(it.orEmpty()) }
+        checkParamIsRegistered(param)
+            .params(param.name)
+            .let { param.pattern.parse(it.orEmpty()) }
 
     inline operator fun <reified T : Any?, R> RequestWrapper.get(param: QueryParam<T, R>): R =
-            checkParamIsRegistered(param)
-                    .queryParams(param.name)
-                    .let { param.pattern.parse(it.orEmpty()) }
+        checkParamIsRegistered(param)
+            .queryParams(param.name)
+            .let { param.pattern.parse(it.orEmpty()) }
 
     inline operator fun <reified T : Any?, R> RequestWrapper.get(param: OptionalQueryParam<T, R>): R =
-            checkParamIsRegistered(param)
-                    .queryParams(param.name)
-                    .filterValid(param)
-                    ?.let { param.pattern.parse(it) } ?: param.default
+        checkParamIsRegistered(param)
+            .queryParams(param.name)
+            .filterValid(param)
+            ?.let { param.pattern.parse(it) } ?: param.default
 
     inline operator fun <reified T : Any?, R> RequestWrapper.get(param: HeaderParam<T, R>): R =
-            checkParamIsRegistered(param)
-                    .headers(param.name)
-                    .let { param.pattern.parse(it.orEmpty()) }
+        checkParamIsRegistered(param)
+            .headers(param.name)
+            .let { param.pattern.parse(it.orEmpty()) }
 
     inline operator fun <reified T : Any?, R> RequestWrapper.get(param: OptionalHeaderParam<T,R>): R =
-            checkParamIsRegistered(param)
-                    .headers(param.name)
-                    .filterValid(param)
-                    ?.let { param.pattern.parse(it) } ?: param.default
-
-    fun RequestWrapper.checkParamIsRegistered(param: Parameter<*,*>) = if (!params.contains(param)) throw UnregisteredParamException(param) else this
+        checkParamIsRegistered(param)
+            .headers(param.name)
+            .filterValid(param)
+            ?.let { param.pattern.parse(it) } ?: param.default
 }
+
+inline operator fun <reified T : Any, R> RequestWrapper.get(param: PathParam<T, R>): R =
+        params(param.name)
+        .let { param.pattern.parse(it.orEmpty()) }
+
+inline operator fun <reified T : Any?, R> RequestWrapper.get(param: QueryParam<T, R>): R =
+        queryParams(param.name)
+        .let { param.pattern.parse(it.orEmpty()) }
+
+inline operator fun <reified T : Any?, R> RequestWrapper.get(param: OptionalQueryParam<T, R>): R =
+        queryParams(param.name)
+        .filterValid(param)
+        ?.let { param.pattern.parse(it) } ?: param.default
+
+inline operator fun <reified T : Any?, R> RequestWrapper.get(param: HeaderParam<T, R>): R =
+        headers(param.name)
+        .let { param.pattern.parse(it.orEmpty()) }
+
+inline operator fun <reified T : Any?, R> RequestWrapper.get(param: OptionalHeaderParam<T,R>): R =
+        headers(param.name)
+        .filterValid(param)
+        ?.let { param.pattern.parse(it) } ?: param.default
+
 
 fun queries(vararg queryParameter: QueryParameter<*,*>) = queryParameter.asList()
 fun headers(vararg headerParameter: HeaderParameter<*,*>) = headerParameter.asList()

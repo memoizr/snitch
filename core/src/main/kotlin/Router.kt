@@ -84,6 +84,7 @@ class Router (
                 invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }
                     .let { Gson().toJson(badRequest<T, List<String>>(it)) }
             } else try {
+                before(request)
                 block(RequestHandler(body, (headerParams + queryParams + pathParams), request, response)).let { httpResponse ->
                     response.setStatus(httpResponse.statusCode)
                     when (httpResponse) {
@@ -98,6 +99,8 @@ class Router (
                         }
                         is HttpResponse.ErrorHttpResponse<*, *> -> httpResponse.json
                     }
+                }.also {
+                    after(request, response)
                 }
             } catch (unregisteredException: UnregisteredParamException) {
                 val param = unregisteredException.param
