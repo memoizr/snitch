@@ -59,6 +59,18 @@ class Router (
         endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = this.leadingSlash + it.endpoint.url), it.response, it.function) }
     }
 
+    operator fun String.invoke(block: Router.() -> Unit) {
+        val router = Router(config, service, pathParams)
+        router.block()
+        endpoints += router.endpoints.map {
+            EndpointBundle(
+                it.endpoint.copy(tags = it.endpoint.tags?.plus(this)),
+                it.response,
+                it.function
+            )
+        }
+    }
+
     operator fun ParametrizedPath.div(block: Router.() -> Unit) {
         val router = Router(config, service, pathParams + this.pathParameters)
         router.block()

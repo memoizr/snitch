@@ -111,6 +111,9 @@ val ServerRouter: Router.() -> Unit = {
     GET(v1 / "mama").copy(tags = listOf("ma","tata")).isHandledBy { "".ok }
     DELETE(v1 / clips / clipId).with(queries(query, length, offset)).with(headers(name)) isHandledBy getPathGreeting
 
+    "haha section" {
+        GET(v1 / "haha").isHandledBy { "".ok }
+    }
 }
 
 enum class FooEnum {
