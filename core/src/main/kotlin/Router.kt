@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
 class Router (
     val config: Config,
     val service: SnitchService,
-    private val pathParams: Set<PathParam<out Any, out Any>> = emptySet()
+    val pathParams: Set<PathParam<out Any, out Any>> = emptySet()
 ) {
 //    val http = this
     val endpoints = mutableListOf<EndpointBundle<*>>()
