@@ -1,10 +1,9 @@
 package com.snitch
 
+import Parser
 import SnitchService
 import com.snitch.Format.*
-import com.snitch.extensions.json
 import com.google.gson.Gson
-import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType
 
@@ -12,7 +11,8 @@ import kotlin.reflect.full.starProjectedType
 class Router(
     val config: Config,
     val service: SnitchService,
-    val pathParams: Set<PathParam<out Any, out Any>> = emptySet()
+    val pathParams: Set<PathParam<out Any, out Any>> = emptySet(),
+    val parser: Parser,
 ) {
     //    val http = this
     val endpoints = mutableListOf<EndpointBundle<*>>()
@@ -191,7 +191,7 @@ class Router(
     operator fun String.div(path: PathParam<out Any, out Any>) = ParametrizedPath(this + "/{${path.name}}", setOf(path))
 
     operator fun String.div(block: Router.() -> Unit) {
-        val router = Router(config, service, pathParams)
+        val router = Router(config, service, pathParams, parser)
         router.block()
         endpoints += router.endpoints.map {
             EndpointBundle(
@@ -203,7 +203,7 @@ class Router(
     }
 
     operator fun String.invoke(block: Router.() -> Unit) {
-        val router = Router(config, service, pathParams)
+        val router = Router(config, service, pathParams, parser)
         router.block()
         endpoints += router.endpoints.map {
             EndpointBundle(
@@ -215,7 +215,7 @@ class Router(
     }
 
     operator fun ParametrizedPath.div(block: Router.() -> Unit) {
-        val router = Router(config, service, pathParams + this.pathParameters)
+        val router = Router(config, service, pathParams + this.pathParameters, parser)
         router.block()
         router.endpoints += router.endpoints.map {
             EndpointBundle(
@@ -229,7 +229,7 @@ class Router(
     }
 
     operator fun PathParam<out Any, out Any>.div(block: Router.() -> Unit) {
-        val router = Router(config, service, pathParams + this)
+        val router = Router(config, service, pathParams + this, parser)
         router.block()
         val path = ParametrizedPath("/{$name}", setOf(this))
         endpoints += router.endpoints.map {
@@ -256,6 +256,7 @@ class Router(
                 before(request)
                 block(
                     RequestHandler(
+                        parser,
                         body,
                         (headerParams + queryParams + pathParams),
                         request,
@@ -267,14 +268,14 @@ class Router(
                         is HttpResponse.SuccessfulHttpResponse -> httpResponse.body.let {
                             response.setType(httpResponse._format)
                             when (httpResponse._format) {
-                                Json -> it.json
+                                Json -> with(parser) { it.jsonString }
                                 OctetStream -> it
                                 VideoMP4 -> it
                                 ImageJpeg -> it
                             }
                         }
 
-                        is HttpResponse.ErrorHttpResponse<*, *> -> httpResponse.json
+                        is HttpResponse.ErrorHttpResponse<*, *> -> with(parser) { httpResponse.jsonString }
                     }
                 }.also {
                     after(request, response)
@@ -287,10 +288,12 @@ class Router(
                     is QueryParameter -> "query"
                     is PathParam -> "path"
                 }
-                HttpResponse.ErrorHttpResponse<T, String>(
-                    500,
-                    "Attempting to use unregistered $type parameter `${param.name}`"
-                ).json
+                with (parser) {
+                    HttpResponse.ErrorHttpResponse<T, String>(
+                        500,
+                        "Attempting to use unregistered $type parameter `${param.name}`"
+                    ).jsonString
+                }
             }
         }
         return this

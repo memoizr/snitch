@@ -1,6 +1,6 @@
 package com.snitch
 
-import com.snitch.extensions.json
+import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test
 
 class ErrorTest : BaseTest(routes {
@@ -8,12 +8,14 @@ class ErrorTest : BaseTest(routes {
 }) {
     @Test
     fun `supports typed path parameters`() {
-        whenPerform GET "/$root/errors" expectCode 400 expectBody badRequest<String, ErrorBody>(
-            ErrorBody(
-                "hellothere",
-                3f
-            )
-        ).json
+        with (GsonJsonParser) {
+            whenPerform GET "/$root/errors" expectCode 400 expectBody badRequest<String, ErrorBody>(
+                ErrorBody(
+                    "hellothere",
+                    3f
+                )
+            ).jsonString
+        }
     }
 
 }

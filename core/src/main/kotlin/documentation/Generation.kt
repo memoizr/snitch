@@ -3,13 +3,9 @@ package com.snitch.documentation
 import RoutedService
 import com.snitch.Parameter
 import com.snitch.Router
-import com.snitch.extensions.json
 import java.io.File
 import java.io.FileOutputStream
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 import kotlin.reflect.full.starProjectedType
-import java.nio.file.Path as JPath
 
 fun RoutedService.generateDocs(): Spec {
     val openApi = OpenApi(info = Info(router.config.title, "1.0"), servers = listOf(Server(router.config.host)))
@@ -78,7 +74,7 @@ fun RoutedService.generateDocs(): Spec {
                     )
                 }
             }.fold(openApi) { a, b -> a.withPath(b.first, b.second) }
-            .let { Spec(it.json, router) }
+            .let { Spec(with( router.parser) {it.jsonString }, router) }
 }
 
 data class Spec(val spec: String, val router: Router) {

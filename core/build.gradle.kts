@@ -16,14 +16,13 @@ repositories {
 }
 
 dependencies {
-    implementation("com.beust:klaxon:5.4")
-    implementation("com.google.code.gson:gson:2.8.9")
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation("ch.qos.logback:logback-classic:1.2.9")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.21")
 
     testImplementation(kotlin("test-junit"))
-    testImplementation("khttp:khttp:1.0.0")
     testImplementation(project(":sparkjava"))
+    testImplementation(project(":gsonparser"))
     testImplementation("com.github.memoizr:assertk-core:-SNAPSHOT")
     testImplementation(project(":tests"))
 }

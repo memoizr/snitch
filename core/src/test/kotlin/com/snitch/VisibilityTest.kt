@@ -1,9 +1,8 @@
 package com.snitch
 
 import com.snitch.documentation.Visibility
-import com.snitch.extensions.parseJson
 import com.google.gson.internal.LinkedTreeMap
-import org.junit.Rule
+import me.snitchon.parsers.GsonJsonParser.parseJson
 import org.junit.Test
 import kotlin.reflect.KClass
 

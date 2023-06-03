@@ -1,5 +1,6 @@
 package com.snitch.spark
 
+import Parser
 import RoutedService
 import SnitchService
 import ch.qos.logback.classic.Logger
@@ -13,7 +14,9 @@ import spark.Service
 import java.io.File
 
 
-class SparkSnitchService(override val config: Config) : SnitchService {
+class SparkSnitchService(override val config: Config,
+    val parser: Parser
+    ) : SnitchService {
     val http by lazy { Service.ignite().port(config.port) }
 
     private val Router.EndpointBundle<*>.func: (request: Request, response: Response) -> Any
@@ -34,7 +37,7 @@ class SparkSnitchService(override val config: Config) : SnitchService {
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
         logger.level = config.logLevel
 
-        val router = Router(config, this)
+        val router = Router(config, this, emptySet(), parser)
         routerConfiguration(router)
         return RoutedService(this, router).startListening()
     }

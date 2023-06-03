@@ -2,8 +2,7 @@ package com.snitch
 
 import com.snitch.documentation.Description
 import com.snitch.documentation.Visibility
-import com.snitch.extensions.json
-import org.junit.Rule
+import me.snitchon.parsers.GsonJsonParser.jsonString
 import org.junit.Test
 
 class SimplePathBuilderTest : BaseTest(routes {
@@ -87,8 +86,8 @@ class SimplePathBuilderTest : BaseTest(routes {
         whenPerform GET "/$root/hey/123/a" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/123" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/one/123" expectBodyJson TestResult("get value") expectCode 200
-        whenPerform GET "/$root/v1" expectBody TestResult("get value").json expectCode 200
-        whenPerform GET "/$root" expectBody TestResult("get value").json expectCode 200
+        whenPerform GET "/$root/v1" expectBody TestResult("get value").jsonString expectCode 200
+        whenPerform GET "/$root" expectBody TestResult("get value").jsonString expectCode 200
 
     }
 

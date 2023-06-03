@@ -24,8 +24,9 @@ class SealedAdapter : JsonDeserializer<Sealed> {
 object GsonJsonParser : Parser {
     val builder = GsonBuilder()
         .setDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
+        .registerTypeAdapterFactory(NullableTypAdapterFactory())
         .registerTypeHierarchyAdapter(Sealed::class.java, SealedAdapter())
-    private val gson = builder.create()
+    val gson = builder.create()
 
     override val Any.jsonString get() = gson.toJson(this)
 
@@ -34,6 +35,10 @@ object GsonJsonParser : Parser {
 
     override fun <T : Any> String.parseJson(klass: Class<T>): T {
         return gson.fromJson(this, klass)
+    }
+
+    inline fun <reified T : Any> String.parseJson(): T {
+        return gson.fromJson(this, T::class.java)
     }
 
     override fun <T : Any> ByteArray.parseJson(klass: Class<T>): T = TODO()

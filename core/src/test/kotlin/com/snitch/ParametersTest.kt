@@ -2,7 +2,7 @@ package com.snitch
 
 import com.snitch.HttpResponse.*
 import com.snitch.documentation.Visibility
-import com.snitch.extensions.json
+import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test
 import java.text.SimpleDateFormat
 import java.util.*
@@ -138,11 +138,13 @@ class ParametersTest : BaseTest(routes {
 
     @Test
     fun `supports default values for query parameters`() {
-        whenPerform GET "/$root/queriespath3?offset=42" expectBody IntTestResult(42).json
-        whenPerform GET "/$root/queriespath3" expectBody IntTestResult(30).json
+        with (GsonJsonParser) {
+            whenPerform GET "/$root/queriespath3?offset=42" expectBody IntTestResult(42).jsonString
+            whenPerform GET "/$root/queriespath3" expectBody IntTestResult(30).jsonString
 
-        whenPerform GET "/$root/queriespath4?limit=42" expectBody NullableIntTestResult(42).json
-        whenPerform GET "/$root/queriespath4" expectBody """{}"""
+            whenPerform GET "/$root/queriespath4?limit=42" expectBody NullableIntTestResult(42).jsonString
+            whenPerform GET "/$root/queriespath4" expectBody """{}"""
+        }
     }
 
     @Test
@@ -174,15 +176,17 @@ class ParametersTest : BaseTest(routes {
 
     @Test
     fun `supports default values for header parameters`() {
-        whenPerform GET "/$root/headerspath3" withHeaders mapOf(offsetHead.name to 42) expectBody IntTestResult(42).json
-        whenPerform GET "/$root/headerspath3" expectBody IntTestResult(666).json
-        whenPerform GET "/$root/headerspath3" expectBody IntTestResult(666).json
+        with (GsonJsonParser) {
+            whenPerform GET "/$root/headerspath3" withHeaders mapOf(offsetHead.name to 42) expectBody IntTestResult(42).jsonString
+            whenPerform GET "/$root/headerspath3" expectBody IntTestResult(666).jsonString
+            whenPerform GET "/$root/headerspath3" expectBody IntTestResult(666).jsonString
 
-        whenPerform GET "/$root/headerspath4" withHeaders mapOf(limitHead.name to 42) expectBody NullableIntTestResult(
-            42
-        ).json
-        whenPerform GET "/$root/headerspath4" withHeaders mapOf(limitHead.name to "") expectBody """{}"""
-        whenPerform GET "/$root/headerspath4" expectBody """{}"""
+            whenPerform GET "/$root/headerspath4" withHeaders mapOf(limitHead.name to 42) expectBody NullableIntTestResult(
+                42
+            ).jsonString
+            whenPerform GET "/$root/headerspath4" withHeaders mapOf(limitHead.name to "") expectBody """{}"""
+            whenPerform GET "/$root/headerspath4" expectBody """{}"""
+        }
     }
 
     val bodyParam = BodyParam(42, "hello", SealedClass.One(33))
@@ -196,23 +200,27 @@ class ParametersTest : BaseTest(routes {
     fun `supports custom parsing`() {
         val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         val date = "2018-06-30T02:59:51-00:00"
-        whenPerform GET "/$root/customParsing?time=$date" expectBody DateResult(df.parse(date)).json
+        with (GsonJsonParser) {
+            whenPerform GET "/$root/customParsing?time=$date" expectBody DateResult(df.parse(date)).jsonString
+        }
     }
 
     @Test
     fun `forbids using parameters which aren't registered`() {
-        whenPerform GET "/$root/sneakyqueryparams" expectBody ErrorHttpResponse<TestResult, String>(
-            500,
-            "Attempting to use unregistered query parameter `param`"
-        ).json
-        whenPerform GET "/$root/sneakyheaderparams" expectBody ErrorHttpResponse<TestResult, String>(
-            500,
-            "Attempting to use unregistered header parameter `param`"
-        ).json
-        whenPerform GET "/$root/sneakypathparams/343" expectBody ErrorHttpResponse<TestResult, String>(
-            500,
-            "Attempting to use unregistered path parameter `param`"
-        ).json
+        with (GsonJsonParser) {
+            whenPerform GET "/$root/sneakyqueryparams" expectBody ErrorHttpResponse<TestResult, String>(
+                500,
+                "Attempting to use unregistered query parameter `param`"
+            ).jsonString
+            whenPerform GET "/$root/sneakyheaderparams" expectBody ErrorHttpResponse<TestResult, String>(
+                500,
+                "Attempting to use unregistered header parameter `param`"
+            ).jsonString
+            whenPerform GET "/$root/sneakypathparams/343" expectBody ErrorHttpResponse<TestResult, String>(
+                500,
+                "Attempting to use unregistered path parameter `param`"
+            ).jsonString
+        }
     }
 
     data class IntTestResult(val result: Int)

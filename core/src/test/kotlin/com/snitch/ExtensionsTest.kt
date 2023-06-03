@@ -1,18 +1,20 @@
 package com.snitch
 
-import com.snitch.extensions.parseJson
 import com.memoizr.assertk.isEqualTo
+import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test
 
 class ExtensionsTest {
     @Test
     fun `parses sealed classes`() {
-        val type = "\$type"
-        """{"$type":"ONE","one":"hello"}""".parseJson<TheSeal>() isEqualTo TheSeal.ONE("hello")
-        """{"$type":"TWO","two":"hello"}""".parseJson<TheSeal>() isEqualTo TheSeal.TWO("hello")
+        with (GsonJsonParser) {
+            val type = "\$type"
+            """{"$type":"ONE","one":"hello"}""".parseJson<TheSeal>() isEqualTo TheSeal.ONE("hello")
+            """{"$type":"TWO","two":"hello"}""".parseJson<TheSeal>() isEqualTo TheSeal.TWO("hello")
 
-        """{"$type":"ONE","one":"hello"}""".parseJson<TheSeal.ONE>() isEqualTo TheSeal.ONE("hello")
-        """{"$type":"TWO","two":"hello"}""".parseJson<TheSeal.TWO>() isEqualTo TheSeal.TWO("hello")
+            """{"$type":"ONE","one":"hello"}""".parseJson<TheSeal.ONE>() isEqualTo TheSeal.ONE("hello")
+            """{"$type":"TWO","two":"hello"}""".parseJson<TheSeal.TWO>() isEqualTo TheSeal.TWO("hello")
+        }
     }
 }
 

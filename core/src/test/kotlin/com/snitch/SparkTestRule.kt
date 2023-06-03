@@ -2,6 +2,7 @@ package com.snitch
 
 import ch.qos.logback.classic.Level
 import com.snitch.spark.SparkSnitchService
+import me.snitchon.parsers.GsonJsonParser
 import org.junit.rules.ExternalResource
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -19,7 +20,7 @@ val config = Config(description = "A test",
 )
 
 open class SparkTestRule(port: Int, val router: Router.() -> Unit = ServerRouter) : ExternalResource() {
-    val server = SparkSnitchService(config.copy(port = port))
+    val server = SparkSnitchService(config.copy(port = port), GsonJsonParser)
 
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
