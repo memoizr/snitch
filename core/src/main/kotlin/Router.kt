@@ -290,6 +290,7 @@ class Router(
                     is PathParam -> "path"
                 }
                 with(parser) {
+                    response.setStatus(500)
                     HttpResponse.ErrorHttpResponse<T, String>(
                         500,
                         "Attempting to use unregistered $type parameter `${param.name}`"
@@ -297,6 +298,7 @@ class Router(
                 }
             } catch (parsingException: ParsingException) {
                 with(parser) {
+                    response.setStatus(400)
                     HttpResponse.ErrorHttpResponse<T, String>(
                         400,
                         "Invalid body parameter"
