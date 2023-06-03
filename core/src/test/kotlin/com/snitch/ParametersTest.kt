@@ -223,6 +223,11 @@ class ParametersTest : BaseTest(routes {
         }
     }
 
+    @Test
+    fun `returns error for failed parsing of body parameter`() {
+        whenPerform POST "/$root/bodyparam" withBody "lolol" expectBody """{"statusCode":400,"details":"Invalid body parameter"}"""
+    }
+
     data class IntTestResult(val result: Int)
     data class NullableIntTestResult(val result: Int?)
     data class DateResult(val date: Date)

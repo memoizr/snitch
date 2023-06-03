@@ -1,6 +1,7 @@
 package com.snitch
 
 import Parser
+import ParsingException
 import SnitchService
 import com.snitch.Format.*
 import com.google.gson.Gson
@@ -288,10 +289,17 @@ class Router(
                     is QueryParameter -> "query"
                     is PathParam -> "path"
                 }
-                with (parser) {
+                with(parser) {
                     HttpResponse.ErrorHttpResponse<T, String>(
                         500,
                         "Attempting to use unregistered $type parameter `${param.name}`"
+                    ).jsonString
+                }
+            } catch (parsingException: ParsingException) {
+                with(parser) {
+                    HttpResponse.ErrorHttpResponse<T, String>(
+                        400,
+                        "Invalid body parameter"
                     ).jsonString
                 }
             }

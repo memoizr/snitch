@@ -1,6 +1,7 @@
 package com.snitch
 
 import Parser
+import ParsingException
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
@@ -15,8 +16,12 @@ data class RequestHandler<T : Any>
 ) {
 
     val body: T by lazy {
-        with (parser) {
-            request.body.parseJson(_body?.klass?.java!!)
+        with(parser) {
+            try {
+                request.body.parseJson(_body?.klass?.java!!)
+            } catch (e: Exception) {
+                throw ParsingException(e.message ?: "")
+            }
         }
     }
 
