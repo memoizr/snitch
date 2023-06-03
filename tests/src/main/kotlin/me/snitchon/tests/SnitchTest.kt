@@ -103,8 +103,8 @@ abstract class SnitchTest(service: (Int) -> RoutedService) {
             with(GsonJsonParser) {
                 when (method) {
                     HttpMethod.GET -> get("http://localhost:${port}$endpoint", headers)
-                    HttpMethod.PUT -> put("http://localhost:${port}$endpoint", headers, body?.jsonString)
-                    HttpMethod.POST -> post("http://localhost:${port}$endpoint", headers, body?.jsonString)
+                    HttpMethod.PUT -> put("http://localhost:${port}$endpoint", headers, if (body is String) body else body?.jsonString)
+                    HttpMethod.POST -> post("http://localhost:${port}$endpoint", headers, if (body is String) body else body?.jsonString)
                     HttpMethod.DELETE -> delete("http://localhost:${port}$endpoint", headers)
                 }
             }
