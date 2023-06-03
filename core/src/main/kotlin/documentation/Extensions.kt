@@ -2,6 +2,7 @@ package com.snitch.documentation
 
 import com.snitch.HTTPMethod
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType
 
 internal fun OpenApi.withPath(name: String, path: Path) =
@@ -27,10 +28,10 @@ internal fun Operation.withRequestBody(
         mapOf(contentType.value to MediaType(toSchema(body.starProjectedType)))))
 
 internal fun Operation.withResponse(
-        contentType: ContentType,
-        body: KClass<*>,
-        code: String = "200"
+    contentType: ContentType,
+    body: KType,
+    code: String = "200"
 ) = copy(responses = responses + (code to Responses.Response(
         content = mapOf(contentType.value to MediaType(
-                toSchema(body.starProjectedType)
+                toSchema(body)
         )))))

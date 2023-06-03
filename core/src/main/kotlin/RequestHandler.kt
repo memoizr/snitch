@@ -4,6 +4,8 @@ import com.beust.klaxon.Klaxon
 import com.snitch.extensions.klaxon
 import com.snitch.extensions.parse
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
+import kotlin.reflect.KType
 
 data class RequestHandler<T : Any>
 (
@@ -85,5 +87,9 @@ data class Body<T : Any>(val klass: KClass<T>, val customGson: Klaxon = klaxon)
 
 data class UnregisteredParamException(val param: Parameter<*,*>) : Throwable()
 
-typealias Handler<BODY_TYPE, RESPONSE_TYPE> =
-        RequestHandler<BODY_TYPE>.() -> HttpResponse<RESPONSE_TYPE>
+class Handler<Request: Any, Response>(val block: RequestHandler<Request>.() -> HttpResponse<Response>) {
+    operator fun getValue(nothing: Nothing?, property: KProperty<*>): Pair<KType, RequestHandler<Request>.() -> HttpResponse<Response>> {
+        println(property.returnType.arguments[1].type!!.arguments[1].type!!.arguments[0])
+        return property.returnType.arguments[1].type!!.arguments[1].type!!.arguments[0].type!! to block
+    }
+}

@@ -81,7 +81,7 @@ class ParametersTest : BaseTest(routes {
     GET("sneakyheaderparams") isHandledBy { TestResult(request.get(headerParam)).ok }
     GET("sneakypathparams" / pathParam.copy(name = "sneaky")) isHandledBy { TestResult(request.get(pathParam)).ok }
 
-    val function: Handler<BodyParam, BodyTestResult> = {
+    val function by Handler<BodyParam, BodyTestResult> {
         val sealed = body.sealed
         BodyTestResult(
             body.int, when (sealed) {

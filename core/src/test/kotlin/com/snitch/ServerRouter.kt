@@ -70,12 +70,12 @@ val ServerRouter: Router.() -> Unit = {
 //        AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok
 //    }
 
-    val getPathGreeting: Handler<Nothing, AResponse> = {
+    val getPathGreeting by Handler<Nothing, AResponse> {
         request[query]
         AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok
     }
 
-    val getGreetingBody: Handler<TestClass, AResponse> = {
+    val getGreetingBody by Handler<TestClass, AResponse> {
         request[query]
         AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok
     }
