@@ -33,7 +33,7 @@ class MyConverter<out T: Sealed> : Converter {
         val subtype = if (clazz.isFinal) clazz else {
             val nestedClasses = clazz.nestedClasses
             val subclasses = nestedClasses.filter { it.isFinal && it.isSubclassOf(clazz) }
-            val type = jv.objString(Sealed::type.name)
+            val type = jv.objString(Sealed::`$type`.name)
             subclasses.find { it.simpleName == type }
         }
         return Klaxon().let { it.fromJsonObject(it.parser(subtype).parse(StringReader(stringRep)) as JsonObject, subtype!!.java, subtype!!)!! as T }

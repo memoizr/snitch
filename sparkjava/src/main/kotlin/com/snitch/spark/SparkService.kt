@@ -30,7 +30,6 @@ class SparkSnitchService(override val config: Config) : SnitchService {
         if (!tmpDir.exists()) {
             tmpDir.mkdirs()
         }
-        println(tmpDir)
         http.externalStaticFileLocation(tmpDir.absolutePath)
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
         logger.level = config.logLevel
@@ -53,7 +52,11 @@ class SparkSnitchService(override val config: Config) : SnitchService {
         }
     }
 
-    fun stop() {
+    override fun start() {
+        http.awaitInitialization()
+    }
+
+    override fun stop() {
         http.stop()
     }
 }

@@ -4,6 +4,8 @@ import com.snitch.Router
 interface SnitchService {
     val config: Config get() = Config()
     fun registerMethod(it: Router.EndpointBundle<*>, path: String)
+    fun stop()
+    fun start()
 }
 
 data class RoutedService(val service: SnitchService, val router: Router) {
@@ -12,6 +14,11 @@ data class RoutedService(val service: SnitchService, val router: Router) {
             val path: String = service.config.basePath + it.endpoint.url//.replace("/{", "/:").replace("}", "")
             service.registerMethod(it, path)
         }
+
+        service.start()
         return this
+    }
+    fun stopListening() {
+        service.stop()
     }
 }
