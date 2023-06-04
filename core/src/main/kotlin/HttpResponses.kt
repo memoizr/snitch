@@ -22,7 +22,7 @@ val <T> T.ok: HttpResponse<T> get() = SuccessfulHttpResponse(200, this)
 val <T> T.created: HttpResponse<T> get() = SuccessfulHttpResponse(201, this)
 val <T> T.badRequest: HttpResponse<T> get() = ErrorHttpResponse(400, this)
 val <T> T.forbidden: HttpResponse<T> get() = ErrorHttpResponse(403, this)
-val <T> T.notFound: HttpResponse<T> get() = ErrorHttpResponse(403, this)
+val <T> T.notFound: HttpResponse<T> get() = ErrorHttpResponse(404, this)
 val Unit.noContent: HttpResponse<Unit> get() = SuccessfulHttpResponse(204, this)
 
 fun <T> HttpResponse<T>.format(newFormat: Format) = if (this is SuccessfulHttpResponse) copy(_format = newFormat) else this
