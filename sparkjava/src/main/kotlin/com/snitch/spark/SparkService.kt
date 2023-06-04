@@ -69,7 +69,10 @@ class SparkSnitchService(
         http.exception(exception.java) { ex, req, res ->
             val handled = block(ex, SparkRequestWrapper(req))
             res.status(handled.statusCode)
-            res.body(with(parser) { handled.jsonString })
+            when (handled) {
+                is SuccessfulHttpResponse<*> -> res.body(with(parser) { handled.body!!.jsonString })
+                is ErrorHttpResponse<*,*> -> res.body(with(parser) { handled.details!!.jsonString })
+            }
         }
     }
 

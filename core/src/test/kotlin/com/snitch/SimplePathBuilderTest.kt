@@ -14,8 +14,8 @@ class SimplePathBuilderTest : BaseTest(routes {
     POST("/foo") isHandledBy { TestResult("post value").created }
     DELETE("/foo") isHandledBy { TestResult("delete value").ok }
 
-    GET("/error") isHandledBy { if (false) TestResult("never happens").ok else badRequest("Something went wrong") }
-    GET("/forbidden") isHandledBy { if (false) TestResult("never happens").ok else forbidden("Forbidden") }
+    GET("/error") isHandledBy { if (false) TestResult("never happens").ok else "Something went wrong".badRequest }
+    GET("/forbidden") isHandledBy { if (false) TestResult("never happens").ok else "Forbidden".forbidden }
 
     GET("noslash/bar") isHandledBy { TestResult("success").ok }
     PUT("noslash/bar") isHandledBy { TestResult("success").ok }
@@ -101,11 +101,8 @@ class SimplePathBuilderTest : BaseTest(routes {
 
     @Test
     fun `returns error responses`() {
-        whenPerform GET "/$root/error" expectBodyJson badRequest<TestResult, String>("Something went wrong") expectCode 400
-        whenPerform GET "/$root/forbidden" expectBodyJson badRequest<TestResult, String>(
-            "Forbidden",
-            403
-        ) expectCode 403
+        whenPerform GET "/$root/error" expectBody  """"Something went wrong"""" expectCode 400
+        whenPerform GET "/$root/forbidden" expectBody """"Forbidden"""" expectCode 403
     }
 
     @Test

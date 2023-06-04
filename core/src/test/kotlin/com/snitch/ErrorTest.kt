@@ -7,7 +7,7 @@ class ErrorTest : BaseTest(
     {
         routes {
             GET("errors") inSummary "does a foo" isHandledBy {
-                badRequest<String, ErrorBody>(ErrorBody("hellothere", 3f))
+                ErrorBody("hellothere", 3f).badRequest
             }
             GET("exception") inSummary "does a foo" isHandledBy {
                 throw CustomException()
@@ -15,14 +15,15 @@ class ErrorTest : BaseTest(
             }
         }(it)
             .handleException<CustomException, _> { ex, req ->
-                HttpResponse.ErrorHttpResponse<String, String>(400, "Something bad happened")
+                "Something bad happened".badRequest
             }
     }
 ) {
+
     @Test
     fun `supports typed path parameters`() {
         with(GsonJsonParser) {
-            whenPerform GET "/$root/errors" expectCode 400 expectBody badRequest<String, ErrorBody>(
+            whenPerform GET "/$root/errors" expectCode 400 expectBody (
                 ErrorBody(
                     "hellothere",
                     3f

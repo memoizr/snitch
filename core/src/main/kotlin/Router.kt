@@ -252,7 +252,7 @@ class Router(
             if (invalidParams.isNotEmpty()) {
                 response.setStatus(400)
                 invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }
-                    .let { Gson().toJson(badRequest<T, List<String>>(it)) }
+                    .let { Gson().toJson(it.badRequest) }
             } else try {
                 before(request)
                 block(
@@ -266,7 +266,7 @@ class Router(
                 ).let { httpResponse ->
                     response.setStatus(httpResponse.statusCode)
                     when (httpResponse) {
-                        is HttpResponse.SuccessfulHttpResponse -> httpResponse.body.let {
+                        is SuccessfulHttpResponse -> httpResponse.body.let {
                             response.setType(httpResponse._format)
                             when (httpResponse._format) {
                                 Json -> with(parser) { it.jsonString }
@@ -275,8 +275,7 @@ class Router(
                                 ImageJpeg -> it
                             }
                         }
-
-                        is HttpResponse.ErrorHttpResponse<*, *> -> with(parser) { httpResponse.jsonString }
+                        is ErrorHttpResponse<*, *> -> with(parser) { httpResponse.details!!.jsonString }
                     }
                 }.also {
                     after(request, response)
@@ -291,7 +290,7 @@ class Router(
                 }
                 with(parser) {
                     response.setStatus(500)
-                    HttpResponse.ErrorHttpResponse<T, String>(
+                    ErrorHttpResponse<T, String>(
                         500,
                         "Attempting to use unregistered $type parameter `${param.name}`"
                     ).jsonString
@@ -299,7 +298,7 @@ class Router(
             } catch (parsingException: ParsingException) {
                 with(parser) {
                     response.setStatus(400)
-                    HttpResponse.ErrorHttpResponse<T, String>(
+                    ErrorHttpResponse<T, String>(
                         400,
                         "Invalid body parameter"
                     ).jsonString
@@ -319,54 +318,6 @@ class Router(
         noinline block: RequestHandler<B>.() -> HttpResponse<T>
     ): Endpoint<B> {
         return addEndpoint(T::class.starProjectedType, block)
-//        endpoints += EndpointBundle(this, T::class.starProjectedType) { request, response ->
-//            val invalidParams = request.getInvalidParams(pathParams, queryParams, headerParams)
-//            if (invalidParams.isNotEmpty()) {
-//                response.setStatus(400)
-//                invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }
-//                    .let { Gson().toJson(badRequest<T, List<String>>(it)) }
-//            } else try {
-//                before(request)
-//                block(
-//                    RequestHandler(
-//                        body,
-//                        (headerParams + queryParams + pathParams),
-//                        request,
-//                        response
-//                    )
-//                ).let { httpResponse ->
-//                    response.setStatus(httpResponse.statusCode)
-//                    when (httpResponse) {
-//                        is HttpResponse.SuccessfulHttpResponse -> httpResponse.body.let {
-//                            response.setType(httpResponse._format)
-//                            when (httpResponse._format) {
-//                                Json -> it.json
-//                                OctetStream -> it
-//                                VideoMP4 -> it
-//                                ImageJpeg -> it
-//                            }
-//                        }
-//
-//                        is HttpResponse.ErrorHttpResponse<*, *> -> httpResponse.json
-//                    }
-//                }.also {
-//                    after(request, response)
-//                }
-//            } catch (unregisteredException: UnregisteredParamException) {
-//                val param = unregisteredException.param
-//
-//                val type = when (param) {
-//                    is HeaderParameter -> "header"
-//                    is QueryParameter -> "query"
-//                    is PathParam -> "path"
-//                }
-//                HttpResponse.ErrorHttpResponse<T, String>(
-//                    500,
-//                    "Attempting to use unregistered $type parameter `${param.name}`"
-//                ).json
-//            }
-//        }
-//        return this
     }
 
     data class EndpointBundle<T : Any>(
