@@ -1,11 +1,15 @@
 import com.snitch.Config
+import com.snitch.HttpResponse
+import com.snitch.RequestWrapper
 import com.snitch.Router
+import kotlin.reflect.KClass
 
 interface SnitchService {
     val config: Config get() = Config()
     fun registerMethod(it: Router.EndpointBundle<*>, path: String)
     fun stop()
     fun start()
+    fun <T: Exception, R: HttpResponse<*>> handleException(exception: KClass<T>, block: (T, RequestWrapper) -> R)
 }
 
 data class RoutedService(val service: SnitchService, val router: Router) {
@@ -20,5 +24,10 @@ data class RoutedService(val service: SnitchService, val router: Router) {
     }
     fun stopListening() {
         service.stop()
+    }
+
+    inline fun <reified T: Exception, R: HttpResponse<*>> handleException(noinline block: (T, RequestWrapper) -> R): RoutedService {
+        service.handleException(T::class, block)
+        return this
     }
 }

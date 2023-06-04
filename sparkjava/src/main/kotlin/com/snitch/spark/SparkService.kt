@@ -4,19 +4,19 @@ import Parser
 import RoutedService
 import SnitchService
 import ch.qos.logback.classic.Logger
-import com.snitch.Config
-import com.snitch.HTTPMethod
-import com.snitch.Router
+import com.snitch.*
 import org.slf4j.LoggerFactory
 import spark.Request
 import spark.Response
 import spark.Service
 import java.io.File
+import kotlin.reflect.KClass
 
 
-class SparkSnitchService(override val config: Config,
+class SparkSnitchService(
+    override val config: Config,
     val parser: Parser
-    ) : SnitchService {
+) : SnitchService {
     val http by lazy { Service.ignite().port(config.port) }
 
     private val Router.EndpointBundle<*>.func: (request: Request, response: Response) -> Any
@@ -43,9 +43,12 @@ class SparkSnitchService(override val config: Config,
     }
 
     override fun registerMethod(it: Router.EndpointBundle<*>, path: String) {
-        val sparkPath = path.replace("{",":").replace("}", "")
+        val sparkPath = path.replace("{", ":").replace("}", "")
         when (it.endpoint.httpMethod) {
-            HTTPMethod.GET -> { http.get(sparkPath, it.func) }
+            HTTPMethod.GET -> {
+                http.get(sparkPath, it.func)
+            }
+
             HTTPMethod.POST -> http.post(sparkPath, it.func)
             HTTPMethod.PUT -> http.put(sparkPath, it.func)
             HTTPMethod.PATCH -> http.patch(sparkPath, it.func)
@@ -57,6 +60,17 @@ class SparkSnitchService(override val config: Config,
 
     override fun start() {
         http.awaitInitialization()
+    }
+
+    override fun <T : Exception, R : HttpResponse<*>> handleException(
+        exception: KClass<T>,
+        block: (T, RequestWrapper) -> R
+    ) {
+        http.exception(exception.java) { ex, req, res ->
+            val handled = block(ex, SparkRequestWrapper(req))
+            res.status(handled.statusCode)
+            res.body(with(parser) { handled.jsonString })
+        }
     }
 
     override fun stop() {
