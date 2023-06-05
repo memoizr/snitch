@@ -11,11 +11,11 @@ private data class SampleClass(val aString: String, val someStrings: List<String
 
 
 private val listHandler by Handler<Nothing, _> {
-    listOf(SampleClass("hey", listOf())).ok
+    listOf(SampleClass("hey", listOf())).ok()
 }
 
 class DocumentationTest : SnitchTest(routes {
-    GET("one").isHandledBy { SampleClass("hey", listOf()).ok }
+    GET("one").isHandledBy { SampleClass("hey", listOf()).ok() }
     GET("two").isHandledBy(listHandler)
 }) {
 

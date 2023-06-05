@@ -1,7 +1,6 @@
 package com.snitch
 
 import com.snitch.Format.*
-import com.snitch.HttpResponse.*
 
 sealed class HttpResponse<T>() {
     abstract val statusCode: Int
@@ -24,6 +23,13 @@ val <T> T.badRequest: HttpResponse<T> get() = ErrorHttpResponse(400, this)
 val <T> T.forbidden: HttpResponse<T> get() = ErrorHttpResponse(403, this)
 val <T> T.notFound: HttpResponse<T> get() = ErrorHttpResponse(404, this)
 val Unit.noContent: HttpResponse<Unit> get() = SuccessfulHttpResponse(204, this)
+
+fun <T> T.ok(): HttpResponse<T> = SuccessfulHttpResponse(200, this)
+fun <T> T.created(): HttpResponse<T> = SuccessfulHttpResponse(201, this)
+fun <T, E> T.badRequest(): HttpResponse<T> = ErrorHttpResponse(400, this)
+fun <T, E> T.forbidden(): HttpResponse<T> = ErrorHttpResponse(403, this)
+fun <T, E> T.notFound(): HttpResponse<T> = ErrorHttpResponse(404, this)
+fun Unit.noContent(): HttpResponse<Unit> = SuccessfulHttpResponse(204, this)
 
 fun <T> HttpResponse<T>.format(newFormat: Format) = if (this is SuccessfulHttpResponse) copy(_format = newFormat) else this
 

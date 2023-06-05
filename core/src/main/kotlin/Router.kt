@@ -252,7 +252,7 @@ class Router(
             if (invalidParams.isNotEmpty()) {
                 response.setStatus(400)
                 invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }
-                    .let { Gson().toJson(it.badRequest) }
+                    .let { Gson().toJson(it.badRequest<Any,Any>()) }
             } else try {
                 before(request)
                 block(
