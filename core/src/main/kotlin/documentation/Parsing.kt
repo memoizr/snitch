@@ -25,18 +25,21 @@ internal fun toSchema(documentationSerializer: DocumentationSerializer, type: KT
         klass.isSealed && Sealed::class.java.isAssignableFrom(klass.java) -> sealedSchema(documentationSerializer, klass, type)
         klass.objectInstance != null -> Schemas.ObjectSchema()
         klass.primaryConstructor == null -> Schemas.StringSchema()
-        else -> objectSchema(documentationSerializer, klass)
+        else -> objectSchema(documentationSerializer, type)
     }
     return schema.apply {
         if (type.isMarkedNullable) nullable = true
     }
 }
 
-private fun objectSchema(serializer: DocumentationSerializer, klass: KClass<*>): Schemas.ObjectSchema {
-    val parameters: List<KParameter> = klass.primaryConstructor!!.parameters
+private fun objectSchema(serializer: DocumentationSerializer, type: KType): Schemas.ObjectSchema {
+    val parameters: List<KParameter> = type.jvmErasure.primaryConstructor!!.parameters
     return Schemas.ObjectSchema(
         properties = parameters.map { param ->
-            serializer.serializeField(param, klass) to (toSchema(serializer, param.type)
+            val paramType = if (param.type.jvmErasure.java == Object::class.java) {
+                type.arguments.singleOrNull()?.type
+            } else null
+            serializer.serializeField(param, type.jvmErasure) to (toSchema(serializer, paramType ?: param.type)
                 .let { schema ->
                     val desc = param.annotations.find { it is Description }?.let { (it as Description) }
                     when (schema) {

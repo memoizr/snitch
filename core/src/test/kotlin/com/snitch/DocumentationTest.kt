@@ -18,14 +18,21 @@ private data class SampleClass(
     val someStrings: List<String>
 )
 
+private data class Foo1(val foo: String)
+private data class GenericResponse<out T>(val data: T)
 
 private val listHandler by Handler<Nothing, _> {
     listOf(SampleClass("hey", listOf())).ok()
 }
 
+private val genericHandler by Handler<Nothing, _> {
+    GenericResponse(Foo1("hey")).ok()
+}
+
 class DocumentationTest : SnitchTest(routes {
     GET("one").isHandledBy { SampleClass("hey", listOf()).ok() }
     GET("two").isHandledBy(listHandler)
+    GET("generic").isHandledBy(genericHandler)
 }) {
 
     @Before
@@ -40,6 +47,13 @@ class DocumentationTest : SnitchTest(routes {
         )
 
         expect that docs.jsonString contains "a_sample"
+    }
+
+    @Test
+    fun `supports generic response types`() {
+        val docs = activeService.startListening().generateDocs(GsonDocumentationSerializer).spec
+
+        expect that docs.jsonString contains "foo"
     }
 
     @After
