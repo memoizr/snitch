@@ -1,12 +1,13 @@
 package com.snitch.documentation
 
 import com.snitch.HTTPMethod
+import documentation.DocumentationSerializer
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType
 
 internal fun OpenApi.withPath(name: String, path: Path) =
-        copy(paths = paths + (name to path))
+    copy(paths = paths + (name to path))
 
 internal fun Path.withOperation(method: HTTPMethod, operation: Operation) = when (method) {
     HTTPMethod.GET -> copy(get = operation)
@@ -19,19 +20,31 @@ internal fun Path.withOperation(method: HTTPMethod, operation: Operation) = when
 }
 
 internal fun Operation.withParameter(parameter: Parameters.Parameter) =
-        copy(parameters = (parameters ?: emptyList()) + parameter)
+    copy(parameters = (parameters ?: emptyList()) + parameter)
 
 internal fun Operation.withRequestBody(
-        contentType: ContentType,
-        body: KClass<*>) =
-        copy(requestBody = RequestBodies.RequestBody(content =
-        mapOf(contentType.value to MediaType(toSchema(body.starProjectedType)))))
+    documentationSerializer: DocumentationSerializer,
+    contentType: ContentType,
+    body: KClass<*>
+) =
+    copy(
+        requestBody = RequestBodies.RequestBody(
+            content =
+            mapOf(contentType.value to MediaType(toSchema(documentationSerializer, body.starProjectedType)))
+        )
+    )
 
 internal fun Operation.withResponse(
+    documentationSerializer: DocumentationSerializer,
     contentType: ContentType,
     body: KType,
     code: String = "200"
-) = copy(responses = responses + (code to Responses.Response(
-        content = mapOf(contentType.value to MediaType(
-                toSchema(body)
-        )))))
+) = copy(
+    responses = responses + (code to Responses.Response(
+        content = mapOf(
+            contentType.value to MediaType(
+                toSchema(documentationSerializer, body)
+            )
+        )
+    ))
+)

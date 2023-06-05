@@ -12,7 +12,8 @@ interface SnitchService {
     fun <T: Exception, R: HttpResponse<*>> handleException(exception: KClass<T>, block: (T, RequestWrapper) -> R)
 }
 
-data class RoutedService(val service: SnitchService, val router: Router) {
+data class RoutedService(val service: SnitchService,
+                         val router: Router) {
     fun startListening(): RoutedService {
         router.endpoints.forEach {
             val path: String = service.config.basePath + it.endpoint.url//.replace("/{", "/:").replace("}", "")

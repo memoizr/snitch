@@ -3,11 +3,13 @@ package com.snitch.documentation
 import RoutedService
 import com.snitch.Parameter
 import com.snitch.Router
+import documentation.DefaultDocumentatoinSerializer
+import documentation.DocumentationSerializer
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
 
-fun RoutedService.generateDocs(): Spec {
+fun RoutedService.generateDocs(documentationSerializer: DocumentationSerializer = DefaultDocumentatoinSerializer): Spec {
     val openApi = OpenApi(info = Info(router.config.title, "1.0"), servers = listOf(Server(router.config.host)))
     return router.endpoints
             .groupBy { it.endpoint.url }
@@ -22,10 +24,10 @@ fun RoutedService.generateDocs(): Spec {
                                     responses = emptyMap(),
                                     visibility = bundle.endpoint.visibility
                             )
-                                    .withResponse(ContentType.APPLICATION_JSON, bundle.response, "200")
+                                    .withResponse(documentationSerializer, ContentType.APPLICATION_JSON, bundle.response, "200")
                                     .let {
                                         if (bundle.endpoint.body.klass != Nothing::class) {
-                                            it.withRequestBody(ContentType.APPLICATION_JSON, bundle.endpoint.body.klass)
+                                            it.withRequestBody(documentationSerializer, ContentType.APPLICATION_JSON, bundle.endpoint.body.klass)
                                         } else it
                                     }
                                     .let {
@@ -36,7 +38,7 @@ fun RoutedService.generateDocs(): Spec {
                                                     required = p.required,
                                                     description = getDescription(p),
                                                     visibility = p.visibility,
-                                                    schema = toSchema(p.type.kotlin.starProjectedType)
+                                                    schema = toSchema(documentationSerializer, p.type.kotlin.starProjectedType)
                                                         .withPattern(p.pattern.regex)
 
                                                 )
@@ -49,7 +51,7 @@ fun RoutedService.generateDocs(): Spec {
                                                 Parameters.PathParameter(
                                                     name = param.name,
                                                     description = getDescription(param),
-                                                    schema = toSchema(param.type.kotlin.starProjectedType)
+                                                    schema = toSchema(documentationSerializer, param.type.kotlin.starProjectedType)
                                                         .withPattern(param.pattern.regex)
                                                 )
                                             )
@@ -64,7 +66,7 @@ fun RoutedService.generateDocs(): Spec {
                                                     allowEmptyValue = p.emptyAsMissing,
                                                     required = p.required,
                                                     visibility = p.visibility,
-                                                    schema = toSchema(p.type.kotlin.starProjectedType)
+                                                    schema = toSchema(documentationSerializer, p.type.kotlin.starProjectedType)
                                                         .withPattern(p.pattern.regex)
 
                                                 )

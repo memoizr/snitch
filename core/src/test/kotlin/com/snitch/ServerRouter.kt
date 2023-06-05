@@ -1,5 +1,6 @@
 package com.snitch
 
+import com.google.gson.annotations.SerializedName
 import com.snitch.documentation.Description
 import com.snitch.documentation.Visibility
 import com.snitch.documentation.Visibility.*
@@ -134,6 +135,7 @@ data class TestClass(
     @Description("no way punk", exString = "https://google.com")
     val aString: String,
     @Description("The best int", exInt = 33)
+    @SerializedName("an_intt")
     val aInt: Int,
     val aLong: Long,
     val aFloat: Float,

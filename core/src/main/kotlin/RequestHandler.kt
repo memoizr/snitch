@@ -100,7 +100,6 @@ class Handler<Request : Any, Response>(val block: RequestHandler<Request>.() -> 
         nothing: Nothing?,
         property: KProperty<*>
     ): Pair<KType, RequestHandler<Request>.() -> HttpResponse<Response>> {
-        println(property.returnType.arguments[1].type!!.arguments[1].type!!.arguments[0])
         return property.returnType.arguments[1].type!!.arguments[1].type!!.arguments[0].type!! to block
     }
 }
