@@ -1,7 +1,7 @@
 package com.snitch
 
 import ch.qos.logback.classic.Level
-import com.snitch.spark.SparkSnitchService
+//import com.snitch.spark.SparkSnitchService
 import me.snitchon.Config
 import me.snitchon.DocExpansion
 import me.snitchon.Router
@@ -22,32 +22,31 @@ val config = Config(description = "A test",
         docExpansion = DocExpansion.LIST
 )
 
-open class SparkTestRule(port: Int, val router: Router.() -> Unit = ServerRouter) : ExternalResource() {
-    val server = SparkSnitchService(config.copy(port = port), GsonJsonParser)
-
-    override fun apply(base: Statement, description: Description): Statement {
-        return object : Statement() {
-            override fun evaluate() {
-                before()
-                fun go() {
-                    try {
-                        base.evaluate()
-                    } catch (b: BindException) {
-                        go()
-                    } catch (e: ConnectException) {
-                        go()
-                    } finally {
-                        after()
-                    }
-                }
-                go()
-
-            }
-        }
-    }
-
-    override fun before() {
-        server.setRoutes(router)
-//        server.http.awaitInitialization()
-    }
-}
+//open class SparkTestRule(port: Int, val router: Router.() -> Unit = ServerRouter) : ExternalResource() {
+//    val server = SparkSnitchService(config.copy(port = port), GsonJsonParser)
+//
+//    override fun apply(base: Statement, description: Description): Statement {
+//        return object : Statement() {
+//            override fun evaluate() {
+//                before()
+//                fun go() {
+//                    try {
+//                        base.evaluate()
+//                    } catch (b: BindException) {
+//                        go()
+//                    } catch (e: ConnectException) {
+//                        go()
+//                    } finally {
+//                        after()
+//                    }
+//                }
+//                go()
+//
+//            }
+//        }
+//    }
+//    override fun before() {
+//        server.setRoutes(router)
+////        server.http.awaitInitialization()
+//    }
+//}

@@ -7,6 +7,7 @@ import com.snitch.me.snitchon.NonNegativeInt
 import com.snitch.me.snitchon.Validator
 import me.snitchon.*
 import me.snitchon.parsers.GsonJsonParser
+import me.snitchon.parsers.GsonJsonParser.jsonString
 import org.junit.Test
 import java.text.SimpleDateFormat
 import java.util.*
@@ -105,11 +106,11 @@ class ParametersTest : BaseTest(routes {
 
     @Test
     fun `validates path parameters`() {
-        whenPerform GET "/$root/intpath2/4545/end" expectBodyJson IntTestResult(4545)
-        whenPerform GET "/$root/intpath2/hello/end" expectBodyJson ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/intpath2/4545/end" expectBody IntTestResult(4545).jsonString
+        whenPerform GET "/$root/intpath2/hello/end" expectBody ErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Path parameter `intParam` is invalid, expecting non negative integer, got `hello`")
-        )
+        ).jsonString
     }
 
     @Test
@@ -197,7 +198,7 @@ class ParametersTest : BaseTest(routes {
 
     @Test
     fun `supports body parameter`() {
-        whenPerform POST "/$root/bodyparam" withBody bodyParam expectBodyJson BodyTestResult(42, 33)
+        whenPerform POST "/$root/bodyparam" withBody bodyParam expectBody BodyTestResult(42, 33).jsonString
     }
 
     @Test

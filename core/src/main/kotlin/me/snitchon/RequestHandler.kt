@@ -15,15 +15,7 @@ data class RequestHandler<T : Any>
     val response: ResponseWrapper
 ) {
 
-    val body: T by lazy {
-        with(parser) {
-            try {
-                request.body.parseJson(_body?.klass?.java!!)
-            } catch (e: Exception) {
-                throw ParsingException(e.message ?: "")
-            }
-        }
-    }
+    val body: T by lazy { request.body() as T }
 
     fun RequestWrapper.checkParamIsRegistered(param: Parameter<*, *>) =
         if (!params.contains(param)) throw UnregisteredParamException(param) else this

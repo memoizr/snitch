@@ -2,7 +2,7 @@ package me.snitchon
 
 import me.snitchon.Format.*
 
-sealed class HttpResponse<T>() {
+sealed class HttpResponse<T> {
     abstract val statusCode: Int
 }
 
@@ -23,6 +23,7 @@ val <T> T.created: HttpResponse<T> get() = SuccessfulHttpResponse(201, this)
 val <T> T.badRequest: HttpResponse<T> get() = ErrorHttpResponse(400, this)
 val <T> T.forbidden: HttpResponse<T> get() = ErrorHttpResponse(403, this)
 val <T> T.notFound: HttpResponse<T> get() = ErrorHttpResponse(404, this)
+val <T> T.serverError: HttpResponse<T> get() = ErrorHttpResponse(500, this)
 val Unit.noContent: HttpResponse<Unit> get() = SuccessfulHttpResponse(204, this)
 
 fun <T> T.ok(): HttpResponse<T> = SuccessfulHttpResponse(200, this)

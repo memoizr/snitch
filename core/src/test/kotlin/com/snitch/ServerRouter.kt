@@ -110,7 +110,7 @@ val ServerRouter: Router.() -> Unit = {
         .copy(tags = listOf("sisi"))
         .isHandledBy(getPathGreeting)
 
-    GET(v1 / "hello").copy(tags = listOf("nono")).isHandledBy { "".ok }
+    GET(v1 / "hello").copy(tags = listOf("nono")).isHandledBy { "hello".ok }
 
     GET(v1 / "nonosisi").copy(tags = listOf("nono","sisi")).isHandledBy { "".ok }
     GET(v1 / "mama").copy(tags = listOf("ma","tata")).isHandledBy { "".ok }

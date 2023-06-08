@@ -16,5 +16,4 @@ abstract class BaseTest(service: (Int) -> RoutedService) : SnitchTest(service) {
     override fun after() {
         super.after()
     }
-
 }

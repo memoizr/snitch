@@ -5,6 +5,7 @@ import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import me.snitchon.Sealed
 import me.snitchon.parsers.GsonJsonParser.jsonString
+import me.snitchon.parsing.ParsingException
 import java.lang.reflect.Type
 
 class SealedAdapter : JsonDeserializer<Sealed> {
@@ -34,11 +35,19 @@ object GsonJsonParser : Parser {
         get() = TODO("Not yet implemented")
 
     override fun <T : Any> String.parseJson(klass: Class<T>): T {
-        return gson.fromJson(this, klass)
+        return try {
+            gson.fromJson(this, klass)
+        } catch (e: JsonSyntaxException) {
+            throw ParsingException(e)
+        }
     }
 
     inline fun <reified T : Any> String.parseJson(): T {
-        return gson.fromJson(this, T::class.java)
+        return try {
+            gson.fromJson(this, T::class.java)
+        } catch (e: JsonSyntaxException) {
+            throw ParsingException(e)
+        }
     }
 
     override fun <T : Any> ByteArray.parseJson(klass: Class<T>): T = TODO()

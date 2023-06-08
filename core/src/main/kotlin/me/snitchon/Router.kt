@@ -247,12 +247,8 @@ class Router(
         endpoints += EndpointBundle(this, kType) { request, response ->
             val invalidParams = request.getInvalidParams(pathParams, queryParams, headerParams)
             if (invalidParams.isNotEmpty()) {
-                with(parser) {
-                    response.setStatus(400)
-                    invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }
-                        .badRequest<Any, Any>()
-                        .jsonString
-                }
+                invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }
+                    .badRequest<Any, Any>().badRequest
             } else try {
                 before(request)
                 block(
@@ -263,21 +259,7 @@ class Router(
                         request,
                         response
                     )
-                ).let { httpResponse ->
-                    response.setStatus(httpResponse.statusCode)
-                    when (httpResponse) {
-                        is SuccessfulHttpResponse -> httpResponse.body.let {
-                            response.setType(httpResponse._format)
-                            when (httpResponse._format) {
-                                Json -> with(parser) { it.jsonString }
-                                OctetStream -> it
-                                VideoMP4 -> it
-                                ImageJpeg -> it
-                            }
-                        }
-                        is ErrorHttpResponse<*, *> -> with(parser) { httpResponse.details!!.jsonString }
-                    }
-                }.also {
+                ).also {
                     after(request, response)
                 }
             } catch (unregisteredException: UnregisteredParamException) {
@@ -288,21 +270,12 @@ class Router(
                     is QueryParameter -> "query"
                     is PathParam -> "path"
                 }
-                with(parser) {
-                    response.setStatus(500)
-                    ErrorHttpResponse<T, String>(
-                        500,
-                        "Attempting to use unregistered $type parameter `${param.name}`"
-                    ).jsonString
-                }
+                ErrorHttpResponse<T, String>(
+                    500,
+                    "Attempting to use unregistered $type parameter `${param.name}`"
+                ).serverError
             } catch (parsingException: ParsingException) {
-                with(parser) {
-                    response.setStatus(400)
-                    ErrorHttpResponse<T, String>(
-                        400,
-                        "Invalid body parameter"
-                    ).jsonString
-                }
+                ErrorHttpResponse<T, String>(400, "Invalid body parameter").badRequest
             }
         }
         return this
@@ -319,7 +292,7 @@ class Router(
     data class EndpointBundle<T : Any>(
         val endpoint: Endpoint<T>,
         val response: KType,
-        val function: (RequestWrapper, ResponseWrapper) -> Any
+        val function: (RequestWrapper, ResponseWrapper) -> HttpResponse<*>
     )
 }
 

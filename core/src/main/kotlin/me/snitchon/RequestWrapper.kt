@@ -1,7 +1,7 @@
 package me.snitchon
 
 interface RequestWrapper {
-    val body: String
+    val body: () -> Any?
     fun params(name: String): String?
     fun headers(name: String): String?
     fun queryParams(name: String): String?
