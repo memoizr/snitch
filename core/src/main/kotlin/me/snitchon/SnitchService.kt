@@ -1,7 +1,5 @@
-import com.snitch.Config
-import com.snitch.HttpResponse
-import com.snitch.RequestWrapper
-import com.snitch.Router
+package me.snitchon
+
 import kotlin.reflect.KClass
 
 interface SnitchService {
@@ -13,7 +11,8 @@ interface SnitchService {
 }
 
 data class RoutedService(val service: SnitchService,
-                         val router: Router) {
+                         val router: Router
+) {
     fun startListening(): RoutedService {
         router.endpoints.forEach {
             val path: String = service.config.basePath + it.endpoint.url//.replace("/{", "/:").replace("}", "")

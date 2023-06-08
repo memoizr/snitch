@@ -1,7 +1,11 @@
 package com.snitch
 
-import com.snitch.HttpResponse.*
-import com.snitch.documentation.Visibility
+import me.snitchon.documentation.Visibility
+import com.snitch.me.snitchon.NonEmptySingleLineString
+import com.snitch.me.snitchon.NonEmptyString
+import com.snitch.me.snitchon.NonNegativeInt
+import com.snitch.me.snitchon.Validator
+import me.snitchon.*
 import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test
 import java.text.SimpleDateFormat

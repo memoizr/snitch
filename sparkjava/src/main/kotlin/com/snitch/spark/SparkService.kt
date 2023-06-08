@@ -1,10 +1,8 @@
 package com.snitch.spark
 
-import Parser
-import RoutedService
-import SnitchService
+import me.snitchon.Parser
 import ch.qos.logback.classic.Logger
-import com.snitch.*
+import me.snitchon.*
 import org.slf4j.LoggerFactory
 import spark.Request
 import spark.Response
@@ -71,7 +69,7 @@ class SparkSnitchService(
             res.status(handled.statusCode)
             when (handled) {
                 is SuccessfulHttpResponse<*> -> res.body(with(parser) { handled.body!!.jsonString })
-                is ErrorHttpResponse<*,*> -> res.body(with(parser) { handled.details!!.jsonString })
+                is ErrorHttpResponse<*, *> -> res.body(with(parser) { handled.details!!.jsonString })
             }
         }
     }

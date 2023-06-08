@@ -1,10 +1,8 @@
-package com.snitch.documentation
+package me.snitchon.documentation
 
-import RoutedService
-import com.snitch.Parameter
-import com.snitch.Router
-import documentation.DefaultDocumentatoinSerializer
-import documentation.DocumentationSerializer
+import me.snitchon.RoutedService
+import me.snitchon.Parameter
+import me.snitchon.Router
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
@@ -88,7 +86,7 @@ data class Spec(val spec: String, val router: Router) {
     }
 }
 
-private fun getDescription(param: Parameter<*,*>) =
+private fun getDescription(param: Parameter<*, *>) =
         "${param.description} - ${param.pattern.description}${if (param.invalidAsMissing) " - Invalid as Missing" else ""}${if (param.emptyAsMissing) " - Empty as Missing" else ""}"
 
 internal fun writeToFile(content: String, destination: String) {

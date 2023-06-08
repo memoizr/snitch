@@ -1,6 +1,6 @@
-package com.snitch
+package me.snitchon
 
-import com.snitch.documentation.Visibility
+import me.snitchon.documentation.Visibility
 
 data class OpDescription(val description: String)
 

@@ -1,4 +1,4 @@
-package com.snitch
+package me.snitchon
 
 import ch.qos.logback.classic.Logger
 import org.slf4j.LoggerFactory

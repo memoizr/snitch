@@ -1,4 +1,4 @@
-package com.snitch.documentation
+package me.snitchon.documentation
 
 import java.util.*
 
@@ -155,10 +155,10 @@ internal enum class DataType { integer, number, string, boolean, array, `object`
 internal sealed class Responses {
     internal data class Reference(override val `$ref`: String) : Responses(), Ref
     internal data class Response(
-            val description: String = "A response",
-            val headers: Map<String, Headers>? = null,
-            val content: Map<String, MediaType>? = null,
-            val links: Map<String, Links>? = null
+        val description: String = "A response",
+        val headers: Map<String, Headers>? = null,
+        val content: Map<String, MediaType>? = null,
+        val links: Map<String, Links>? = null
     ) : Responses()
 }
 

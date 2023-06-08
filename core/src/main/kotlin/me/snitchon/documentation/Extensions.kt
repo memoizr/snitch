@@ -1,7 +1,6 @@
-package com.snitch.documentation
+package me.snitchon.documentation
 
-import com.snitch.HTTPMethod
-import documentation.DocumentationSerializer
+import me.snitchon.HTTPMethod
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType

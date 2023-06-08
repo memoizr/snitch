@@ -1,6 +1,6 @@
 package com.snitch
 
-import com.snitch.extensions.print
+import me.snitchon.extensions.print
 import com.memoizr.assertk.expect
 import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test

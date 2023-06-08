@@ -1,9 +1,13 @@
 package com.snitch
 
 import com.google.gson.annotations.SerializedName
-import com.snitch.documentation.Description
-import com.snitch.documentation.Visibility
-import com.snitch.documentation.Visibility.*
+import me.snitchon.documentation.Description
+import me.snitchon.documentation.Visibility
+import me.snitchon.documentation.Visibility.*
+import com.snitch.me.snitchon.NonEmptyString
+import com.snitch.me.snitchon.NonNegativeInt
+import com.snitch.me.snitchon.Validator
+import me.snitchon.*
 import java.util.*
 
 val root = "home"

@@ -1,6 +1,6 @@
-package com.snitch
+package me.snitchon
 
-import com.snitch.Format.*
+import me.snitchon.Format.*
 
 sealed class HttpResponse<T>() {
     abstract val statusCode: Int
@@ -14,7 +14,8 @@ data class ErrorHttpResponse<T, E>(override val statusCode: Int,
                                    val details: E) : HttpResponse<T>()
 fun <T, R> HttpResponse<T>.mapSuccessful(fn: (T) -> R): HttpResponse<R> = if (this is SuccessfulHttpResponse) {
     SuccessfulHttpResponse(statusCode, fn(body), _format)
-} else { this as HttpResponse<R> }
+} else { this as HttpResponse<R>
+}
 
 fun <T> T.success(code: Int = 200): HttpResponse<T> = SuccessfulHttpResponse(code, this)
 val <T> T.ok: HttpResponse<T> get() = SuccessfulHttpResponse(200, this)

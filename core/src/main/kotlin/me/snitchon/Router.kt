@@ -1,9 +1,6 @@
-package com.snitch
+package me.snitchon
 
-import Parser
-import ParsingException
-import SnitchService
-import com.snitch.Format.*
+import me.snitchon.Format.*
 import com.google.gson.Gson
 import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType

@@ -2,6 +2,9 @@ package com.snitch
 
 import ch.qos.logback.classic.Level
 import com.snitch.spark.SparkSnitchService
+import me.snitchon.Config
+import me.snitchon.DocExpansion
+import me.snitchon.Router
 import me.snitchon.parsers.GsonJsonParser
 import org.junit.rules.ExternalResource
 import org.junit.runner.Description

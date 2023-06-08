@@ -1,4 +1,4 @@
-package com.snitch
+package com.snitch.me.snitchon
 import com.google.gson.Gson
 import kotlin.reflect.KClass
 import kotlin.text.RegexOption.*

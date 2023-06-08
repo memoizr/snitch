@@ -1,12 +1,4 @@
-package com.snitch.extensions
-
-import com.snitch.Sealed
-import com.google.gson.Gson
-import java.io.StringReader
-import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.jvm.jvmErasure
+package me.snitchon.extensions
 
 fun <T : Any?> T.print(): T = this.apply {
     val stackFrame = Thread.currentThread().stackTrace[2]

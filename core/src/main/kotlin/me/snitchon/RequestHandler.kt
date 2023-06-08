@@ -1,7 +1,5 @@
-package com.snitch
+package me.snitchon
 
-import Parser
-import ParsingException
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType

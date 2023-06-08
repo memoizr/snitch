@@ -1,6 +1,6 @@
 package com.snitch
 
-import RoutedService
+import me.snitchon.RoutedService
 import me.snitchon.tests.SnitchTest
 import org.junit.After
 import org.junit.Before

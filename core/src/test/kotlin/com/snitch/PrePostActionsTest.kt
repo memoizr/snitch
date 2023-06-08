@@ -1,6 +1,11 @@
 package com.snitch
 
 import com.memoizr.assertk.expect
+import com.snitch.me.snitchon.NonEmptyString
+import me.snitchon.get
+import me.snitchon.ok
+import me.snitchon.queries
+import me.snitchon.query
 import org.junit.Test
 
 private val list = mutableListOf<String>()

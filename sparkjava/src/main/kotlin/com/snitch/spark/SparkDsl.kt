@@ -1,6 +1,6 @@
 package com.snitch.spark
 
-import com.snitch.*
+import me.snitchon.*
 import spark.Request
 import spark.Response
 

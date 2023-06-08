@@ -1,9 +1,9 @@
 package me.snitchon.parsers
 
-import Parser
+import me.snitchon.Parser
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
-import com.snitch.Sealed
+import me.snitchon.Sealed
 import me.snitchon.parsers.GsonJsonParser.jsonString
 import java.lang.reflect.Type
 

@@ -1,7 +1,6 @@
-package com.snitch.documentation
+package me.snitchon.documentation
 
-import com.snitch.Sealed
-import documentation.DocumentationSerializer
+import me.snitchon.Sealed
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter

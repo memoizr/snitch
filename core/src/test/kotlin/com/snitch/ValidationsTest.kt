@@ -1,5 +1,9 @@
 package com.snitch
 
+import com.snitch.me.snitchon.NonNegativeInt
+import com.snitch.me.snitchon.StringSet
+import com.snitch.me.snitchon.Validator
+import me.snitchon.*
 import org.junit.Test
 
 private val id = path("id", condition = NonNegativeInt)

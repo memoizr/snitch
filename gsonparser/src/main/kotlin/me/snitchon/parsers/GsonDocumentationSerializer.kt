@@ -1,7 +1,7 @@
 package me.snitchon.parsers
 
 import com.google.gson.annotations.SerializedName
-import documentation.DocumentationSerializer
+import me.snitchon.documentation.DocumentationSerializer
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 

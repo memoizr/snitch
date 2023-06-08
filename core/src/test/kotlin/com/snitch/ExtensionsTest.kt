@@ -1,6 +1,7 @@
 package com.snitch
 
 import com.memoizr.assertk.isEqualTo
+import me.snitchon.Sealed
 import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test
 

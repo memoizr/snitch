@@ -1,16 +1,18 @@
 package com.snitch
 
-import com.snitch.extensions.print
+import me.snitchon.extensions.print
 import com.memoizr.assertk.expect
+import me.snitchon.format
+import me.snitchon.ok
 import org.junit.Test
 import java.io.File
 
 class FormatTest : BaseTest(routes{
     GET("json") isHandledBy { "ok".ok }
-    GET("bytearray") isHandledBy { "ok".ok.format(Format.VideoMP4) }
+    GET("bytearray") isHandledBy { "ok".ok.format(me.snitchon.Format.VideoMP4) }
     GET("image") isHandledBy { val readBytes = File(ClassLoader.getSystemClassLoader().getResource("squat.jpg")?.file).readBytes()
         readBytes.size.print()
-        readBytes.ok.format(Format.ImageJpeg) }
+        readBytes.ok.format(me.snitchon.Format.ImageJpeg) }
 }) {
 
     @Test

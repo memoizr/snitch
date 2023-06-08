@@ -1,7 +1,11 @@
 package com.snitch
 
-import com.snitch.documentation.Description
-import com.snitch.documentation.Visibility
+import me.snitchon.documentation.Description
+import me.snitchon.documentation.Visibility
+import me.snitchon.badRequest
+import me.snitchon.created
+import me.snitchon.forbidden
+import me.snitchon.ok
 import me.snitchon.parsers.GsonJsonParser.jsonString
 import org.junit.Test
 

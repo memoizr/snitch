@@ -1,3 +1,5 @@
+package me.snitchon
+
 interface Parser {
     val Any.jsonString: String
     val Any.jsonByteArray: ByteArray

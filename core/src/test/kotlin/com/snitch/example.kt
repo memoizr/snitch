@@ -1,8 +1,9 @@
 package com.snitch
 
-import com.snitch.documentation.generateDocs
-import com.snitch.extensions.print
+import me.snitchon.documentation.generateDocs
+import me.snitchon.extensions.print
 import com.snitch.spark.SparkSnitchService
+import me.snitchon.Config
 import me.snitchon.parsers.GsonDocumentationSerializer
 import me.snitchon.parsers.GsonJsonParser
 

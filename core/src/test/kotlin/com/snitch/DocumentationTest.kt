@@ -3,14 +3,15 @@ package com.snitch
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.memoizr.assertk.expect
-import com.snitch.documentation.generateDocs
+import me.snitchon.documentation.generateDocs
+import me.snitchon.Handler
+import me.snitchon.ok
 import me.snitchon.parsers.GsonDocumentationSerializer
 import me.snitchon.parsers.GsonJsonParser.jsonString
 import me.snitchon.tests.SnitchTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import kotlin.reflect.full.starProjectedType
 
 private data class SampleClass(
     @SerializedName("a_sample")
@@ -26,7 +27,7 @@ private val listHandler by Handler<Nothing, _> {
 }
 
 private val genericHandler by Handler<Nothing, _> {
-    GenericResponse(Foo1("hey")).ok()
+    GenericResponse(GenericResponse(Foo1("hey"))).ok()
 }
 
 class DocumentationTest : SnitchTest(routes {

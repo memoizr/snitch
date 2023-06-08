@@ -1,6 +1,6 @@
 package me.snitchon.tests
 
-import RoutedService
+import me.snitchon.RoutedService
 import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.parsers.GsonJsonParser.parseJson
 import java.net.URI

@@ -1,5 +1,7 @@
 package com.snitch
 
+import me.snitchon.badRequest
+import me.snitchon.ok
 import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test
 
