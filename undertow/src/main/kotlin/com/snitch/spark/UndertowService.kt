@@ -19,8 +19,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     lateinit var service: Undertow
 
     private val handlers = mutableListOf<ExceptionHandler>()
-    private val exceptionHandlers = mutableMapOf<KClass<*>, (Exception, RequestWrapper) -> HttpResponse<*>>()
-
+    private val exceptionHandlers = LinkedHashMap<KClass<*>, (Exception, RequestWrapper) -> HttpResponse<*>>()
 
     private val routingHandler = RoutingHandler()
     private val serviceBuilder by lazy {
@@ -48,49 +47,37 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
 
     override fun registerMethod(endpointBundle: Router.EndpointBundle<*>, path: String) {
         val handler: RoutingHandler =
-            routingHandler.add(endpointBundle.endpoint.httpMethod.toUndertow(), path, endpointBundle.func)
+            routingHandler.add(endpointBundle.endpoint.httpMethod.toUndertow(), path, endpointBundle.undertowHandler)
 
         val x: ExceptionHandler = Handlers.exceptionHandler(handler)
             .also {
                 it.addExceptionHandler(Exception::class.java) { exchange ->
                     val ex: Throwable = exchange.getAttachment(ExceptionHandler.THROWABLE)
-                    exceptionHandlers[ex::class]?.invoke(ex as Exception, UndertowRequestWrapper(exchange, { null }))
-                        ?.process(exchange)
+                    exceptionHandlers[ex::class]?.invoke(ex as Exception, UndertowRequestWrapper(exchange) { null })
+                        ?.dispatch(exchange)
                 }
             }
 
         handlers.add(x)
     }
 
-    private val Router.EndpointBundle<*>.func: (exchange: HttpServerExchange) -> Unit
+    private val Router.EndpointBundle<*>.undertowHandler: (exchange: HttpServerExchange) -> Unit
         get() = { exchange: HttpServerExchange ->
-            with(parser) {
-                val block = { it: ByteArray? -> handle(exchange) { it?.parseJson(endpoint.body.klass.java) } }
-                if (endpoint.body.klass == Nothing::class) {
-                    block(null)
-                } else {
-                    exchange.requestReceiver.receiveFullBytes { ex, msg: ByteArray -> block(msg) }
-                }
+            val block = { byteArray: ByteArray? ->
+                handle(exchange) { with(parser) { byteArray?.parseJson(endpoint.body.klass.java) } }
+            }
+            if (endpoint.body.klass == Nothing::class) {
+                block(null)
+            } else {
+                exchange.requestReceiver.receiveFullBytes { ex, msg: ByteArray -> block(msg) }
             }
         }
 
-    fun Router.EndpointBundle<*>.foo(exchange: HttpServerExchange, block: (ByteArray?) -> Unit) {
-        return if (endpoint.body.klass == Nothing::class) {
-            block(null)
-        } else {
-            exchange.requestReceiver.receiveFullBytes { ex, msg: ByteArray -> block(msg) }
-        }
-    }
-
-    private fun Router.EndpointBundle<*>.handle(
-        exchange: HttpServerExchange,
-        b: () -> Any?
-    ) {
-        val result = handler.invoke(
+    private fun Router.EndpointBundle<*>.handle(exchange: HttpServerExchange, b: () -> Any?) {
+        handler(
             UndertowRequestWrapper(exchange, b),
             UndertowResponseWrapper(exchange)
-        )
-        result.process(exchange)
+        ).dispatch(exchange)
     }
 
     fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService {
@@ -117,7 +104,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
         HTTPMethod.OPTIONS -> OPTIONS
     }
 
-    private fun HttpResponse<*>.process(exchange: HttpServerExchange) {
+    private fun HttpResponse<*>.dispatch(exchange: HttpServerExchange) {
         when (this) {
             is SuccessfulHttpResponse<*> -> {
                 exchange.setStatusCode(this.statusCode)
@@ -135,7 +122,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
                 exchange.setStatusCode(this.statusCode)
                 exchange.responseHeaders.put(HttpString("content-type"), Format.Json.type)
                 with(parser) {
-                    exchange.responseSender.send(this@process.details?.jsonString)
+                    exchange.responseSender.send(this@dispatch.details?.jsonString)
                 }
             }
         }

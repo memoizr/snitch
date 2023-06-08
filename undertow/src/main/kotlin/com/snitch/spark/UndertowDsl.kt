@@ -5,7 +5,7 @@ import io.undertow.util.PathTemplateMatch
 import me.snitchon.*
 import java.net.URLDecoder
 
-class UndertowRequestWrapper(val exchange: HttpServerExchange, val _body: () -> Any?) : RequestWrapper {
+class UndertowRequestWrapper(val exchange: HttpServerExchange, inline val _body: () -> Any?) : RequestWrapper {
 
     override val body: () -> Any? get() = _body
 
