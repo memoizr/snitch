@@ -1,6 +1,6 @@
 package me.snitchon.parsers
 
-import me.snitchon.Parser
+import me.snitchon.parsing.Parser
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import me.snitchon.Sealed

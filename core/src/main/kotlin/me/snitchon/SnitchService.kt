@@ -15,7 +15,7 @@ data class RoutedService(val service: SnitchService,
 ) {
     fun startListening(): RoutedService {
         router.endpoints.forEach {
-            val path: String = service.config.basePath + it.endpoint.url//.replace("/{", "/:").replace("}", "")
+            val path: String = service.config.basePath + it.endpoint.url
             service.registerMethod(it, path)
         }
 

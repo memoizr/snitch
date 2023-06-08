@@ -1,6 +1,6 @@
 package com.snitch.spark
 
-import me.snitchon.Parser
+import me.snitchon.parsing.Parser
 import ch.qos.logback.classic.Logger
 import me.snitchon.*
 import org.slf4j.LoggerFactory

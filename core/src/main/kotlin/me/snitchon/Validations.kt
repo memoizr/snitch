@@ -36,7 +36,6 @@ object StringSet : Validator<String, Set<String>> {
 interface Validator<T, R> {
     val regex: Regex
     val description: String
-
     val parse: (String) -> R
 
     fun optional(): Validator<T?, R?> = this as Validator<T?, R?>

@@ -1,4 +1,4 @@
-package me.snitchon
+package me.snitchon.parsing
 
 interface Parser {
     val Any.jsonString: String

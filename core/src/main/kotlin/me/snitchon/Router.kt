@@ -1,7 +1,8 @@
 package me.snitchon
 
-import com.google.gson.Gson
 import me.snitchon.Format.*
+import me.snitchon.parsing.Parser
+import me.snitchon.parsing.ParsingException
 import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType
 
@@ -12,7 +13,6 @@ class Router(
     val pathParams: Set<PathParam<out Any, out Any>> = emptySet(),
     val parser: Parser,
 ) {
-    //    val http = this
     val endpoints = mutableListOf<EndpointBundle<*>>()
 
     fun GET() = Endpoint(HTTPMethod.GET, null, null, "", pathParams, emptySet(), emptySet(), Body(Nothing::class))
@@ -247,9 +247,12 @@ class Router(
         endpoints += EndpointBundle(this, kType) { request, response ->
             val invalidParams = request.getInvalidParams(pathParams, queryParams, headerParams)
             if (invalidParams.isNotEmpty()) {
-                response.setStatus(400)
-                invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }
-                    .let { Gson().toJson(it.badRequest<Any,Any>()) }
+                with(parser) {
+                    response.setStatus(400)
+                    invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }
+                        .badRequest<Any, Any>()
+                        .jsonString
+                }
             } else try {
                 before(request)
                 block(
@@ -307,15 +310,11 @@ class Router(
 
     inline infix fun <B : Any, reified T : Any> Endpoint<B>.isHandledBy(
         pair: Pair<KType, RequestHandler<B>.() -> HttpResponse<T>>
-    ): Endpoint<B> {
-        return addEndpoint(pair.first, pair.second)
-    }
+    ): Endpoint<B> = addEndpoint(pair.first, pair.second)
 
     inline infix fun <B : Any, reified T : Any> Endpoint<B>.isHandledBy(
         noinline block: RequestHandler<B>.() -> HttpResponse<T>
-    ): Endpoint<B> {
-        return addEndpoint(T::class.starProjectedType, block)
-    }
+    ): Endpoint<B> = addEndpoint(T::class.starProjectedType, block)
 
     data class EndpointBundle<T : Any>(
         val endpoint: Endpoint<T>,
@@ -324,10 +323,4 @@ class Router(
     )
 }
 
-data class ParametrizedPath(val path: String, val pathParameters: Set<PathParam<out Any, out Any>>) {
-    operator fun div(path: String) = copy(path = this.path + "/" + path)
-    operator fun div(path: PathParam<out Any, out Any>) =
-        copy(path = this.path + "/" + "{${path.name}}", pathParameters = pathParameters + path)
-}
-
-val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this
+internal val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this
