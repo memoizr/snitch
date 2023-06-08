@@ -8,6 +8,7 @@ interface SnitchService {
     fun stop()
     fun start()
     fun <T: Exception, R: HttpResponse<*>> handleException(exception: KClass<T>, block: (T, RequestWrapper) -> R)
+    fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService
 }
 
 data class RoutedService(val service: SnitchService,

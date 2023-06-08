@@ -28,6 +28,20 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
             .addHttpListener(config.port, "localhost")
     }
 
+    override fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService {
+        val tmpDir = File(System.getProperty("java.io.tmpdir") + "/swagger-ui/docs")
+        if (!tmpDir.exists()) {
+            tmpDir.mkdirs()
+        }
+
+        val router = Router(config, this, emptySet(), parser)
+        routerConfiguration(router)
+        return RoutedService(this, router).handleException<ParsingException, _> { ex, req: RequestWrapper ->
+            "Invalid body parameter"
+                .badRequest
+        }
+    }
+
     override fun start() {
         val builder = handlers.fold(serviceBuilder) { acc, routingHandler -> acc.setHandler(routingHandler) }
         service = builder.build()
@@ -80,21 +94,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
         ).dispatch(exchange)
     }
 
-    fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService {
-        val tmpDir = File(System.getProperty("java.io.tmpdir") + "/swagger-ui/docs")
-        if (!tmpDir.exists()) {
-            tmpDir.mkdirs()
-        }
-
-        val router = Router(config, this, emptySet(), parser)
-        routerConfiguration(router)
-        return RoutedService(this, router).handleException<ParsingException, _> { ex, req: RequestWrapper ->
-            "Invalid body parameter"
-                .badRequest
-        }
-    }
-
-    fun HTTPMethod.toUndertow() = when (this) {
+    private fun HTTPMethod.toUndertow() = when (this) {
         HTTPMethod.GET -> GET
         HTTPMethod.POST -> POST
         HTTPMethod.PUT -> PUT
