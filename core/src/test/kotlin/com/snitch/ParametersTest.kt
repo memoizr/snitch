@@ -87,7 +87,9 @@ class ParametersTest : BaseTest(routes {
     GET("sneakypathparams" / pathParam.copy(name = "sneaky")) isHandledBy { TestResult(request.get(pathParam)).ok }
 
     val function by Handler<BodyParam, BodyTestResult> {
+        println("hey")
         val sealed = body.sealed
+        println(sealed)
         BodyTestResult(
             body.int, when (sealed) {
                 is SealedClass.One -> sealed.oneInt

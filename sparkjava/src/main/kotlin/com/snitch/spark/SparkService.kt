@@ -20,7 +20,7 @@ class SparkSnitchService(
     private val Router.EndpointBundle<*>.func: (request: Request, response: Response) -> Any
         get() =
             { request, response ->
-                function(
+                handler(
                     SparkRequestWrapper(request),
                     SparkResponseWrapper(response)
                 )

@@ -3,9 +3,11 @@ package me.snitchon.parsers
 import me.snitchon.parsing.Parser
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
+import com.google.gson.stream.JsonReader
 import me.snitchon.Sealed
 import me.snitchon.parsers.GsonJsonParser.jsonString
 import me.snitchon.parsing.ParsingException
+import java.io.Reader
 import java.lang.reflect.Type
 
 class SealedAdapter : JsonDeserializer<Sealed> {
@@ -50,5 +52,9 @@ object GsonJsonParser : Parser {
         }
     }
 
-    override fun <T : Any> ByteArray.parseJson(klass: Class<T>): T = TODO()
+    override fun <T : Any> ByteArray.parseJson(klass: Class<T>): T = try {
+        gson.fromJson(JsonReader(this.inputStream().bufferedReader()), klass)
+    } catch (e: JsonSyntaxException) {
+        throw ParsingException(e)
+    }
 }

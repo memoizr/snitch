@@ -1,6 +1,5 @@
 package me.snitchon
 
-import me.snitchon.Format.*
 import me.snitchon.parsing.Parser
 import me.snitchon.parsing.ParsingException
 import kotlin.reflect.KType
@@ -195,7 +194,7 @@ class Router(
             EndpointBundle(
                 it.endpoint.copy(url = this.leadingSlash + it.endpoint.url),
                 it.response,
-                it.function
+                it.handler
             )
         }
     }
@@ -207,7 +206,7 @@ class Router(
             EndpointBundle(
                 it.endpoint.copy(tags = it.endpoint.tags?.plus(this)),
                 it.response,
-                it.function
+                it.handler
             )
         }
     }
@@ -220,7 +219,7 @@ class Router(
                 it.endpoint.copy(
                     url = this.path.leadingSlash + it.endpoint.url,
                     pathParams = it.endpoint.pathParams + this.pathParameters
-                ), it.response, it.function
+                ), it.response, it.handler
             )
         }
         endpoints += router.endpoints
@@ -235,7 +234,7 @@ class Router(
             EndpointBundle(
                 it.endpoint.copy(url = url, pathParams = it.endpoint.pathParams + this.copy(url)),
                 it.response,
-                it.function
+                it.handler
             )
         }
     }
@@ -292,7 +291,7 @@ class Router(
     data class EndpointBundle<T : Any>(
         val endpoint: Endpoint<T>,
         val response: KType,
-        val function: (RequestWrapper, ResponseWrapper) -> HttpResponse<*>
+        val handler: (RequestWrapper, ResponseWrapper) -> HttpResponse<*>
     )
 }
 

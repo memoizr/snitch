@@ -11,16 +11,16 @@ import me.snitchon.*
 import me.snitchon.parsing.Parser
 import me.snitchon.parsing.ParsingException
 import java.io.File
-import java.text.ParseException
 import kotlin.reflect.KClass
 
 
 class UndertowSnitchService(override val config: Config, val parser: Parser) : SnitchService {
 
+    lateinit var service: Undertow
+
     private val handlers = mutableListOf<ExceptionHandler>()
     private val exceptionHandlers = mutableMapOf<KClass<*>, (Exception, RequestWrapper) -> HttpResponse<*>>()
 
-    lateinit var service: Undertow
 
     private val routingHandler = RoutingHandler()
     private val serviceBuilder by lazy {
@@ -29,24 +29,64 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
             .addHttpListener(config.port, "localhost")
     }
 
+    override fun start() {
+        val builder = handlers.fold(serviceBuilder) { acc, routingHandler -> acc.setHandler(routingHandler) }
+        service = builder.build()
+        service.start()
+    }
+
+    override fun stop() {
+        service.stop()
+    }
+
+    override fun <T : Exception, R : HttpResponse<*>> handleException(
+        exception: KClass<T>,
+        block: (T, RequestWrapper) -> R
+    ) {
+        exceptionHandlers.put(exception, block as (Exception, RequestWrapper) -> R)
+    }
+
+    override fun registerMethod(endpointBundle: Router.EndpointBundle<*>, path: String) {
+        val handler: RoutingHandler =
+            routingHandler.add(endpointBundle.endpoint.httpMethod.toUndertow(), path, endpointBundle.func)
+
+        val x: ExceptionHandler = Handlers.exceptionHandler(handler)
+            .also {
+                it.addExceptionHandler(Exception::class.java) { exchange ->
+                    val ex: Throwable = exchange.getAttachment(ExceptionHandler.THROWABLE)
+                    exceptionHandlers[ex::class]?.invoke(ex as Exception, UndertowRequestWrapper(exchange, { null }))
+                        ?.process(exchange)
+                }
+            }
+
+        handlers.add(x)
+    }
+
     private val Router.EndpointBundle<*>.func: (exchange: HttpServerExchange) -> Unit
         get() = { exchange: HttpServerExchange ->
-            if (endpoint.body.klass == Nothing::class) {
-                function(exchange, {null})
-            } else {
-                exchange.requestReceiver.receiveFullString { ex, msg ->
-                    with(parser) {
-                        function(exchange, {msg.parseJson(endpoint.body.klass.java)})
-                    }
+            with(parser) {
+                val block = { it: ByteArray? -> handle(exchange) { it?.parseJson(endpoint.body.klass.java) } }
+                if (endpoint.body.klass == Nothing::class) {
+                    block(null)
+                } else {
+                    exchange.requestReceiver.receiveFullBytes { ex, msg: ByteArray -> block(msg) }
                 }
             }
         }
 
-    private inline fun Router.EndpointBundle<*>.function(
+    fun Router.EndpointBundle<*>.foo(exchange: HttpServerExchange, block: (ByteArray?) -> Unit) {
+        return if (endpoint.body.klass == Nothing::class) {
+            block(null)
+        } else {
+            exchange.requestReceiver.receiveFullBytes { ex, msg: ByteArray -> block(msg) }
+        }
+    }
+
+    private fun Router.EndpointBundle<*>.handle(
         exchange: HttpServerExchange,
-        noinline b: () -> Any?
+        b: () -> Any?
     ) {
-        val result = function.invoke(
+        val result = handler.invoke(
             UndertowRequestWrapper(exchange, b),
             UndertowResponseWrapper(exchange)
         )
@@ -77,23 +117,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
         HTTPMethod.OPTIONS -> OPTIONS
     }
 
-    override fun registerMethod(it: Router.EndpointBundle<*>, path: String) {
-        val handler: RoutingHandler =
-            routingHandler.add(it.endpoint.httpMethod.toUndertow(), path, it.func)
-
-        val x: ExceptionHandler = Handlers.exceptionHandler(handler)
-            .also {
-                it.addExceptionHandler(Exception::class.java) {
-                    val ex: Throwable = it.getAttachment(ExceptionHandler.THROWABLE)
-                    exceptionHandlers[ex::class]?.invoke(ex as Exception, UndertowRequestWrapper(it, {""}))
-                        ?.process(it)
-                }
-            }
-
-        handlers.add(x)
-    }
-
-    private inline fun HttpResponse<*>.process(exchange: HttpServerExchange) {
+    private fun HttpResponse<*>.process(exchange: HttpServerExchange) {
         when (this) {
             is SuccessfulHttpResponse<*> -> {
                 exchange.setStatusCode(this.statusCode)
@@ -101,9 +125,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
 
                 if (this._format == Format.Json) {
                     val body = this.body
-                    with(parser) {
-                        exchange.responseSender.send(body?.jsonString)
-                    }
+                    with(parser) { exchange.responseSender.send(body?.jsonString) }
                 } else {
                     exchange.responseSender.send(this.body.toString())
                 }
@@ -117,24 +139,6 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
                 }
             }
         }
-    }
-
-
-    override fun start() {
-        val builder = handlers.fold(serviceBuilder) { acc, routingHandler -> acc.setHandler(routingHandler) }
-        service = builder.build()
-        service.start()
-    }
-
-    override fun <T : Exception, R : HttpResponse<*>> handleException(
-        exception: KClass<T>,
-        block: (T, RequestWrapper) -> R
-    ) {
-        exceptionHandlers.put(exception, block as (Exception, RequestWrapper) -> R)
-    }
-
-    override fun stop() {
-        service.stop()
     }
 }
 
