@@ -1,7 +1,7 @@
 package me.snitchon
 
-import me.snitchon.Format.*
 import com.google.gson.Gson
+import me.snitchon.Format.*
 import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType
 
