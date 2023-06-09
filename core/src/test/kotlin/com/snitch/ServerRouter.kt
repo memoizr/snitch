@@ -17,7 +17,7 @@ import me.snitchon.request.Handler
 import me.snitchon.request.body
 import me.snitchon.request.headers
 import me.snitchon.request.queries
-import me.snitchon.response.Format
+import me.snitchon.types.Format
 import me.snitchon.types.Sealed
 import me.snitchon.response.format
 import me.snitchon.response.ok

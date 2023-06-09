@@ -1,6 +1,6 @@
 package me.snitchon
 
-import me.snitchon.response.Format
+import me.snitchon.types.Format
 
 interface ResponseWrapper {
     fun setStatus(code: Int)

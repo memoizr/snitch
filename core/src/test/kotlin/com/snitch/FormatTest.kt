@@ -1,8 +1,8 @@
 package com.snitch
 
 import com.memoizr.assertk.expect
-import me.snitchon.response.Format.ImageJpeg
-import me.snitchon.response.Format.VideoMP4
+import me.snitchon.types.Format.ImageJpeg
+import me.snitchon.types.Format.VideoMP4
 import me.snitchon.response.format
 import me.snitchon.response.ok
 import org.junit.Test

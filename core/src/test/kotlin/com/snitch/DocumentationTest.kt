@@ -12,13 +12,13 @@ import me.snitchon.parsers.GsonJsonParser.parse
 import me.snitchon.request.Handler
 import me.snitchon.request.body
 import me.snitchon.tests.SnitchTest
-import me.snitchon.response.Format
+import me.snitchon.types.Format
 import me.snitchon.response.format
 import me.snitchon.response.ok
 import org.junit.Test
 
 private val listHandler by Handler<Nothing, _> {
-    listOf(SampleClass("hey", listOf())).ok()
+    listOf(SampleClass("hey", listOf())).ok
 }
 
 private val genericHandler by Handler<Nothing, _> {
@@ -27,7 +27,7 @@ private val genericHandler by Handler<Nothing, _> {
 
 class DocumentationTest : SnitchTest(routes {
     GET("one")
-        .isHandledBy { SampleClass("hey", listOf()).ok() }
+        .isHandledBy { SampleClass("hey", listOf()).ok }
     GET("two")
         .isHandledBy(listHandler)
     GET("generic")

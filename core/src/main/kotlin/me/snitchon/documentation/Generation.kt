@@ -1,7 +1,7 @@
 package me.snitchon.documentation
 
 import me.snitchon.*
-import me.snitchon.response.Format.*
+import me.snitchon.types.Format.*
 import me.snitchon.parameters.Parameter
 import me.snitchon.service.RoutedService
 import me.snitchon.response.format

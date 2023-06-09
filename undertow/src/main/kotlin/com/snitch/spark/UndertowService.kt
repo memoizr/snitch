@@ -10,7 +10,6 @@ import io.undertow.util.Methods.*
 import me.snitchon.*
 import me.snitchon.documentation.ContentType
 import me.snitchon.parsing.Parser
-import me.snitchon.parsing.ParsingException
 import me.snitchon.request.RequestWrapper
 import me.snitchon.response.*
 import me.snitchon.service.RoutedService
@@ -112,20 +111,20 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     context (Parser)
     private fun HttpResponse<*>.dispatch(exchange: HttpServerExchange) {
         when (this) {
-            is SuccessfulHttpResponse<*> -> dispatchSuccessfulResponse(exchange)
-            is ErrorHttpResponse<*, *> -> dispatchFailedResponse(exchange)
+            is SuccessfulHttpResponse<*,*> -> dispatchSuccessfulResponse(exchange)
+            is ErrorHttpResponse<*, *, *> -> dispatchFailedResponse(exchange)
         }
     }
 
     context (Parser)
-    private fun <T> ErrorHttpResponse<*, T>.dispatchFailedResponse(exchange: HttpServerExchange) {
-        exchange.setStatusCode(this.statusCode)
+    private fun <T> ErrorHttpResponse<*,T,*>.dispatchFailedResponse(exchange: HttpServerExchange) {
+        exchange.setStatusCode(this.statusCode.code)
         exchange.responseHeaders.put(HttpString("content-type"), Format.Json.type)
         exchange.responseSender.send(this.details?.serialized)
     }
 
-    private fun SuccessfulHttpResponse<*>.dispatchSuccessfulResponse(exchange: HttpServerExchange) {
-        exchange.setStatusCode(this.statusCode)
+    private fun SuccessfulHttpResponse<*,*>.dispatchSuccessfulResponse(exchange: HttpServerExchange) {
+        exchange.setStatusCode(this.statusCode.code)
         exchange.responseHeaders.put(HttpString("content-type"), this._format.type)
         if (this._format == Format.Json) {
             val value1 = value(parser)!!
