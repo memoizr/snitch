@@ -1,10 +1,10 @@
 package com.snitch
 
 import com.memoizr.assertk.expect
-import me.snitchon.Format.ImageJpeg
-import me.snitchon.Format.VideoMP4
-import me.snitchon.format
-import me.snitchon.ok
+import me.snitchon.response.Format.ImageJpeg
+import me.snitchon.response.Format.VideoMP4
+import me.snitchon.response.format
+import me.snitchon.response.ok
 import org.junit.Test
 import java.io.File
 

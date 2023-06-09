@@ -11,7 +11,11 @@ import me.snitchon.*
 import me.snitchon.documentation.ContentType
 import me.snitchon.parsing.Parser
 import me.snitchon.parsing.ParsingException
-import me.snitchon.types.ErrorResponse
+import me.snitchon.request.RequestWrapper
+import me.snitchon.response.*
+import me.snitchon.service.RoutedService
+import me.snitchon.service.SnitchService
+import me.snitchon.types.*
 import java.nio.ByteBuffer
 import kotlin.reflect.KClass
 
@@ -81,7 +85,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
                 handle(exchange) {
                     with(parser) {
                         when (endpoint.body.contentType) {
-                            ContentType.APPLICATION_JSON -> byteArray?.parseJson(endpoint.body.klass.java)
+                            ContentType.APPLICATION_JSON -> byteArray?.parse(endpoint.body.klass.java)
                             ContentType.APPLICATION_OCTET_STREAM -> byteArray
                             else -> byteArray.contentToString()
                         }
@@ -113,7 +117,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     private fun <T> ErrorHttpResponse<*, T>.dispatchFailedResponse(exchange: HttpServerExchange) {
         exchange.setStatusCode(this.statusCode)
         exchange.responseHeaders.put(HttpString("content-type"), Format.Json.type)
-        exchange.responseSender.send(this.details?.jsonString)
+        exchange.responseSender.send(this.details?.serialized)
     }
 
     private fun SuccessfulHttpResponse<*>.dispatchSuccessfulResponse(exchange: HttpServerExchange) {

@@ -4,15 +4,14 @@ import me.snitchon.parsing.Parser
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
-import me.snitchon.Sealed
-import me.snitchon.parsers.GsonJsonParser.jsonString
+import me.snitchon.types.Sealed
+import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsing.ParsingException
-import java.io.Reader
 import java.lang.reflect.Type
 
 class SealedAdapter : JsonDeserializer<Sealed> {
     override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Sealed {
-        val type = json?.asJsonObject?.get("\$type")?.jsonString
+        val type = json?.asJsonObject?.get("\$type")?.serialized
         val rawType = TypeToken.get(typeOfT).rawType
 
         return rawType.kotlin.sealedSubclasses
@@ -31,12 +30,12 @@ object GsonJsonParser : Parser {
         .registerTypeHierarchyAdapter(Sealed::class.java, SealedAdapter())
     val gson = builder.create()
 
-    override val Any.jsonString get() = gson.toJson(this)
+    override val Any.serialized get() = gson.toJson(this)
 
-    override val Any.jsonByteArray: ByteArray
+    override val Any.serializedBytes: ByteArray
         get() = TODO("Not yet implemented")
 
-    override fun <T : Any> String.parseJson(klass: Class<T>): T {
+    override fun <T : Any> String.parse(klass: Class<T>): T {
         return try {
             gson.fromJson(this, klass)
         } catch (e: JsonSyntaxException) {
@@ -52,7 +51,7 @@ object GsonJsonParser : Parser {
         }
     }
 
-    override fun <T : Any> ByteArray.parseJson(klass: Class<T>): T = try {
+    override fun <T : Any> ByteArray.parse(klass: Class<T>): T = try {
         gson.fromJson(JsonReader(this.inputStream().bufferedReader()), klass)
     } catch (e: JsonSyntaxException) {
         throw ParsingException(e)

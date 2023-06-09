@@ -1,6 +1,6 @@
 package me.snitchon.documentation
 
-import me.snitchon.HTTPMethod
+import me.snitchon.types.HTTPMethod
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType

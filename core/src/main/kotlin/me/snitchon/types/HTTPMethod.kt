@@ -1,4 +1,4 @@
-package me.snitchon
+package me.snitchon.types
 
 enum class HTTPMethod {
     GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD;

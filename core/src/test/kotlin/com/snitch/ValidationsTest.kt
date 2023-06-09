@@ -3,7 +3,12 @@ package com.snitch
 import com.snitch.me.snitchon.NonNegativeInt
 import com.snitch.me.snitchon.StringSet
 import com.snitch.me.snitchon.Validator
-import me.snitchon.*
+import me.snitchon.parameters.optionalHeader
+import me.snitchon.parameters.optionalQuery
+import me.snitchon.parameters.path
+import me.snitchon.request.headers
+import me.snitchon.request.queries
+import me.snitchon.response.ok
 import org.junit.Test
 
 private val id = path("id", condition = NonNegativeInt)

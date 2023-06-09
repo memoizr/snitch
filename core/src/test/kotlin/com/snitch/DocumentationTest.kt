@@ -7,9 +7,14 @@ import me.snitchon.*
 import me.snitchon.documentation.ContentType
 import me.snitchon.documentation.generateDocs
 import me.snitchon.parsers.GsonDocumentationSerializer
-import me.snitchon.parsers.GsonJsonParser.jsonString
-import me.snitchon.parsers.GsonJsonParser.parseJson
+import me.snitchon.parsers.GsonJsonParser.serialized
+import me.snitchon.parsers.GsonJsonParser.parse
+import me.snitchon.request.Handler
+import me.snitchon.request.body
 import me.snitchon.tests.SnitchTest
+import me.snitchon.response.Format
+import me.snitchon.response.format
+import me.snitchon.response.ok
 import org.junit.Test
 
 private val listHandler by Handler<Nothing, _> {
@@ -36,31 +41,31 @@ class DocumentationTest : SnitchTest(routes {
     fun `uses custom serialization`() {
         val docs = activeService.generateDocs(GsonDocumentationSerializer).spec
 
-        expect that docs.jsonString contains "a_sample"
+        expect that docs.serialized contains "a_sample"
     }
 
     @Test
     fun `supports generic response types`() {
         val docs = activeService.generateDocs(GsonDocumentationSerializer).spec
 
-        expect that docs.jsonString contains "foo"
+        expect that docs.serialized contains "foo"
     }
 
     @Test
     fun `supports binary request types`() {
-        val docs = activeService.generateDocs(GsonDocumentationSerializer).spec.parseJson(JsonObject::class.java)
+        val docs = activeService.generateDocs(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
             .getAsJsonObject("paths")
             .getAsJsonObject("/bytearray")
             .getAsJsonObject("post")
             .getAsJsonObject("requestBody")
             .getAsJsonObject("content")
 
-        expect that docs.jsonString contains """"format":"byte"""" contains "octet-stream"
+        expect that docs.serialized contains """"format":"byte"""" contains "octet-stream"
     }
 
     @Test
     fun `supports binary response types`() {
-        val docs = activeService.generateDocs(GsonDocumentationSerializer).spec.parseJson(JsonObject::class.java)
+        val docs = activeService.generateDocs(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
             .getAsJsonObject("paths")
             .getAsJsonObject("/bytearray")
             .getAsJsonObject("post")
@@ -68,7 +73,7 @@ class DocumentationTest : SnitchTest(routes {
             .getAsJsonObject("200")
             .getAsJsonObject("content")
 
-        expect that docs.jsonString contains """"format":"byte"""" contains "octet-stream"
+        expect that docs.serialized contains """"format":"byte"""" contains "octet-stream"
     }
 
 }

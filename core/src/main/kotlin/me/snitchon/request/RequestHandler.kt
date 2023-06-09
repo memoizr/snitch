@@ -1,6 +1,10 @@
-package me.snitchon
+package me.snitchon.request
 
+import me.snitchon.response.HttpResponse
+import me.snitchon.service.OpDescription
+import me.snitchon.ResponseWrapper
 import me.snitchon.documentation.ContentType
+import me.snitchon.parameters.*
 import me.snitchon.parsing.Parser
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty

@@ -1,6 +1,6 @@
 package com.snitch
 
-import me.snitchon.RoutedService
+import me.snitchon.service.RoutedService
 import com.snitch.spark.UndertowSnitchService
 import me.snitchon.Config
 import me.snitchon.Router

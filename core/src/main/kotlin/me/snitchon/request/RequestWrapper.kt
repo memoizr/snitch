@@ -1,4 +1,10 @@
-package me.snitchon
+package me.snitchon.request
+
+import me.snitchon.types.HTTPMethod
+import me.snitchon.parameters.HeaderParameter
+import me.snitchon.parameters.Parameter
+import me.snitchon.parameters.PathParam
+import me.snitchon.parameters.QueryParameter
 
 interface RequestWrapper {
     val body: () -> Any?

@@ -1,7 +1,7 @@
 package com.snitch
 
-import me.snitchon.badRequest
-import me.snitchon.ok
+import me.snitchon.response.badRequest
+import me.snitchon.response.ok
 import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test
 
@@ -30,7 +30,7 @@ class ErrorTest : BaseTest(
                     "hellothere",
                     3f
                 )
-            ).jsonString
+            ).serialized
         }
     }
 

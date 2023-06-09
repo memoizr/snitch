@@ -5,9 +5,16 @@ import com.snitch.me.snitchon.NonEmptySingleLineString
 import com.snitch.me.snitchon.NonEmptyString
 import com.snitch.me.snitchon.NonNegativeInt
 import com.snitch.me.snitchon.Validator
-import me.snitchon.*
+import me.snitchon.parameters.*
 import me.snitchon.parsers.GsonJsonParser
-import me.snitchon.parsers.GsonJsonParser.jsonString
+import me.snitchon.parsers.GsonJsonParser.serialized
+import me.snitchon.request.Handler
+import me.snitchon.request.body
+import me.snitchon.request.headers
+import me.snitchon.request.queries
+import me.snitchon.response.ErrorHttpResponse
+import me.snitchon.types.Sealed
+import me.snitchon.response.ok
 import org.junit.Test
 import java.text.SimpleDateFormat
 import java.util.*
@@ -106,11 +113,11 @@ class ParametersTest : BaseTest(routes {
 
     @Test
     fun `validates path parameters`() {
-        whenPerform GET "/$root/intpath2/4545/end" expectBody IntTestResult(4545).jsonString
+        whenPerform GET "/$root/intpath2/4545/end" expectBody IntTestResult(4545).serialized
         whenPerform GET "/$root/intpath2/hello/end" expectBody ErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Path parameter `intParam` is invalid, expecting non negative integer, got `hello`")
-        ).jsonString
+        ).serialized
     }
 
     @Test
@@ -144,10 +151,10 @@ class ParametersTest : BaseTest(routes {
     @Test
     fun `supports default values for query parameters`() {
         with (GsonJsonParser) {
-            whenPerform GET "/$root/queriespath3?offset=42" expectBody IntTestResult(42).jsonString
-            whenPerform GET "/$root/queriespath3" expectBody IntTestResult(30).jsonString
+            whenPerform GET "/$root/queriespath3?offset=42" expectBody IntTestResult(42).serialized
+            whenPerform GET "/$root/queriespath3" expectBody IntTestResult(30).serialized
 
-            whenPerform GET "/$root/queriespath4?limit=42" expectBody NullableIntTestResult(42).jsonString
+            whenPerform GET "/$root/queriespath4?limit=42" expectBody NullableIntTestResult(42).serialized
             whenPerform GET "/$root/queriespath4" expectBody """{}"""
         }
     }
@@ -182,13 +189,13 @@ class ParametersTest : BaseTest(routes {
     @Test
     fun `supports default values for header parameters`() {
         with (GsonJsonParser) {
-            whenPerform GET "/$root/headerspath3" withHeaders mapOf(offsetHead.name to 42) expectBody IntTestResult(42).jsonString
-            whenPerform GET "/$root/headerspath3" expectBody IntTestResult(666).jsonString
-            whenPerform GET "/$root/headerspath3" expectBody IntTestResult(666).jsonString
+            whenPerform GET "/$root/headerspath3" withHeaders mapOf(offsetHead.name to 42) expectBody IntTestResult(42).serialized
+            whenPerform GET "/$root/headerspath3" expectBody IntTestResult(666).serialized
+            whenPerform GET "/$root/headerspath3" expectBody IntTestResult(666).serialized
 
             whenPerform GET "/$root/headerspath4" withHeaders mapOf(limitHead.name to 42) expectBody NullableIntTestResult(
                 42
-            ).jsonString
+            ).serialized
             whenPerform GET "/$root/headerspath4" withHeaders mapOf(limitHead.name to "") expectBody """{}"""
             whenPerform GET "/$root/headerspath4" expectBody """{}"""
         }
@@ -198,7 +205,7 @@ class ParametersTest : BaseTest(routes {
 
     @Test
     fun `supports body parameter`() {
-        whenPerform POST "/$root/bodyparam" withBody bodyParam expectBody BodyTestResult(42, 33).jsonString
+        whenPerform POST "/$root/bodyparam" withBody bodyParam expectBody BodyTestResult(42, 33).serialized
     }
 
     @Test
@@ -206,7 +213,7 @@ class ParametersTest : BaseTest(routes {
         val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         val date = "2018-06-30T02:59:51-00:00"
         with (GsonJsonParser) {
-            whenPerform GET "/$root/customParsing?time=$date" expectBody DateResult(df.parse(date)).jsonString
+            whenPerform GET "/$root/customParsing?time=$date" expectBody DateResult(df.parse(date)).serialized
         }
     }
 
@@ -216,15 +223,15 @@ class ParametersTest : BaseTest(routes {
             whenPerform GET "/$root/sneakyqueryparams" expectBody ErrorHttpResponse<TestResult, String>(
                 500,
                 "Attempting to use unregistered query parameter `param`"
-            ).jsonString
+            ).serialized
             whenPerform GET "/$root/sneakyheaderparams" expectBody ErrorHttpResponse<TestResult, String>(
                 500,
                 "Attempting to use unregistered header parameter `param`"
-            ).jsonString
+            ).serialized
             whenPerform GET "/$root/sneakypathparams/343" expectBody ErrorHttpResponse<TestResult, String>(
                 500,
                 "Attempting to use unregistered path parameter `param`"
-            ).jsonString
+            ).serialized
         }
     }
 

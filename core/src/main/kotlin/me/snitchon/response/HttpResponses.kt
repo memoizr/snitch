@@ -1,6 +1,6 @@
-package me.snitchon
+package me.snitchon.response
 
-import me.snitchon.Format.*
+import me.snitchon.response.Format.*
 import me.snitchon.parsing.Parser
 
 sealed class HttpResponse<T> {
@@ -15,7 +15,7 @@ data class SuccessfulHttpResponse<T>(
     override val value: context(Parser) () -> Any? = {
         when (_format) {
             OctetStream -> body
-            Json -> body?.jsonString
+            Json -> body?.serialized
             ImageJpeg -> body
             VideoMP4 -> body
             TextHTML -> body
@@ -28,32 +28,33 @@ data class SuccessfulHttpResponse<T>(
 data class ErrorHttpResponse<T, E>(
     override val statusCode: Int,
     val details: E,
-    override val value: context(Parser) () -> Any? = { details?.jsonString },
+    override val value: context(Parser) () -> Any? = { details?.serialized },
     override val headers: Map<String, String> = emptyMap(),
 ) : HttpResponse<T>()
-
-//fun <T, R> HttpResponse<T>.mapSuccessful(fn: (T) -> R): HttpResponse<R> = if (this is SuccessfulHttpResponse) {
-//    SuccessfulHttpResponse(statusCode, fn(body), _format)
-//} else {
-//    this as HttpResponse<R>
-//}
 
 context (Parser)
 fun <T> T.success(code: Int = 200): HttpResponse<T> = SuccessfulHttpResponse(code, this)
 context (Parser)
-inline val <reified T> T.ok: HttpResponse<T> get() = SuccessfulHttpResponse(200, this)
+inline val <reified T> T.ok: HttpResponse<T>
+    get() = SuccessfulHttpResponse(200, this)
 context (Parser)
-val <T> T.created: HttpResponse<T> get() = SuccessfulHttpResponse(201, this)
+val <T> T.created: HttpResponse<T>
+    get() = SuccessfulHttpResponse(201, this)
 context (Parser)
-val <T> T.badRequest: HttpResponse<T> get() = ErrorHttpResponse(400, this)
+val <T> T.badRequest: HttpResponse<T>
+    get() = ErrorHttpResponse(400, this)
 context (Parser)
-val <T> T.forbidden: HttpResponse<T> get() = ErrorHttpResponse(403, this)
+val <T> T.forbidden: HttpResponse<T>
+    get() = ErrorHttpResponse(403, this)
 context (Parser)
-val Unit.noContent: HttpResponse<Unit> get() = SuccessfulHttpResponse(204, this)
+val Unit.noContent: HttpResponse<Unit>
+    get() = SuccessfulHttpResponse(204, this)
 context (Parser)
-val <T> T.notFound: HttpResponse<T> get() = ErrorHttpResponse(404, this)
+val <T> T.notFound: HttpResponse<T>
+    get() = ErrorHttpResponse(404, this)
 context (Parser)
-val <T> T.serverError: HttpResponse<T> get() = ErrorHttpResponse(500, this)
+val <T> T.serverError: HttpResponse<T>
+    get() = ErrorHttpResponse(500, this)
 
 context (Parser)
 fun <T> T.ok(): HttpResponse<T> = SuccessfulHttpResponse(200, this)

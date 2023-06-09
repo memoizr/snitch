@@ -1,4 +1,4 @@
-package me.snitchon
+package me.snitchon.parameters
 
 import me.snitchon.documentation.Visibility
 import com.snitch.me.snitchon.Validator

@@ -1,6 +1,6 @@
 package me.snitchon.documentation
 
-import me.snitchon.Sealed
+import me.snitchon.types.Sealed
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter

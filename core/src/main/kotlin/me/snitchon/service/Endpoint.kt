@@ -1,7 +1,14 @@
-package me.snitchon
+package me.snitchon.service
 
-import me.snitchon.documentation.ContentType
+import me.snitchon.ResponseWrapper
 import me.snitchon.documentation.Visibility
+import me.snitchon.parameters.HeaderParameter
+import me.snitchon.parameters.Parameter
+import me.snitchon.parameters.PathParam
+import me.snitchon.parameters.QueryParameter
+import me.snitchon.request.Body
+import me.snitchon.request.RequestWrapper
+import me.snitchon.types.HTTPMethod
 
 data class OpDescription(val description: String)
 

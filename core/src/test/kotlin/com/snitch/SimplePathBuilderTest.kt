@@ -2,11 +2,11 @@ package com.snitch
 
 import me.snitchon.documentation.Description
 import me.snitchon.documentation.Visibility
-import me.snitchon.badRequest
-import me.snitchon.created
-import me.snitchon.forbidden
-import me.snitchon.ok
-import me.snitchon.parsers.GsonJsonParser.jsonString
+import me.snitchon.response.badRequest
+import me.snitchon.response.created
+import me.snitchon.response.forbidden
+import me.snitchon.response.ok
+import me.snitchon.parsers.GsonJsonParser.serialized
 import org.junit.Test
 
 class SimplePathBuilderTest : BaseTest(routes {
@@ -90,8 +90,8 @@ class SimplePathBuilderTest : BaseTest(routes {
         whenPerform GET "/$root/hey/123/a" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/123" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/one/123" expectBodyJson TestResult("get value") expectCode 200
-        whenPerform GET "/$root/v1" expectBody TestResult("get value").jsonString expectCode 200
-        whenPerform GET "/$root" expectBody TestResult("get value").jsonString expectCode 200
+        whenPerform GET "/$root/v1" expectBody TestResult("get value").serialized expectCode 200
+        whenPerform GET "/$root" expectBody TestResult("get value").serialized expectCode 200
 
     }
 

@@ -3,6 +3,13 @@ package com.snitch.spark
 import io.undertow.server.HttpServerExchange
 import io.undertow.util.PathTemplateMatch
 import me.snitchon.*
+import me.snitchon.parameters.HeaderParameter
+import me.snitchon.parameters.PathParam
+import me.snitchon.parameters.QueryParameter
+import me.snitchon.request.RequestWrapper
+import me.snitchon.request.filterValid
+import me.snitchon.response.Format
+import me.snitchon.types.HTTPMethod
 import java.net.URLDecoder
 
 class UndertowRequestWrapper(val exchange: HttpServerExchange, inline val _body: () -> Any?) : RequestWrapper {
@@ -13,19 +20,6 @@ class UndertowRequestWrapper(val exchange: HttpServerExchange, inline val _body:
 
     override fun params(name: String): String? =
         URLDecoder.decode(exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).parameters.get(name))
-
-//    override fun <RAW, PARSED : Any?> getParam(param: Parameter<RAW, PARSED>): String? {
-//        return when (param) {
-//            is Path<*> -> {
-//                val params = exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY)
-//                URLDecoder.decode(params.parameters.get(param.name))
-//            }
-//
-//            is Query<*, *> -> exchange.queryParameters.get(param.name)?.firstOrNull()
-//            is Header<*, *> ->
-//            else -> TODO()
-//        }
-//    }
 
     override fun headers(name: String): String? = exchange.requestHeaders.get(name)?.firstOrNull()
 

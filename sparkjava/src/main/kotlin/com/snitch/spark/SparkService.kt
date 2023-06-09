@@ -3,6 +3,13 @@ package com.snitch.spark
 import me.snitchon.parsing.Parser
 import ch.qos.logback.classic.Logger
 import me.snitchon.*
+import me.snitchon.request.RequestWrapper
+import me.snitchon.service.RoutedService
+import me.snitchon.service.SnitchService
+import me.snitchon.response.ErrorHttpResponse
+import me.snitchon.types.HTTPMethod
+import me.snitchon.response.HttpResponse
+import me.snitchon.response.SuccessfulHttpResponse
 import org.slf4j.LoggerFactory
 import spark.Request
 import spark.Response
@@ -68,8 +75,8 @@ class SparkSnitchService(
             val handled = block(ex, SparkRequestWrapper(req))
             res.status(handled.statusCode)
             when (handled) {
-                is SuccessfulHttpResponse<*> -> res.body(with(parser) { handled.body!!.jsonString })
-                is ErrorHttpResponse<*, *> -> res.body(with(parser) { handled.details!!.jsonString })
+                is SuccessfulHttpResponse<*> -> res.body(with(parser) { handled.body!!.serialized })
+                is ErrorHttpResponse<*, *> -> res.body(with(parser) { handled.details!!.serialized })
             }
         }
     }

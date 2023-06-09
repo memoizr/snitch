@@ -1,7 +1,12 @@
 package me.snitchon.documentation
 
 import me.snitchon.*
-import me.snitchon.Format.*
+import me.snitchon.response.Format.*
+import me.snitchon.parameters.Parameter
+import me.snitchon.service.RoutedService
+import me.snitchon.response.format
+import me.snitchon.response.ok
+import me.snitchon.response.serializer
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
@@ -85,7 +90,7 @@ fun RoutedService.generateDocs(documentationSerializer: DocumentationSerializer 
             }
         }.fold(openApi) { a, b -> a.withPath(b.first, b.second) }
         .let {
-            Spec(with(router.parser) { it.jsonString }, router, this)
+            Spec(with(router.parser) { it.serialized }, router, this)
         }
 }
 

@@ -1,8 +1,8 @@
 package me.snitchon.tests
 
-import me.snitchon.RoutedService
+import me.snitchon.service.RoutedService
 import me.snitchon.parsers.GsonJsonParser
-import me.snitchon.parsers.GsonJsonParser.parseJson
+import me.snitchon.parsers.GsonJsonParser.parse
 import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -106,13 +106,13 @@ abstract class SnitchTest(service: (Int) -> RoutedService) {
                     HttpMethod.PUT -> put(
                         "http://localhost:${port}$endpoint",
                         headers,
-                        if (body is String) body else body?.jsonString
+                        if (body is String) body else body?.serialized
                     )
 
                     HttpMethod.POST -> post(
                         "http://localhost:${port}$endpoint",
                         headers,
-                        if (body is String) body else body?.jsonString
+                        if (body is String) body else body?.serialized
                     )
 
                     HttpMethod.DELETE -> delete("http://localhost:${port}$endpoint", headers)
@@ -140,7 +140,7 @@ abstract class SnitchTest(service: (Int) -> RoutedService) {
 
         infix inline fun <reified T : Any> expectBodyJson(body: T) = apply {
             val r = response.body()
-            com.memoizr.assertk.expect that r.parseJson(T::class.java) isEqualTo body
+            com.memoizr.assertk.expect that r.parse(T::class.java) isEqualTo body
         }
     }
 }
