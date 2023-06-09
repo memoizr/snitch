@@ -9,7 +9,6 @@ import io.undertow.util.HttpString
 import io.undertow.util.Methods.*
 import me.snitchon.*
 import me.snitchon.documentation.ContentType
-import me.snitchon.extensions.print
 import me.snitchon.parsing.Parser
 import me.snitchon.parsing.ParsingException
 import me.snitchon.types.ErrorResponse
@@ -17,20 +16,16 @@ import java.nio.ByteBuffer
 import kotlin.reflect.KClass
 
 
+@Suppress("UNCHECKED_CAST")
 class UndertowSnitchService(override val config: Config, val parser: Parser) : SnitchService {
 
-    lateinit var service: Undertow
-
+    private lateinit var service: Undertow
     private val handlers = mutableListOf<ExceptionHandler>()
     private val exceptionHandlers =
         LinkedHashMap<KClass<*>, context(Parser) (Exception, RequestWrapper) -> HttpResponse<*>>()
 
     private val routingHandler = RoutingHandler()
-    private val serviceBuilder by lazy {
-        Undertow
-            .builder()
-            .addHttpListener(config.port, "localhost")
-    }
+    private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.port, "localhost") }
 
     override fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService {
         val router = with(parser) { Router(config, this@UndertowSnitchService, emptySet()) }
@@ -41,8 +36,9 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     }
 
     override fun start() {
-        val builder = handlers.fold(serviceBuilder) { acc, routingHandler -> acc.setHandler(routingHandler) }
-        service = builder.build()
+        service = handlers
+            .fold(serviceBuilder) { builder, routingHandler -> builder.setHandler(routingHandler) }
+            .build()
         service.start()
     }
 
@@ -51,87 +47,90 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     }
 
     override fun <T : Exception, R : HttpResponse<*>> handleException(
-        exception: KClass<T>,
-        block: context (Parser) (T, RequestWrapper) -> R
+        exceptionClass: KClass<T>,
+        exceptionHandler: context (Parser) (T, RequestWrapper) -> R
     ) {
-//        with(parser) {
-        exceptionHandlers.put(exception, block as context(Parser) (Exception, RequestWrapper) -> R)
-//        }
+        exceptionHandlers[exceptionClass] = exceptionHandler as context(Parser) (Exception, RequestWrapper) -> R
     }
 
     override fun registerMethod(endpointBundle: Router.EndpointBundle<*>, path: String) {
-        val handler: RoutingHandler =
-            routingHandler.add(endpointBundle.endpoint.httpMethod.toUndertow(), path, endpointBundle.undertowHandler)
+        with(parser) {
+            val handler = routingHandler.add(
+                endpointBundle.endpoint.httpMethod.toUndertow(),
+                path,
+                endpointBundle.undertowHandler
+            )
 
-        handlers.add(exceptionHandler(handler)
-            .also {
-                it.addExceptionHandler(Exception::class.java) { exchange ->
-                    val ex: Throwable = exchange.getAttachment(ExceptionHandler.THROWABLE)
-                    exceptionHandlers[ex::class]?.invoke(
-                        parser,
-                        ex as Exception,
-                        UndertowRequestWrapper(exchange) { null })
-                        ?.dispatch(exchange)
-                }
-            })
+            handlers.add(exceptionHandler(handler)
+                .also {
+                    it.addExceptionHandler(Exception::class.java) { exchange ->
+                        val ex: Throwable = exchange.getAttachment(ExceptionHandler.THROWABLE)
+                        exceptionHandlers[ex::class]?.invoke(
+                            parser,
+                            ex as Exception,
+                            UndertowRequestWrapper(exchange) { null })?.dispatch(exchange)
+                    }
+                })
+        }
     }
 
+    context (Parser)
     private val Router.EndpointBundle<*>.undertowHandler: (exchange: HttpServerExchange) -> Unit
         get() = { exchange: HttpServerExchange ->
-            val block = { byteArray: ByteArray? ->
+            val byteArrayHandler = { byteArray: ByteArray? ->
                 handle(exchange) {
                     with(parser) {
                         when (endpoint.body.contentType) {
                             ContentType.APPLICATION_JSON -> byteArray?.parseJson(endpoint.body.klass.java)
                             ContentType.APPLICATION_OCTET_STREAM -> byteArray
-                            else -> println("fooo")
+                            else -> byteArray.contentToString()
                         }
                     }
                 }
             }
             if (endpoint.body.klass == Nothing::class) {
-                block(null)
+                byteArrayHandler(null)
             } else {
-                exchange.requestReceiver.receiveFullBytes { ex, msg: ByteArray -> block(msg) }
+                exchange.requestReceiver.receiveFullBytes { _, byteArray -> byteArrayHandler(byteArray) }
             }
         }
 
+    context (Parser)
     private fun Router.EndpointBundle<*>.handle(exchange: HttpServerExchange, b: () -> Any?) {
         handler(UndertowRequestWrapper(exchange, b), UndertowResponseWrapper(exchange))
             .dispatch(exchange)
     }
 
+    context (Parser)
     private fun HttpResponse<*>.dispatch(exchange: HttpServerExchange) {
         when (this) {
-            is SuccessfulHttpResponse<*> -> {
-                exchange.setStatusCode(this.statusCode)
-//                headers.forEach {
-//                    exchange.responseHeaders.put(HttpString(it.key), it.value)
-//                }
-                exchange.responseHeaders.put(HttpString("Content-Type"), this._format.type)
+            is SuccessfulHttpResponse<*> -> dispatchSuccessfulResponse(exchange)
+            is ErrorHttpResponse<*, *> -> dispatchFailedResponse(exchange)
+        }
+    }
 
-                if (this._format == Format.Json) {
-                    val value1 = value(parser)!!
+    context (Parser)
+    private fun <T> ErrorHttpResponse<*, T>.dispatchFailedResponse(exchange: HttpServerExchange) {
+        exchange.setStatusCode(this.statusCode)
+        exchange.responseHeaders.put(HttpString("content-type"), Format.Json.type)
+        exchange.responseSender.send(this.details?.jsonString)
+    }
 
-                    exchange.responseSender.send(value1.toString())
-                    headers.forEach {
-                        exchange.responseHeaders.put(HttpString(it.key), it.value)
-                    }
-                } else {
-                    if (body!!::class == ByteArray::class) {
-                        exchange.responseSender.send(ByteBuffer.wrap(body as ByteArray))
-                    } else {
-                        exchange.responseSender.send(body.toString())
-                    }
-                }
+    private fun SuccessfulHttpResponse<*>.dispatchSuccessfulResponse(exchange: HttpServerExchange) {
+        exchange.setStatusCode(this.statusCode)
+        exchange.responseHeaders.put(HttpString("content-type"), this._format.type)
+        if (this._format == Format.Json) {
+            val value1 = value(parser)!!
+
+            exchange.responseSender.send(value1.toString())
+            headers.forEach {
+                exchange.responseHeaders.put(HttpString(it.key), it.value)
             }
-
-            is ErrorHttpResponse<*, *> -> {
-                exchange.setStatusCode(this.statusCode)
-                exchange.responseHeaders.put(HttpString("content-type"), Format.Json.type)
-                with(parser) {
-                    exchange.responseSender.send(this@dispatch.details?.jsonString)
-                }
+        } else {
+            if (body!!::class == ByteArray::class) {
+                exchange.responseSender.send(ByteBuffer.wrap(body as ByteArray))
+            } else {
+                exchange.responseSender.send(body.toString())
             }
         }
     }
