@@ -1,6 +1,5 @@
 package com.snitch
 
-import me.snitchon.extensions.print
 import com.memoizr.assertk.expect
 import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test
@@ -12,7 +11,7 @@ class JsonParsingTest {
     fun `it fails with informative error when json is invalid`() {
         with (GsonJsonParser) {
             expect thatThrownBy {
-                """{test": maa}""".parseJson<Foo>().test.print()
+                """{test": maa}""".parseJson<Foo>().test
             } hasMessage """Value of non-nullable member [test] cannot be null"""
         }
     }

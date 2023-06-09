@@ -90,6 +90,7 @@ class Handler<Request : Any, Response>(val block: context(Parser) RequestHandler
         nothing: Nothing?,
         property: KProperty<*>
     ): Pair<KType, context(Parser) RequestHandler<Request>.() -> HttpResponse<Response>> {
-        return property.returnType.arguments[1].type!!.arguments[1].type!!.arguments[0].type!! to block
+        val type = property.returnType.arguments[1].type!!.arguments[2].type!!.arguments[0].type!!
+        return type to block
     }
 }

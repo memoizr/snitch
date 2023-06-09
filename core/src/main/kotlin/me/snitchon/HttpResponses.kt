@@ -1,9 +1,7 @@
 package me.snitchon
 
 import me.snitchon.Format.*
-import me.snitchon.extensions.print
 import me.snitchon.parsing.Parser
-import me.snitchon.types.ErrorResponse
 
 sealed class HttpResponse<T> {
     abstract val statusCode: Int
@@ -34,7 +32,7 @@ data class ErrorHttpResponse<T, E>(
 context (Parser)
 fun <T> T.success(code: Int = 200): HttpResponse<T> = SuccessfulHttpResponse(code, this)
 context (Parser)
-val <T> T.ok: HttpResponse<T> get() = SuccessfulHttpResponse(200, this)
+inline val <reified T> T.ok: HttpResponse<T> get() = SuccessfulHttpResponse(200, this)
 context (Parser)
 val <T> T.created: HttpResponse<T> get() = SuccessfulHttpResponse(201, this)
 context (Parser)
@@ -63,11 +61,11 @@ fun Unit.noContent(): HttpResponse<Unit> = SuccessfulHttpResponse(204, this)
 
 context (Parser)
 fun <T> HttpResponse<T>.format(newFormat: Format) =
-    if (this is SuccessfulHttpResponse) copy(_format = newFormat).print() else this.print()
+    if (this is SuccessfulHttpResponse) copy(_format = newFormat) else this
 
 context (Parser)
 fun <T> HttpResponse<T>.serializer(serializer: (T) -> Any) =
-    if (this is SuccessfulHttpResponse) copy(value = {serializer(this.body)}).print() else this.print()
+    if (this is SuccessfulHttpResponse) copy(value = {serializer(this.body)}) else this
 
 enum class Format(val type: String) {
     OctetStream("application/octect-streeam"),

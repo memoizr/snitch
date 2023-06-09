@@ -2,7 +2,6 @@ package me.snitchon.documentation
 
 import me.snitchon.*
 import me.snitchon.Format.*
-import me.snitchon.parsing.Parser
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType

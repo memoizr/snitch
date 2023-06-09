@@ -1,7 +1,6 @@
 package me.snitchon
 
 import me.snitchon.parsing.Parser
-import me.snitchon.parsing.ParsingException
 import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType
 

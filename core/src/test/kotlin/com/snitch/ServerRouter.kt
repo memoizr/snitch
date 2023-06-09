@@ -80,7 +80,7 @@ val ServerRouter: Router.() -> Unit = {
         AResponse(request[clipId], 0, 0, listOf(Query("hey")), FooEnum.A).ok
     }
 
-    val getGreetingBody by Handler<TestClass, AResponse> {
+    val getGreetingBody by Handler<TestClass, _> {
         request[query]
         AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok
     }

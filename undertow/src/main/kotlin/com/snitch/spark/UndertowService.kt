@@ -93,7 +93,6 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     private fun HttpResponse<*>.dispatch(exchange: HttpServerExchange) {
         when (this) {
             is SuccessfulHttpResponse<*> -> {
-                println(this)
                 exchange.setStatusCode(this.statusCode)
 //                headers.forEach {
 //                    exchange.responseHeaders.put(HttpString(it.key), it.value)

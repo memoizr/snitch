@@ -3,14 +3,12 @@ package com.snitch
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.memoizr.assertk.expect
-import me.snitchon.documentation.generateDocs
 import me.snitchon.Handler
+import me.snitchon.documentation.generateDocs
 import me.snitchon.ok
 import me.snitchon.parsers.GsonDocumentationSerializer
 import me.snitchon.parsers.GsonJsonParser.jsonString
 import me.snitchon.tests.SnitchTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
 private data class SampleClass(
@@ -26,39 +24,32 @@ private val listHandler by Handler<Nothing, _> {
     listOf(SampleClass("hey", listOf())).ok()
 }
 
-private val genericHandler by Handler<Nothing, _> {
-    GenericResponse(GenericResponse(Foo1("hey"))).ok()
+private val genericHandler by Handler<Nothing, GenericResponse<GenericResponse<Foo1>>> {
+    GenericResponse(GenericResponse(Foo1("hey"))).ok
 }
 
 class DocumentationTest : SnitchTest(routes {
-    GET("one").isHandledBy { SampleClass("hey", listOf()).ok() }
-    GET("two").isHandledBy(listHandler)
+//    GET("one").isHandledBy { SampleClass("hey", listOf()).ok() }
+//    GET("two").isHandledBy(listHandler)
     GET("generic").isHandledBy(genericHandler)
 }) {
-
-//    @Before
-//    override fun before() {
-//    }
-
     @Test
     fun `uses custom serialization`() {
-//        val docs = Gson().fromJson(
-//            activeService.startListening().generateDocs(GsonDocumentationSerializer).spec,
-//            com.google.gson.JsonObject::class.java
-//        )
+        val docs = Gson().fromJson(
+            activeService.generateDocs(GsonDocumentationSerializer).spec,
+            com.google.gson.JsonObject::class.java
+        )
 
-//        expect that docs.jsonString contains "a_sample"
+        expect that docs.jsonString contains "a_sample"
     }
 
     @Test
     fun `supports generic response types`() {
-//        val docs = activeService.startListening().generateDocs(GsonDocumentationSerializer).spec
+        val docs = Gson().fromJson(
+            activeService.generateDocs(GsonDocumentationSerializer).spec,
+            com.google.gson.JsonObject::class.java
+        )
 
-//        expect that docs.jsonString contains "foo"
+        expect that docs.jsonString contains "foo"
     }
-
-//    @After
-//    override fun after() {
-////        activeService.stopListening()
-//    }
 }
