@@ -5,6 +5,7 @@ import me.snitchon.Format.*
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.jvm.jvmErasure
 
 fun RoutedService.generateDocs(documentationSerializer: DocumentationSerializer = DefaultDocumentatoinSerializer): Spec {
     val openApi = OpenApi(info = Info(router.config.title, "1.0"), servers = listOf(Server(router.config.host)))
@@ -21,12 +22,18 @@ fun RoutedService.generateDocs(documentationSerializer: DocumentationSerializer 
                         responses = emptyMap(),
                         visibility = bundle.endpoint.visibility
                     )
-                        .withResponse(documentationSerializer, ContentType.APPLICATION_JSON, bundle.response, "200")
+                        .withResponse(documentationSerializer,
+                            if (bundle.response.jvmErasure == ByteArray::class) {
+                                ContentType.APPLICATION_OCTET_STREAM
+                            } else {
+                                ContentType.APPLICATION_JSON
+                            },
+                            bundle.response, "200")
                         .let {
                             if (bundle.endpoint.body.klass != Nothing::class) {
                                 it.withRequestBody(
                                     documentationSerializer,
-                                    ContentType.APPLICATION_JSON,
+                                    bundle.endpoint.body.contentType,
                                     bundle.endpoint.body.klass
                                 )
                             } else it

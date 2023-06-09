@@ -12,7 +12,16 @@ data class SuccessfulHttpResponse<T>(
     override val statusCode: Int,
     val body: T,
     val _format: Format = Json,
-    override val value: context(Parser) () -> Any? = { body?.jsonString },
+    override val value: context(Parser) () -> Any? = {
+        when (_format) {
+            OctetStream -> body
+            Json -> body?.jsonString
+            ImageJpeg -> body
+            VideoMP4 -> body
+            TextHTML -> body
+            TextPlain -> body
+        }
+                                                     },
     override val headers: Map<String, String> = emptyMap(),
 ) : HttpResponse<T>()
 
@@ -68,7 +77,7 @@ fun <T> HttpResponse<T>.serializer(serializer: (T) -> Any) =
     if (this is SuccessfulHttpResponse) copy(value = {serializer(this.body)}) else this
 
 enum class Format(val type: String) {
-    OctetStream("application/octect-streeam"),
+    OctetStream("application/octet-stream"),
     Json("application/json"),
     ImageJpeg("image/jpeg"),
     VideoMP4("video/mp4"),

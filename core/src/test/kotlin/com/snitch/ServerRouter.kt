@@ -1,14 +1,20 @@
 package com.snitch
 
 import com.google.gson.annotations.SerializedName
-import me.snitchon.documentation.Description
-import me.snitchon.documentation.Visibility
-import me.snitchon.documentation.Visibility.*
 import com.snitch.me.snitchon.NonEmptyString
 import com.snitch.me.snitchon.NonNegativeInt
 import com.snitch.me.snitchon.Validator
 import me.snitchon.*
+import me.snitchon.documentation.ContentType
+import me.snitchon.documentation.Description
+import me.snitchon.documentation.Visibility
+import me.snitchon.documentation.Visibility.*
+import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.util.*
+import java.util.stream.IntStream
+import javax.imageio.ImageIO
 
 val root = "home"
 val v1 = "/v1"
@@ -75,6 +81,12 @@ val ServerRouter: Router.() -> Unit = {
 //        AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok
 //    }
 
+    POST("bytearray")
+        .with(body<ByteArray>(ContentType.APPLICATION_OCTET_STREAM))
+        .isHandledBy {
+                body.ok.format(Format.OctetStream)
+        }
+
     val getPathGreeting by Handler<Nothing, AResponse> {
         request[query]
         AResponse(request[clipId], 0, 0, listOf(Query("hey")), FooEnum.A).ok
@@ -112,8 +124,8 @@ val ServerRouter: Router.() -> Unit = {
 
     GET(v1 / "hello").copy(tags = listOf("nono")).isHandledBy { "hello".ok }
 
-    GET(v1 / "nonosisi").copy(tags = listOf("nono","sisi")).isHandledBy { "".ok }
-    GET(v1 / "mama").copy(tags = listOf("ma","tata")).isHandledBy { "".ok }
+    GET(v1 / "nonosisi").copy(tags = listOf("nono", "sisi")).isHandledBy { "".ok }
+    GET(v1 / "mama").copy(tags = listOf("ma", "tata")).isHandledBy { "".ok }
     DELETE(v1 / clips / clipId).with(queries(query, length, offset)).with(headers(name)) isHandledBy getPathGreeting
 
     "haha section" {

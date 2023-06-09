@@ -8,9 +8,12 @@ import io.undertow.server.handlers.ExceptionHandler
 import io.undertow.util.HttpString
 import io.undertow.util.Methods.*
 import me.snitchon.*
+import me.snitchon.documentation.ContentType
+import me.snitchon.extensions.print
 import me.snitchon.parsing.Parser
 import me.snitchon.parsing.ParsingException
 import me.snitchon.types.ErrorResponse
+import java.nio.ByteBuffer
 import kotlin.reflect.KClass
 
 
@@ -76,7 +79,15 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     private val Router.EndpointBundle<*>.undertowHandler: (exchange: HttpServerExchange) -> Unit
         get() = { exchange: HttpServerExchange ->
             val block = { byteArray: ByteArray? ->
-                handle(exchange) { with(parser) { byteArray?.parseJson(endpoint.body.klass.java) } }
+                handle(exchange) {
+                    with(parser) {
+                        when (endpoint.body.contentType) {
+                            ContentType.APPLICATION_JSON -> byteArray?.parseJson(endpoint.body.klass.java)
+                            ContentType.APPLICATION_OCTET_STREAM -> byteArray
+                            else -> println("fooo")
+                        }
+                    }
+                }
             }
             if (endpoint.body.klass == Nothing::class) {
                 block(null)
@@ -100,16 +111,18 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
                 exchange.responseHeaders.put(HttpString("Content-Type"), this._format.type)
 
                 if (this._format == Format.Json) {
-                    val body = this.body
-                    with(parser) { exchange.responseSender.send(value(parser).toString()) }
+                    val value1 = value(parser)!!
+
+                    exchange.responseSender.send(value1.toString())
                     headers.forEach {
                         exchange.responseHeaders.put(HttpString(it.key), it.value)
                     }
                 } else {
-//                    headers.forEach {
-//                        exchange.responseHeaders.put(HttpString(it.key), it.value)
-//                    }
-                    exchange.responseSender.send(this.body.toString())
+                    if (body!!::class == ByteArray::class) {
+                        exchange.responseSender.send(ByteBuffer.wrap(body as ByteArray))
+                    } else {
+                        exchange.responseSender.send(body.toString())
+                    }
                 }
             }
 

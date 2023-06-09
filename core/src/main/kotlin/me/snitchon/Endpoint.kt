@@ -1,5 +1,6 @@
 package me.snitchon
 
+import me.snitchon.documentation.ContentType
 import me.snitchon.documentation.Visibility
 
 data class OpDescription(val description: String)

@@ -1,5 +1,6 @@
 package me.snitchon
 
+import me.snitchon.documentation.ContentType
 import me.snitchon.parsing.Parser
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -72,7 +73,7 @@ inline operator fun <reified T : Any?, R> RequestWrapper.get(param: OptionalHead
 fun queries(vararg queryParameter: QueryParameter<*, *>) = queryParameter.asList()
 fun headers(vararg headerParameter: HeaderParameter<*, *>) = headerParameter.asList()
 fun description(description: String) = OpDescription(description)
-inline fun <reified T : Any> body() = Body(T::class)
+inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) = Body(T::class, contentType)
 
 fun String?.filterValid(param: Parameter<*, *>): String? = when {
     this == null -> null
@@ -81,7 +82,7 @@ fun String?.filterValid(param: Parameter<*, *>): String? = when {
     else -> this
 }
 
-data class Body<T : Any>(val klass: KClass<T>)
+data class Body<T : Any>(val klass: KClass<T>, val contentType: ContentType = ContentType.APPLICATION_JSON)
 
 data class UnregisteredParamException(val param: Parameter<*, *>) : Throwable()
 
