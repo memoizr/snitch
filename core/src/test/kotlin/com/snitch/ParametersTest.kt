@@ -87,9 +87,7 @@ class ParametersTest : BaseTest(routes {
     GET("sneakypathparams" / pathParam.copy(name = "sneaky")) isHandledBy { TestResult(request.get(pathParam)).ok }
 
     val function by Handler<BodyParam, BodyTestResult> {
-        println("hey")
         val sealed = body.sealed
-        println(sealed)
         BodyTestResult(
             body.int, when (sealed) {
                 is SealedClass.One -> sealed.oneInt
@@ -119,25 +117,25 @@ class ParametersTest : BaseTest(routes {
     fun `supports query parameters`() {
         whenPerform GET "/$root/queriespath?q=foo" expectBodyJson TestResult("foo")
         whenPerform GET "/$root/queriespath?q=foo%0Abar" expectBodyJson TestResult("foo\nbar")
-        whenPerform GET "/$root/queriespath?q=" expectBodyJson ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/queriespath?q=" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Query parameter `q` is invalid, expecting non empty string, got ``")
         )
-        whenPerform GET "/$root/queriespath" expectBodyJson ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/queriespath" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Required Query parameter `q` is missing")
         )
 
         whenPerform GET "/$root/queriespath2?int=3434" expectBodyJson IntTestResult(3434)
-        whenPerform GET "/$root/queriespath2?int=" expectBodyJson ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/queriespath2?int=" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Required Query parameter `int` is missing")
         )
-        whenPerform GET "/$root/queriespath2?int=hello" expectBodyJson ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/queriespath2?int=hello" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Query parameter `int` is invalid, expecting non negative integer, got `hello`")
         )
-        whenPerform GET "/$root/queriespath2?int=-34" expectBodyJson ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/queriespath2?int=-34" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Query parameter `int` is invalid, expecting non negative integer, got `-34`")
         )
@@ -157,25 +155,25 @@ class ParametersTest : BaseTest(routes {
     @Test
     fun `supports header parameters`() {
         whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "foo") expectBodyJson TestResult("foo")
-        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "") expectBodyJson ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "") expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Header parameter `q` is invalid, expecting non empty single-line string, got ``")
         )
-        whenPerform GET "/$root/headerspath" withHeaders mapOf() expectBodyJson ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/headerspath" withHeaders mapOf() expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Required Header parameter `q` is missing")
         )
 
         whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to 3434) expectBodyJson IntTestResult(3434)
-        whenPerform GET "/$root/headerspath2" expectBodyJson ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/headerspath2" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Required Header parameter `int` is missing")
         )
-        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to "hello") expectBodyJson ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to "hello") expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Header parameter `int` is invalid, expecting non negative integer, got `hello`")
         )
-        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to -34) expectBodyJson ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to -34) expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Header parameter `int` is invalid, expecting non negative integer, got `-34`")
         )
@@ -247,3 +245,8 @@ class ParametersTest : BaseTest(routes {
         object Two : SealedClass()
     }
 }
+
+data class TestErrorHttpResponse<T, E>(
+    val statusCode: Int,
+    val details: E,
+)

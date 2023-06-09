@@ -1,14 +1,12 @@
 package me.snitchon
 
 import me.snitchon.parsing.Parser
-import me.snitchon.parsing.ParsingException
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 
 data class RequestHandler<T : Any>
     (
-    val parser: Parser,
     private val _body: Body<T>?,
     val params: Set<Parameter<*, *>>,
     val request: RequestWrapper,
@@ -87,11 +85,11 @@ data class Body<T : Any>(val klass: KClass<T>)
 
 data class UnregisteredParamException(val param: Parameter<*, *>) : Throwable()
 
-class Handler<Request : Any, Response>(val block: RequestHandler<Request>.() -> HttpResponse<Response>) {
+class Handler<Request : Any, Response>(val block: context(Parser) RequestHandler<Request>.() -> HttpResponse<Response>) {
     operator fun getValue(
         nothing: Nothing?,
         property: KProperty<*>
-    ): Pair<KType, RequestHandler<Request>.() -> HttpResponse<Response>> {
+    ): Pair<KType, context(Parser) RequestHandler<Request>.() -> HttpResponse<Response>> {
         return property.returnType.arguments[1].type!!.arguments[1].type!!.arguments[0].type!! to block
     }
 }

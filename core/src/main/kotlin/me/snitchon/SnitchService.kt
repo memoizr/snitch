@@ -1,5 +1,6 @@
 package me.snitchon
 
+import me.snitchon.parsing.Parser
 import kotlin.reflect.KClass
 
 interface SnitchService {
@@ -7,12 +8,17 @@ interface SnitchService {
     fun registerMethod(endpointBundle: Router.EndpointBundle<*>, path: String)
     fun stop()
     fun start()
-    fun <T: Exception, R: HttpResponse<*>> handleException(exception: KClass<T>, block: (T, RequestWrapper) -> R)
+    fun <T : Exception, R : HttpResponse<*>> handleException(
+        exception: KClass<T>,
+        block: context(Parser) (T, RequestWrapper) -> R
+    )
+
     fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService
 }
 
-data class RoutedService(val service: SnitchService,
-                         val router: Router
+data class RoutedService(
+    val service: SnitchService,
+    val router: Router
 ) {
     fun startListening(): RoutedService {
         router.endpoints.forEach {
@@ -23,11 +29,12 @@ data class RoutedService(val service: SnitchService,
         service.start()
         return this
     }
+
     fun stopListening() {
         service.stop()
     }
 
-    inline fun <reified T: Exception, R: HttpResponse<*>> handleException(noinline block: (T, RequestWrapper) -> R): RoutedService {
+    inline fun <reified T : Exception, R : HttpResponse<*>> handleException(noinline block: context(Parser) (T, RequestWrapper) -> R): RoutedService {
         service.handleException(T::class, block)
         return this
     }

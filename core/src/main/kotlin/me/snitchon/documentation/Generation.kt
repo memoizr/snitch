@@ -1,8 +1,8 @@
 package me.snitchon.documentation
 
-import me.snitchon.RoutedService
-import me.snitchon.Parameter
-import me.snitchon.Router
+import me.snitchon.*
+import me.snitchon.Format.*
+import me.snitchon.parsing.Parser
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
@@ -10,84 +10,108 @@ import kotlin.reflect.full.starProjectedType
 fun RoutedService.generateDocs(documentationSerializer: DocumentationSerializer = DefaultDocumentatoinSerializer): Spec {
     val openApi = OpenApi(info = Info(router.config.title, "1.0"), servers = listOf(Server(router.config.host)))
     return router.endpoints
-            .groupBy { it.endpoint.url }
-            .map { entry ->
-                entry.key to entry.value.foldRight(Path()) { bundle: Router.EndpointBundle<*>, path ->
-                    path.withOperation(
-                            bundle.endpoint.httpMethod,
-                            Operation(
-                                    tags = bundle.endpoint.tags,
-                                    summary = bundle.endpoint.summary,
-                                    description = bundle.endpoint.description,
-                                    responses = emptyMap(),
-                                    visibility = bundle.endpoint.visibility
-                            )
-                                    .withResponse(documentationSerializer, ContentType.APPLICATION_JSON, bundle.response, "200")
-                                    .let {
-                                        if (bundle.endpoint.body.klass != Nothing::class) {
-                                            it.withRequestBody(documentationSerializer, ContentType.APPLICATION_JSON, bundle.endpoint.body.klass)
-                                        } else it
-                                    }
-                                    .let {
-                                        bundle.endpoint.headerParams.fold(it) { acc, p ->
-                                            acc.withParameter(
-                                                Parameters.HeaderParameter(
-                                                    name = p.name,
-                                                    required = p.required,
-                                                    description = getDescription(p),
-                                                    visibility = p.visibility,
-                                                    schema = toSchema(documentationSerializer, p.type.kotlin.starProjectedType)
-                                                        .withPattern(p.pattern.regex)
-
-                                                )
-                                            )
-                                        }
-                                    }
-                                    .let {
-                                        bundle.endpoint.pathParams.fold(it) { acc, param ->
-                                            acc.withParameter(
-                                                Parameters.PathParameter(
-                                                    name = param.name,
-                                                    description = getDescription(param),
-                                                    schema = toSchema(documentationSerializer, param.type.kotlin.starProjectedType)
-                                                        .withPattern(param.pattern.regex)
-                                                )
-                                            )
-                                        }
-                                    }
-                                    .let {
-                                        bundle.endpoint.queryParams.fold(it) { acc, p ->
-                                            acc.withParameter(
-                                                Parameters.QueryParameter(
-                                                    name = p.name,
-                                                    description = getDescription(p),
-                                                    allowEmptyValue = p.emptyAsMissing,
-                                                    required = p.required,
-                                                    visibility = p.visibility,
-                                                    schema = toSchema(documentationSerializer, p.type.kotlin.starProjectedType)
-                                                        .withPattern(p.pattern.regex)
-
-                                                )
-                                            )
-                                        }
-                                    }
+        .groupBy { it.endpoint.url }
+        .map { entry ->
+            entry.key to entry.value.foldRight(Path()) { bundle: Router.EndpointBundle<*>, path ->
+                path.withOperation(
+                    bundle.endpoint.httpMethod,
+                    Operation(
+                        tags = bundle.endpoint.tags,
+                        summary = bundle.endpoint.summary,
+                        description = bundle.endpoint.description,
+                        responses = emptyMap(),
+                        visibility = bundle.endpoint.visibility
                     )
-                }
-            }.fold(openApi) { a, b -> a.withPath(b.first, b.second) }
-            .let { Spec(with( router.parser) {it.jsonString }, router) }
+                        .withResponse(documentationSerializer, ContentType.APPLICATION_JSON, bundle.response, "200")
+                        .let {
+                            if (bundle.endpoint.body.klass != Nothing::class) {
+                                it.withRequestBody(
+                                    documentationSerializer,
+                                    ContentType.APPLICATION_JSON,
+                                    bundle.endpoint.body.klass
+                                )
+                            } else it
+                        }
+                        .let {
+                            bundle.endpoint.headerParams.fold(it) { acc, p ->
+                                acc.withParameter(
+                                    Parameters.HeaderParameter(
+                                        name = p.name,
+                                        required = p.required,
+                                        description = getDescription(p),
+                                        visibility = p.visibility,
+                                        schema = toSchema(documentationSerializer, p.type.kotlin.starProjectedType)
+                                            .withPattern(p.pattern.regex)
+
+                                    )
+                                )
+                            }
+                        }
+                        .let {
+                            bundle.endpoint.pathParams.fold(it) { acc, param ->
+                                acc.withParameter(
+                                    Parameters.PathParameter(
+                                        name = param.name,
+                                        description = getDescription(param),
+                                        schema = toSchema(documentationSerializer, param.type.kotlin.starProjectedType)
+                                            .withPattern(param.pattern.regex)
+                                    )
+                                )
+                            }
+                        }
+                        .let {
+                            bundle.endpoint.queryParams.fold(it) { acc, p ->
+                                acc.withParameter(
+                                    Parameters.QueryParameter(
+                                        name = p.name,
+                                        description = getDescription(p),
+                                        allowEmptyValue = p.emptyAsMissing,
+                                        required = p.required,
+                                        visibility = p.visibility,
+                                        schema = toSchema(documentationSerializer, p.type.kotlin.starProjectedType)
+                                            .withPattern(p.pattern.regex)
+
+                                    )
+                                )
+                            }
+                        }
+                )
+            }
+        }.fold(openApi) { a, b -> a.withPath(b.first, b.second) }
+        .let {
+            Spec(with(router.parser) { it.jsonString }, router, this)
+        }
 }
 
-data class Spec(val spec: String, val router: Router) {
+class Spec internal constructor(
+    val spec: String,
+    val router: Router,
+    val routedService: RoutedService
+) {
 
-    fun writeDocsToStaticFolder() {
-        val dest = "/tmp/swagger-ui" + "/docs"
-        writeToFile(spec, "$dest/spec.json")
-        File("$dest/index.html").writeText(index)
+    fun servePublicDocumenation(): Spec {
+        with(router.parser) {
+            with(Router(router.config, routedService.service)) {
+                val path = "/"// config.publicDocumentationPath.ensureLeadingSlash()
+                val docPath = "/spec.json"//.ensureLeadingSlash()
+//            routedService.service.registerMethod(
+                with(router.parser) {
+                    GET(path).isHandledBy {
+                        index(docPath).ok.format(TextHTML)
+                    }
+                    GET(docPath).isHandledBy {
+                        spec.ok.format(Json).serializer { it }
+                    }
+                }
+                endpoints.forEach { router.service.registerMethod(it, it.endpoint.url) }
+            }
+        }
+        return this
     }
 }
 
 private fun getDescription(param: Parameter<*, *>) =
-        "${param.description} - ${param.pattern.description}${if (param.invalidAsMissing) " - Invalid as Missing" else ""}${if (param.emptyAsMissing) " - Empty as Missing" else ""}"
+    "${param.description} - ${param.pattern.description}${if (param.invalidAsMissing) " - Invalid as Missing" else ""}${if (param.emptyAsMissing) " - Empty as Missing" else ""}"
 
 internal fun writeToFile(content: String, destination: String) {
     File(destination.split("/").dropLast(1).joinToString("")).apply { if (!exists()) mkdirs() }
@@ -98,7 +122,7 @@ internal fun writeToFile(content: String, destination: String) {
     }
 }
 
-val index = """
+fun index(docPath: String) = """
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -134,7 +158,7 @@ val index = """
     window.onload = function() {
       // Begin Swagger UI call region
       const ui = SwaggerUIBundle({
-        url: "./spec.json",
+        url: ".$docPath",
         dom_id: '#swagger-ui',
         deepLinking: true,
         presets: [

@@ -77,7 +77,7 @@ val ServerRouter: Router.() -> Unit = {
 
     val getPathGreeting by Handler<Nothing, AResponse> {
         request[query]
-        AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok
+        AResponse(request[clipId], 0, 0, listOf(Query("hey")), FooEnum.A).ok
     }
 
     val getGreetingBody by Handler<TestClass, AResponse> {

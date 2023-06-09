@@ -6,13 +6,14 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType
 
 
+context (Parser)
 class Router(
     val config: Config,
     val service: SnitchService,
     val pathParams: Set<PathParam<out Any, out Any>> = emptySet(),
-    val parser: Parser,
 ) {
     val endpoints = mutableListOf<EndpointBundle<*>>()
+    val parser = this@Parser
 
     fun GET() = Endpoint(HTTPMethod.GET, null, null, "", pathParams, emptySet(), emptySet(), Body(Nothing::class))
     infix fun GET(path: String) = Endpoint(
@@ -188,7 +189,7 @@ class Router(
     operator fun String.div(path: PathParam<out Any, out Any>) = ParametrizedPath(this + "/{${path.name}}", setOf(path))
 
     operator fun String.div(block: Router.() -> Unit) {
-        val router = Router(config, service, pathParams, parser)
+        val router = Router(config, service, pathParams)
         router.block()
         endpoints += router.endpoints.map {
             EndpointBundle(
@@ -200,7 +201,7 @@ class Router(
     }
 
     operator fun String.invoke(block: Router.() -> Unit) {
-        val router = Router(config, service, pathParams, parser)
+        val router = Router(config, service, pathParams)
         router.block()
         endpoints += router.endpoints.map {
             EndpointBundle(
@@ -212,7 +213,7 @@ class Router(
     }
 
     operator fun ParametrizedPath.div(block: Router.() -> Unit) {
-        val router = Router(config, service, pathParams + this.pathParameters, parser)
+        val router = Router(config, service, pathParams + this.pathParameters)
         router.block()
         router.endpoints += router.endpoints.map {
             EndpointBundle(
@@ -226,7 +227,7 @@ class Router(
     }
 
     operator fun PathParam<out Any, out Any>.div(block: Router.() -> Unit) {
-        val router = Router(config, service, pathParams + this, parser)
+        val router = Router(config, service, pathParams + this)
         router.block()
         val path = ParametrizedPath("/{$name}", setOf(this))
         endpoints += router.endpoints.map {
@@ -241,7 +242,7 @@ class Router(
 
     inline fun <B : Any, reified T : Any> Endpoint<B>.addEndpoint(
         kType: KType,
-        noinline block: RequestHandler<B>.() -> HttpResponse<T>
+        noinline block: context(Parser) RequestHandler<B>.() -> HttpResponse<T>
     ): Endpoint<B> {
         endpoints += EndpointBundle(this, kType) { request, response ->
             val invalidParams = request.getInvalidParams(pathParams, queryParams, headerParams)
@@ -251,8 +252,8 @@ class Router(
             } else try {
                 before(request)
                 block(
+                    this@Parser,
                     RequestHandler(
-                        parser,
                         body,
                         (headerParams + queryParams + pathParams),
                         request,
@@ -273,19 +274,17 @@ class Router(
                     500,
                     "Attempting to use unregistered $type parameter `${param.name}`"
                 ).serverError
-            } catch (parsingException: ParsingException) {
-                ErrorHttpResponse<T, String>(400, "Invalid body parameter").badRequest
             }
         }
         return this
     }
 
     inline infix fun <B : Any, reified T : Any> Endpoint<B>.isHandledBy(
-        pair: Pair<KType, RequestHandler<B>.() -> HttpResponse<T>>
+        pair: Pair<KType, context(Parser) RequestHandler<B>.() -> HttpResponse<T>>
     ): Endpoint<B> = addEndpoint(pair.first, pair.second)
 
     inline infix fun <B : Any, reified T : Any> Endpoint<B>.isHandledBy(
-        noinline block: RequestHandler<B>.() -> HttpResponse<T>
+        noinline block: context(Parser) RequestHandler<B>.() -> HttpResponse<T>
     ): Endpoint<B> = addEndpoint(T::class.starProjectedType, block)
 
     data class EndpointBundle<T : Any>(

@@ -6,8 +6,7 @@ import me.snitchon.Config
 import me.snitchon.Router
 import me.snitchon.parsers.GsonJsonParser
 
-fun routes(router: Router.() -> Unit): (Int) -> RoutedService =
-    { port ->
+fun routes(router: Router.() -> Unit): (Int) -> RoutedService = { port ->
 //        SparkSnitchService(
 //            Config(
 //                basePath = root,

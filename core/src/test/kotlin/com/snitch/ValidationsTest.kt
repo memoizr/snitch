@@ -52,15 +52,15 @@ class ValidationsTest : BaseTest(routes {
     @Test
     fun `validates routes`() {
         whenPerform GET "/$root/foo/3456" expectCode 200
-        whenPerform GET "/$root/foo/hey" expectBodyJson ErrorHttpResponse<Any, List<String>>(
+        whenPerform GET "/$root/foo/hey" expectBodyJson TestErrorHttpResponse<Any, List<String>>(
             400,
             listOf("""Path parameter `id` is invalid, expecting non negative integer, got `hey`""")
         ) expectCode 400
-        whenPerform GET "/$root/foo/134?offset=-34" expectBodyJson ErrorHttpResponse<Any, List<String>>(
+        whenPerform GET "/$root/foo/134?offset=-34" expectBodyJson TestErrorHttpResponse<Any, List<String>>(
             400,
             listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `-34`""")
         ) expectCode 400
-        whenPerform GET "/$root/foo/134?offset=a" expectBodyJson ErrorHttpResponse<Any, List<String>>(
+        whenPerform GET "/$root/foo/134?offset=a" expectBodyJson TestErrorHttpResponse<Any, List<String>>(
             400,
             listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `a`""")
         ) expectCode 400

@@ -11,7 +11,9 @@ import me.snitchon.parsers.GsonJsonParser
 
 fun main(args: Array<String>) {
     UndertowSnitchService(Config(), GsonJsonParser)
-        .setRoutes(ServerRouter).generateDocs(GsonDocumentationSerializer)
+        .setRoutes(ServerRouter)
+        .startListening()
+        .generateDocs(GsonDocumentationSerializer)
         .print()
-        .writeDocsToStaticFolder()
+        .servePublicDocumenation()
 }
