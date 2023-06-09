@@ -88,7 +88,7 @@ fun String?.filterValid(param: Parameter<*, *>): String? = when {
 
 data class Body<T : Any>(val klass: KClass<T>, val contentType: ContentType = ContentType.APPLICATION_JSON)
 
-data class UnregisteredParamException(val param: Parameter<*, *>) : Throwable()
+data class UnregisteredParamException(val param: Parameter<*, *>) : Exception()
 
 class Handler<Request : Any, Response>(val block: context(Parser) RequestHandler<Request>.() -> HttpResponse<Response>) {
     operator fun getValue(

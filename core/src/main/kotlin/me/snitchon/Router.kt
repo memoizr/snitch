@@ -1,24 +1,18 @@
 package me.snitchon
 
-import me.snitchon.parameters.HeaderParameter
+import me.snitchon.parameters.InvalidParametersException
 import me.snitchon.parameters.ParametrizedPath
 import me.snitchon.parameters.PathParam
-import me.snitchon.parameters.QueryParameter
 import me.snitchon.parsing.Parser
 import me.snitchon.request.Body
 import me.snitchon.request.RequestHandler
 import me.snitchon.request.RequestWrapper
-import me.snitchon.request.UnregisteredParamException
-import me.snitchon.response.ErrorHttpResponse
 import me.snitchon.response.HttpResponse
-import me.snitchon.response.badRequest
-import me.snitchon.response.serverError
 import me.snitchon.service.Endpoint
 import me.snitchon.service.SnitchService
-import me.snitchon.types.*
+import me.snitchon.types.HTTPMethod
 import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType
-
 
 context (Parser)
 class Router(
@@ -261,9 +255,8 @@ class Router(
         endpoints += EndpointBundle(this, kType) { request, response ->
             val invalidParams = request.getInvalidParams(pathParams, queryParams, headerParams)
             if (invalidParams.isNotEmpty()) {
-                invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }
-                    .badRequest<Any, Any>().badRequest
-            } else try {
+                throw InvalidParametersException(invalidParams.foldRight(emptyList()) { error, acc -> acc + error })
+            } else {
                 before(request)
                 block(
                     this@Parser,
@@ -276,18 +269,6 @@ class Router(
                 ).also {
                     after(request, response)
                 }
-            } catch (unregisteredException: UnregisteredParamException) {
-                val param = unregisteredException.param
-
-                val type = when (param) {
-                    is HeaderParameter -> "header"
-                    is QueryParameter -> "query"
-                    is PathParam -> "path"
-                }
-                ErrorHttpResponse<T, String>(
-                    500,
-                    "Attempting to use unregistered $type parameter `${param.name}`"
-                ).serverError
             }
         }
         return this

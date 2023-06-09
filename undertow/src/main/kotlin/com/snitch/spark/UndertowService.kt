@@ -15,6 +15,9 @@ import me.snitchon.request.RequestWrapper
 import me.snitchon.response.*
 import me.snitchon.service.RoutedService
 import me.snitchon.service.SnitchService
+import me.snitchon.service.exceptionhandling.handleInvalidParameters
+import me.snitchon.service.exceptionhandling.handleParsingException
+import me.snitchon.service.exceptionhandling.handleUnregisteredParameters
 import me.snitchon.types.*
 import java.nio.ByteBuffer
 import kotlin.reflect.KClass
@@ -34,9 +37,10 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     override fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService {
         val router = with(parser) { Router(config, this@UndertowSnitchService, emptySet()) }
         routerConfiguration(router)
-        return RoutedService(this, router).handleException<ParsingException, _> { ex, req: RequestWrapper ->
-            ErrorResponse(400, "Invalid body parameter").badRequest
-        }
+        return RoutedService(this, router)
+            .handleInvalidParameters()
+            .handleUnregisteredParameters()
+            .handleParsingException()
     }
 
     override fun start() {

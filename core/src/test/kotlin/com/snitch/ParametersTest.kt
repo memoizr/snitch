@@ -15,6 +15,7 @@ import me.snitchon.request.queries
 import me.snitchon.response.ErrorHttpResponse
 import me.snitchon.types.Sealed
 import me.snitchon.response.ok
+import me.snitchon.types.ErrorResponse
 import org.junit.Test
 import java.text.SimpleDateFormat
 import java.util.*
@@ -114,7 +115,7 @@ class ParametersTest : BaseTest(routes {
     @Test
     fun `validates path parameters`() {
         whenPerform GET "/$root/intpath2/4545/end" expectBody IntTestResult(4545).serialized
-        whenPerform GET "/$root/intpath2/hello/end" expectBody ErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/intpath2/hello/end" expectBody ErrorResponse(
             400,
             listOf("Path parameter `intParam` is invalid, expecting non negative integer, got `hello`")
         ).serialized
@@ -220,15 +221,15 @@ class ParametersTest : BaseTest(routes {
     @Test
     fun `forbids using parameters which aren't registered`() {
         with (GsonJsonParser) {
-            whenPerform GET "/$root/sneakyqueryparams" expectBody ErrorHttpResponse<TestResult, String>(
+            whenPerform GET "/$root/sneakyqueryparams" expectBody ErrorResponse(
                 500,
                 "Attempting to use unregistered query parameter `param`"
             ).serialized
-            whenPerform GET "/$root/sneakyheaderparams" expectBody ErrorHttpResponse<TestResult, String>(
+            whenPerform GET "/$root/sneakyheaderparams" expectBody ErrorResponse(
                 500,
                 "Attempting to use unregistered header parameter `param`"
             ).serialized
-            whenPerform GET "/$root/sneakypathparams/343" expectBody ErrorHttpResponse<TestResult, String>(
+            whenPerform GET "/$root/sneakypathparams/343" expectBody ErrorResponse(
                 500,
                 "Attempting to use unregistered path parameter `param`"
             ).serialized
