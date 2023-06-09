@@ -37,7 +37,7 @@ internal fun Operation.withResponse(
     documentationSerializer: DocumentationSerializer,
     contentType: ContentType,
     body: KType,
-    code: String = "200"
+    code: String
 ) = copy(
     responses = responses + (code to Responses.Response(
         content = mapOf(

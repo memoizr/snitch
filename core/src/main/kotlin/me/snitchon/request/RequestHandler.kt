@@ -4,11 +4,14 @@ import me.snitchon.response.HttpResponse
 import me.snitchon.service.OpDescription
 import me.snitchon.ResponseWrapper
 import me.snitchon.documentation.ContentType
+import me.snitchon.extensions.print
 import me.snitchon.parameters.*
 import me.snitchon.parsing.Parser
+import me.snitchon.types.StatusCodes
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
+import kotlin.reflect.full.starProjectedType
 
 data class RequestHandler<T : Any>
     (
@@ -90,12 +93,21 @@ data class Body<T : Any>(val klass: KClass<T>, val contentType: ContentType = Co
 
 data class UnregisteredParamException(val param: Parameter<*, *>) : Exception()
 
-class Handler<Request : Any, Response>(val block: context(Parser) RequestHandler<Request>.() -> HttpResponse<Response>) {
+class Handler<Request : Any, Response, S: StatusCodes>(val block: context(Parser) RequestHandler<Request>.() -> HttpResponse<Response, S>) {
     operator fun getValue(
         nothing: Nothing?,
         property: KProperty<*>
-    ): Pair<KType, context(Parser) RequestHandler<Request>.() -> HttpResponse<Response>> {
-        val type = property.returnType.arguments[1].type!!.arguments[2].type!!.arguments[0].type!!
-        return type to block
+    ): HandlerResponse<Request, Response, S>{
+        val type = property.returnType.arguments.get(1).type.print()
+        val statusCode = property.returnType.arguments.get(2).type
+
+        return HandlerResponse(statusCode!!, type!!, block)
     }
 }
+
+data class HandlerResponse<Request : Any, Response, S : StatusCodes>(
+    val statusCodes: KType,
+    val type: KType,
+    val handler:
+    context(Parser) RequestHandler<Request>.() -> HttpResponse<Response, S>
+)

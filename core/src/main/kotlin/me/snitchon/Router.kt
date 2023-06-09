@@ -5,12 +5,14 @@ import me.snitchon.parameters.ParametrizedPath
 import me.snitchon.parameters.PathParam
 import me.snitchon.parsing.Parser
 import me.snitchon.request.Body
+import me.snitchon.request.HandlerResponse
 import me.snitchon.request.RequestHandler
 import me.snitchon.request.RequestWrapper
 import me.snitchon.response.HttpResponse
 import me.snitchon.service.Endpoint
 import me.snitchon.service.SnitchService
 import me.snitchon.types.HTTPMethod
+import me.snitchon.types.StatusCodes
 import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType
 
@@ -248,17 +250,16 @@ class Router(
         }
     }
 
-    inline fun <B : Any, reified T : Any> Endpoint<B>.addEndpoint(
-        kType: KType,
-        noinline block: context(Parser) RequestHandler<B>.() -> HttpResponse<T>
+    inline fun <B : Any, reified T : Any, S: StatusCodes> Endpoint<B>.addEndpoint(
+        endpointResponse: HandlerResponse<B, T, S>
     ): Endpoint<B> {
-        endpoints += EndpointBundle(this, kType) { request, response ->
+        endpoints += EndpointBundle(this, EndpointResponse(endpointResponse.statusCodes, endpointResponse.type)) { request, response ->
             val invalidParams = request.getInvalidParams(pathParams, queryParams, headerParams)
             if (invalidParams.isNotEmpty()) {
                 throw InvalidParametersException(invalidParams.foldRight(emptyList()) { error, acc -> acc + error })
             } else {
                 before(request)
-                block(
+                endpointResponse.handler(
                     this@Parser,
                     RequestHandler(
                         body,
@@ -274,18 +275,24 @@ class Router(
         return this
     }
 
-    inline infix fun <B : Any, reified T : Any> Endpoint<B>.isHandledBy(
-        pair: Pair<KType, context(Parser) RequestHandler<B>.() -> HttpResponse<T>>
-    ): Endpoint<B> = addEndpoint(pair.first, pair.second)
+    inline infix fun <B : Any, reified T : Any, S: StatusCodes> Endpoint<B>.isHandledBy(
+        handlerResponse: HandlerResponse<B,T,S>
+    ): Endpoint<B> = addEndpoint(handlerResponse)
 
-    inline infix fun <B : Any, reified T : Any> Endpoint<B>.isHandledBy(
-        noinline block: context(Parser) RequestHandler<B>.() -> HttpResponse<T>
-    ): Endpoint<B> = addEndpoint(T::class.starProjectedType, block)
+    inline infix fun <B : Any, reified T : Any, reified S: StatusCodes> Endpoint<B>.isHandledBy(
+        noinline block: context(Parser) RequestHandler<B>.() -> HttpResponse<T, S>
+    ): Endpoint<B> = addEndpoint(
+        HandlerResponse(S::class.starProjectedType, T::class.starProjectedType, block))
 
     data class EndpointBundle<T : Any>(
         val endpoint: Endpoint<T>,
-        val response: KType,
-        val handler: (RequestWrapper, ResponseWrapper) -> HttpResponse<*>
+        val response: EndpointResponse,
+        val handler: (RequestWrapper, ResponseWrapper) -> HttpResponse<*, *>
+    )
+
+    data class EndpointResponse(
+        val statusCode: KType,
+        val type: KType
     )
 }
 

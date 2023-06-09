@@ -23,7 +23,7 @@ data class RoutedService(
         service.stop()
     }
 
-    inline fun <reified T : Exception, R : HttpResponse<*>> handleException(noinline block: context(Parser) (T, RequestWrapper) -> R): RoutedService {
+    inline fun <reified T : Exception, R : HttpResponse<*,*>> handleException(noinline block: context(Parser) (T, RequestWrapper) -> R): RoutedService {
         service.handleException(T::class, block)
         return this
     }

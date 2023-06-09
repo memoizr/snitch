@@ -6,22 +6,28 @@ import com.memoizr.assertk.expect
 import me.snitchon.*
 import me.snitchon.documentation.ContentType
 import me.snitchon.documentation.generateDocs
+import me.snitchon.extensions.print
 import me.snitchon.parsers.GsonDocumentationSerializer
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsers.GsonJsonParser.parse
 import me.snitchon.request.Handler
 import me.snitchon.request.body
+import me.snitchon.response.created
 import me.snitchon.tests.SnitchTest
 import me.snitchon.types.Format
 import me.snitchon.response.format
 import me.snitchon.response.ok
 import org.junit.Test
 
-private val listHandler by Handler<Nothing, _> {
+private val listHandler by Handler<Nothing, _, _> {
     listOf(SampleClass("hey", listOf())).ok
 }
 
-private val genericHandler by Handler<Nothing, _> {
+private val createdHandler by Handler<Nothing, _, _> {
+    listOf(SampleClass("hey", listOf())).created
+}
+
+private val genericHandler by Handler<Nothing,_, _> {
     GenericResponse(GenericResponse(Foo1("hey"))).ok
 }
 
@@ -32,6 +38,8 @@ class DocumentationTest : SnitchTest(routes {
         .isHandledBy(listHandler)
     GET("generic")
         .isHandledBy(genericHandler)
+    GET("created")
+        .isHandledBy(createdHandler)
     POST("bytearray")
         .with(body<ByteArray>(ContentType.APPLICATION_OCTET_STREAM))
         .isHandledBy { body.ok.format(Format.OctetStream) }
@@ -74,6 +82,17 @@ class DocumentationTest : SnitchTest(routes {
             .getAsJsonObject("content")
 
         expect that docs.serialized contains """"format":"byte"""" contains "octet-stream"
+    }
+
+    @Test
+    fun `supports response status codes`() {
+        val docs = activeService.generateDocs(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
+            .getAsJsonObject("paths")
+            .getAsJsonObject("/created")
+            .getAsJsonObject("get")
+            .getAsJsonObject("responses")
+
+        expect that docs.serialized contains "201"
     }
 
 }

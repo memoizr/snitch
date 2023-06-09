@@ -28,7 +28,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     private lateinit var service: Undertow
     private val handlers = mutableListOf<ExceptionHandler>()
     private val exceptionHandlers =
-        LinkedHashMap<KClass<*>, context(Parser) (Exception, RequestWrapper) -> HttpResponse<*>>()
+        LinkedHashMap<KClass<*>, context(Parser) (Exception, RequestWrapper) -> HttpResponse<*,*>>()
 
     private val routingHandler = RoutingHandler()
     private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.port, "localhost") }
@@ -53,7 +53,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
         service.stop()
     }
 
-    override fun <T : Exception, R : HttpResponse<*>> handleException(
+    override fun <T : Exception, R : HttpResponse<*,*>> handleException(
         exceptionClass: KClass<T>,
         exceptionHandler: context (Parser) (T, RequestWrapper) -> R
     ) {
@@ -109,7 +109,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     }
 
     context (Parser)
-    private fun HttpResponse<*>.dispatch(exchange: HttpServerExchange) {
+    private fun HttpResponse<*,*>.dispatch(exchange: HttpServerExchange) {
         when (this) {
             is SuccessfulHttpResponse<*,*> -> dispatchSuccessfulResponse(exchange)
             is ErrorHttpResponse<*, *, *> -> dispatchFailedResponse(exchange)

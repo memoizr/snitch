@@ -1,14 +1,17 @@
 package me.snitchon.documentation
 
 import me.snitchon.*
+import me.snitchon.extensions.print
 import me.snitchon.types.Format.*
 import me.snitchon.parameters.Parameter
 import me.snitchon.service.RoutedService
 import me.snitchon.response.format
 import me.snitchon.response.ok
 import me.snitchon.response.serializer
+import me.snitchon.types.StatusCodes
 import java.io.File
 import java.io.FileOutputStream
+import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.jvmErasure
 
@@ -27,13 +30,16 @@ fun RoutedService.generateDocs(documentationSerializer: DocumentationSerializer 
                         responses = emptyMap(),
                         visibility = bundle.endpoint.visibility
                     )
-                        .withResponse(documentationSerializer,
-                            if (bundle.response.jvmErasure == ByteArray::class) {
+                        .withResponse(
+                            documentationSerializer,
+                            if (bundle.response.type.jvmErasure == ByteArray::class) {
                                 ContentType.APPLICATION_OCTET_STREAM
                             } else {
                                 ContentType.APPLICATION_JSON
                             },
-                            bundle.response, "200")
+                            bundle.response.type,
+                            (bundle.response.statusCode.jvmErasure.objectInstance as StatusCodes).code.toString()
+                        )
                         .let {
                             if (bundle.endpoint.body.klass != Nothing::class) {
                                 it.withRequestBody(

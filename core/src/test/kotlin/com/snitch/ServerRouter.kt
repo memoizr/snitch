@@ -17,6 +17,8 @@ import me.snitchon.request.Handler
 import me.snitchon.request.body
 import me.snitchon.request.headers
 import me.snitchon.request.queries
+import me.snitchon.response.accepted
+import me.snitchon.response.created
 import me.snitchon.types.Format
 import me.snitchon.types.Sealed
 import me.snitchon.response.format
@@ -94,14 +96,14 @@ val ServerRouter: Router.() -> Unit = {
                 body.ok.format(Format.OctetStream)
         }
 
-    val getPathGreeting by Handler<Nothing, AResponse> {
+    val getPathGreeting by Handler<Nothing, _,_> {
         request[query]
-        AResponse(request[clipId], 0, 0, listOf(Query("hey")), FooEnum.A).ok
+        AResponse(request[clipId], 0, 0, listOf(Query("hey")), FooEnum.A).created
     }
 
-    val getGreetingBody by Handler<TestClass, _> {
+    val getGreetingBody by Handler<TestClass, _, _> {
         request[query]
-        AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok
+        AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).accepted
     }
 
 //    "hello" GET "hey" withQuery queries(query) isHandledBy getGreeting

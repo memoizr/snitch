@@ -14,7 +14,7 @@ interface SnitchService {
     fun start()
     fun stop()
 
-    fun <T : Exception, R : HttpResponse<*>> handleException(
+    fun <T : Exception, R : HttpResponse<*,*>> handleException(
         exceptionClass: KClass<T>,
         exceptionHandler: context(Parser) (T, RequestWrapper) -> R
     )

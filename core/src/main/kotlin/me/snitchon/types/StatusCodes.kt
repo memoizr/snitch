@@ -1,53 +1,44 @@
 package me.snitchon.types
 
-enum class StatusCodes(val code: Int) {
-    // 1xx Informational
-    CONTINUE(100),
-    SWITCHING_PROTOCOLS(101),
-
-    // 2xx Success
-    OK(200),
-    CREATED(201),
-    ACCEPTED(202),
-    NON_AUTHORITATIVE_INFORMATION(203),
-    NO_CONTENT(204),
-    RESET_CONTENT(205),
-    PARTIAL_CONTENT(206),
-
-    // 3xx Redirection
-    MULTIPLE_CHOICES(300),
-    MOVED_PERMANENTLY(301),
-    FOUND(302),
-    SEE_OTHER(303),
-    NOT_MODIFIED(304),
-    USE_PROXY(305),
-    TEMPORARY_REDIRECT(307),
-
-    // 4xx Client errors
-    BAD_REQUEST(400),
-    UNAUTHORIZED(401),
-    PAYMENT_REQUIRED(402),
-    FORBIDDEN(403),
-    NOT_FOUND(404),
-    METHOD_NOT_ALLOWED(405),
-    NOT_ACCEPTABLE(406),
-    PROXY_AUTHENTICATION_REQUIRED(407),
-    REQUEST_TIMEOUT(408),
-    CONFLICT(409),
-    GONE(410),
-    LENGTH_REQUIRED(411),
-    PRECONDITION_FAILED(412),
-    PAYLOAD_TOO_LARGE(413),
-    URI_TOO_LONG(414),
-    UNSUPPORTED_MEDIA_TYPE(415),
-    REQUESTED_RANGE_NOT_SATISFIABLE(416),
-    EXPECTATION_FAILED(417),
-
-    // 5xx Server errors
-    INTERNAL_SERVER_ERROR(500),
-    NOT_IMPLEMENTED(501),
-    BAD_GATEWAY(502),
-    SERVICE_UNAVAILABLE(503),
-    GATEWAY_TIMEOUT(504),
-    HTTP_VERSION_NOT_SUPPORTED(505)
+sealed class StatusCodes(val code: Int) {
+    object CONTINUE : StatusCodes(100)
+    object SWITCHING_PROTOCOLS : StatusCodes(101)
+    object OK : StatusCodes(200)
+    object CREATED : StatusCodes(201)
+    object ACCEPTED : StatusCodes(202)
+    object NON_AUTHORITATIVE_INFORMATION : StatusCodes(203)
+    object NO_CONTENT : StatusCodes(204)
+    object RESET_CONTENT : StatusCodes(205)
+    object PARTIAL_CONTENT : StatusCodes(206)
+    object MULTIPLE_CHOICES : StatusCodes(300)
+    object MOVED_PERMANENTLY : StatusCodes(301)
+    object FOUND : StatusCodes(302)
+    object SEE_OTHER : StatusCodes(303)
+    object NOT_MODIFIED : StatusCodes(304)
+    object USE_PROXY : StatusCodes(305)
+    object TEMPORARY_REDIRECT : StatusCodes(307)
+    object BAD_REQUEST : StatusCodes(400)
+    object UNAUTHORIZED : StatusCodes(401)
+    object PAYMENT_REQUIRED : StatusCodes(402)
+    object FORBIDDEN : StatusCodes(403)
+    object NOT_FOUND : StatusCodes(404)
+    object METHOD_NOT_ALLOWED : StatusCodes(405)
+    object NOT_ACCEPTABLE : StatusCodes(406)
+    object PROXY_AUTHENTICATION_REQUIRED : StatusCodes(407)
+    object REQUEST_TIMEOUT : StatusCodes(408)
+    object CONFLICT : StatusCodes(409)
+    object GONE : StatusCodes(410)
+    object LENGTH_REQUIRED : StatusCodes(411)
+    object PRECONDITION_FAILED : StatusCodes(412)
+    object PAYLOAD_TOO_LARGE : StatusCodes(413)
+    object URI_TOO_LONG : StatusCodes(414)
+    object UNSUPPORTED_MEDIA_TYPE : StatusCodes(415)
+    object REQUESTED_RANGE_NOT_SATISFIABLE : StatusCodes(416)
+    object EXPECTATION_FAILED : StatusCodes(417)
+    object INTERNAL_SERVER_ERROR : StatusCodes(500)
+    object NOT_IMPLEMENTED : StatusCodes(501)
+    object BAD_GATEWAY : StatusCodes(502)
+    object SERVICE_UNAVAILABLE : StatusCodes(503)
+    object GATEWAY_TIMEOUT : StatusCodes(504)
+    object HTTP_VERSION_NOT_SUPPORTED : StatusCodes(505)
 }

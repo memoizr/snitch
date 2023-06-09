@@ -2,11 +2,9 @@ package com.snitch
 
 import me.snitchon.documentation.Description
 import me.snitchon.documentation.Visibility
-import me.snitchon.response.badRequest
-import me.snitchon.response.created
-import me.snitchon.response.forbidden
-import me.snitchon.response.ok
 import me.snitchon.parsers.GsonJsonParser.serialized
+import me.snitchon.response.*
+import me.snitchon.types.StatusCodes
 import org.junit.Test
 
 class SimplePathBuilderTest : BaseTest(routes {
@@ -18,8 +16,17 @@ class SimplePathBuilderTest : BaseTest(routes {
     POST("/foo") isHandledBy { TestResult("post value").created }
     DELETE("/foo") isHandledBy { TestResult("delete value").ok }
 
-    GET("/error") isHandledBy { if (false) TestResult("never happens").ok else "Something went wrong".badRequest }
-    GET("/forbidden") isHandledBy { if (false) TestResult("never happens").ok else "Forbidden".forbidden }
+    GET("/error") isHandledBy {
+        val x: HttpResponse<Any, StatusCodes.OK> =
+            if (false) TestResult("never happens").ok else "Something went wrong".badRequest as HttpResponse<Any, StatusCodes.OK>
+        x
+    }
+    GET("/forbidden") isHandledBy {
+        val x: HttpResponse<Any, StatusCodes.OK> =
+            if (false) TestResult("never happens").ok else "Forbidden".forbidden as HttpResponse<Any, StatusCodes.OK>
+        x
+    }
+
 
     GET("noslash/bar") isHandledBy { TestResult("success").ok }
     PUT("noslash/bar") isHandledBy { TestResult("success").ok }
@@ -105,7 +112,7 @@ class SimplePathBuilderTest : BaseTest(routes {
 
     @Test
     fun `returns error responses`() {
-        whenPerform GET "/$root/error" expectBody  """"Something went wrong"""" expectCode 400
+        whenPerform GET "/$root/error" expectBody """"Something went wrong"""" expectCode 400
         whenPerform GET "/$root/forbidden" expectBody """"Forbidden"""" expectCode 403
     }
 
