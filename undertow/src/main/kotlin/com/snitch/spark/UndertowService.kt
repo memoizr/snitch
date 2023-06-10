@@ -34,7 +34,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.port, "localhost") }
 
     override fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService {
-        val router = with(parser) { Router(config, this@UndertowSnitchService, emptySet()) }
+        val router = Router(config, this@UndertowSnitchService, emptySet(), parser)
         routerConfiguration(router)
         return RoutedService(this, router)
             .handleInvalidParameters()
@@ -60,7 +60,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
         exceptionHandlers[exceptionClass] = exceptionHandler as context(Parser) (Exception, RequestWrapper) -> R
     }
 
-    override fun registerMethod(endpointBundle: Router.EndpointBundle<*>, path: String) {
+    override fun registerMethod(endpointBundle: EndpointBundle<*>, path: String) {
         with(parser) {
             val handler = routingHandler.add(
                 endpointBundle.endpoint.httpMethod.toUndertow(),
@@ -82,7 +82,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
     }
 
     context (Parser)
-    private val Router.EndpointBundle<*>.undertowHandler: (exchange: HttpServerExchange) -> Unit
+    private val EndpointBundle<*>.undertowHandler: (exchange: HttpServerExchange) -> Unit
         get() = { exchange: HttpServerExchange ->
             val byteArrayHandler = { byteArray: ByteArray? ->
                 handle(exchange) {
@@ -103,7 +103,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
         }
 
     context (Parser)
-    private fun Router.EndpointBundle<*>.handle(exchange: HttpServerExchange, b: () -> Any?) {
+    private fun EndpointBundle<*>.handle(exchange: HttpServerExchange, b: () -> Any?) {
         handler(UndertowRequestWrapper(exchange, b), UndertowResponseWrapper(exchange))
             .dispatch(exchange)
     }

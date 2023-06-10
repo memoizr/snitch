@@ -1,7 +1,6 @@
 package me.snitchon.documentation
 
 import me.snitchon.*
-import me.snitchon.extensions.print
 import me.snitchon.types.Format.*
 import me.snitchon.parameters.Parameter
 import me.snitchon.service.RoutedService
@@ -11,7 +10,6 @@ import me.snitchon.response.serializer
 import me.snitchon.types.StatusCodes
 import java.io.File
 import java.io.FileOutputStream
-import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.jvmErasure
 
@@ -20,7 +18,7 @@ fun RoutedService.generateDocs(documentationSerializer: DocumentationSerializer 
     return router.endpoints
         .groupBy { it.endpoint.url }
         .map { entry ->
-            entry.key to entry.value.foldRight(Path()) { bundle: Router.EndpointBundle<*>, path ->
+            entry.key to entry.value.foldRight(Path()) { bundle: EndpointBundle<*>, path ->
                 path.withOperation(
                     bundle.endpoint.httpMethod,
                     Operation(
@@ -38,7 +36,7 @@ fun RoutedService.generateDocs(documentationSerializer: DocumentationSerializer 
                                 ContentType.APPLICATION_JSON
                             },
                             bundle.response.type,
-                            (bundle.response.statusCode.jvmErasure.objectInstance as StatusCodes).code.toString()
+                            (bundle.response.statusCode.jvmErasure.objectInstance as? StatusCodes)?.code?.toString() ?: "200"
                         )
                         .let {
                             if (bundle.endpoint.body.klass != Nothing::class) {
@@ -108,7 +106,7 @@ class Spec internal constructor(
 
     fun servePublicDocumenation(): Spec {
         with(router.parser) {
-            with(Router(router.config, routedService.service)) {
+            with(Router(router.config, routedService.service, emptySet(), router.parser)) {
                 val path = "/"// config.publicDocumentationPath.ensureLeadingSlash()
                 val docPath = "/spec.json"//.ensureLeadingSlash()
 //            routedService.service.registerMethod(

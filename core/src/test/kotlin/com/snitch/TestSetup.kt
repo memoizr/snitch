@@ -4,7 +4,9 @@ import me.snitchon.service.RoutedService
 import com.snitch.spark.UndertowSnitchService
 import me.snitchon.Config
 import me.snitchon.Router
+import me.snitchon.documentation.generateDocs
 import me.snitchon.parameters.InvalidParametersException
+import me.snitchon.parsers.GsonDocumentationSerializer
 import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.response.badRequest
 import me.snitchon.service.exceptionhandling.handleInvalidParameters
@@ -19,4 +21,7 @@ fun routes(router: Router.() -> Unit): (Int) -> RoutedService = { port ->
         ),
         GsonJsonParser
     ).setRoutes(router)
+        .also {
+            it.generateDocs(GsonDocumentationSerializer)
+        }
 }

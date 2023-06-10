@@ -24,7 +24,7 @@ class SparkSnitchService(
 ) : SnitchService {
     val http by lazy { Service.ignite().port(config.port) }
 
-    private val Router.EndpointBundle<*>.func: (request: Request, response: Response) -> Any
+    private val EndpointBundle<*>.func: (request: Request, response: Response) -> Any
         get() =
             { request, response ->
                 handler(
@@ -47,7 +47,7 @@ class SparkSnitchService(
         return RoutedService(this, router).startListening()
     }
 
-    override fun registerMethod(it: Router.EndpointBundle<*>, path: String) {
+    override fun registerMethod(it: EndpointBundle<*>, path: String) {
         val sparkPath = path.replace("{", ":").replace("}", "")
         when (it.endpoint.httpMethod) {
             HTTPMethod.GET -> {

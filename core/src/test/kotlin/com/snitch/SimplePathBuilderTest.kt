@@ -4,7 +4,6 @@ import me.snitchon.documentation.Description
 import me.snitchon.documentation.Visibility
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.response.*
-import me.snitchon.types.StatusCodes
 import org.junit.Test
 
 class SimplePathBuilderTest : BaseTest(routes {
@@ -17,16 +16,12 @@ class SimplePathBuilderTest : BaseTest(routes {
     DELETE("/foo") isHandledBy { TestResult("delete value").ok }
 
     GET("/error") isHandledBy {
-        val x: HttpResponse<Any, StatusCodes.OK> =
-            if (false) TestResult("never happens").ok else "Something went wrong".badRequest as HttpResponse<Any, StatusCodes.OK>
-        x
-    }
-    GET("/forbidden") isHandledBy {
-        val x: HttpResponse<Any, StatusCodes.OK> =
-            if (false) TestResult("never happens").ok else "Forbidden".forbidden as HttpResponse<Any, StatusCodes.OK>
-        x
+        if (false) TestResult("never happens").ok else "Something went wrong".badRequest
     }
 
+    GET("/forbidden") isHandledBy {
+        if (false) TestResult("never happens").ok else "Forbidden".forbidden
+    }
 
     GET("noslash/bar") isHandledBy { TestResult("success").ok }
     PUT("noslash/bar") isHandledBy { TestResult("success").ok }

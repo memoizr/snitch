@@ -1,6 +1,6 @@
 package me.snitchon.types
 
-sealed class StatusCodes(val code: Int) {
+sealed class StatusCodes(val code: Int = 200) {
     object CONTINUE : StatusCodes(100)
     object SWITCHING_PROTOCOLS : StatusCodes(101)
     object OK : StatusCodes(200)

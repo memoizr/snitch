@@ -5,7 +5,7 @@ import me.snitchon.types.Format
 import me.snitchon.types.Format.*
 import me.snitchon.types.StatusCodes
 
-sealed class HttpResponse<T, S> {
+sealed class HttpResponse<T, out S> {
     abstract val statusCode: S
     abstract val headers: Map<String, String>
     abstract val value: context(Parser) () -> Any?
