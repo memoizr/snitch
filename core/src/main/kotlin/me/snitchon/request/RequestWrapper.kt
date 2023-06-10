@@ -1,6 +1,6 @@
 package me.snitchon.request
 
-import me.snitchon.types.HTTPMethod
+import me.snitchon.types.HTTPMethods
 import me.snitchon.parameters.HeaderParameter
 import me.snitchon.parameters.Parameter
 import me.snitchon.parameters.PathParam
@@ -12,7 +12,7 @@ interface RequestWrapper {
     fun headers(name: String): String?
     fun queryParams(name: String): String?
 
-    fun method(): HTTPMethod
+    fun method(): HTTPMethods
 
 
     fun getPathParam(param: PathParam<*, *>): String?

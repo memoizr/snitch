@@ -3,7 +3,7 @@ package me.snitchon.request
 import me.snitchon.response.HttpResponse
 import me.snitchon.service.OpDescription
 import me.snitchon.ResponseWrapper
-import me.snitchon.documentation.ContentType
+import me.snitchon.types.ContentType
 import me.snitchon.extensions.print
 import me.snitchon.parameters.*
 import me.snitchon.parsing.Parser
@@ -11,7 +11,6 @@ import me.snitchon.types.StatusCodes
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
-import kotlin.reflect.full.starProjectedType
 
 data class RequestHandler<T : Any>
     (

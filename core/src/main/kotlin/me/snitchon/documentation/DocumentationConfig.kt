@@ -1,6 +1,6 @@
 package me.snitchon.documentation
 
-data class Config(
+data class DocumentationConfig(
     val description: String = "",
     val title: String = "",
     val host: String = "http://localhost:3000",

@@ -5,7 +5,7 @@ import com.snitch.me.snitchon.NonEmptyString
 import com.snitch.me.snitchon.NonNegativeInt
 import com.snitch.me.snitchon.Validator
 import me.snitchon.*
-import me.snitchon.documentation.ContentType
+import me.snitchon.types.ContentType
 import me.snitchon.documentation.Description
 import me.snitchon.documentation.Visibility
 import me.snitchon.documentation.Visibility.*

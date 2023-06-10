@@ -7,24 +7,30 @@ import io.undertow.server.RoutingHandler
 import io.undertow.server.handlers.ExceptionHandler
 import io.undertow.util.HttpString
 import io.undertow.util.Methods.*
-import me.snitchon.*
-import me.snitchon.documentation.Config
-import me.snitchon.documentation.ContentType
+import me.snitchon.Router
 import me.snitchon.parsing.Parser
 import me.snitchon.request.RequestWrapper
-import me.snitchon.response.*
+import me.snitchon.response.ErrorHttpResponse
+import me.snitchon.response.HttpResponse
+import me.snitchon.response.SuccessfulHttpResponse
 import me.snitchon.service.RoutedService
+import me.snitchon.config.SnitchConfig
 import me.snitchon.service.SnitchService
 import me.snitchon.service.exceptionhandling.handleInvalidParameters
 import me.snitchon.service.exceptionhandling.handleParsingException
 import me.snitchon.service.exceptionhandling.handleUnregisteredParameters
-import me.snitchon.types.*
+import me.snitchon.types.ContentType
+import me.snitchon.types.EndpointBundle
+import me.snitchon.types.Format
+import me.snitchon.types.HTTPMethods
 import java.nio.ByteBuffer
 import kotlin.reflect.KClass
 
-
 @Suppress("UNCHECKED_CAST")
-class UndertowSnitchService(override val config: Config, val parser: Parser) : SnitchService {
+class UndertowSnitchService(
+    val parser: Parser,
+    override val config: SnitchConfig = SnitchConfig()
+) : SnitchService {
 
     private lateinit var service: Undertow
     private val handlers = mutableListOf<ExceptionHandler>()
@@ -32,7 +38,7 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
         LinkedHashMap<KClass<*>, context(Parser) (Exception, RequestWrapper) -> HttpResponse<*,*>>()
 
     private val routingHandler = RoutingHandler()
-    private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.port, "localhost") }
+    private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.service.port, "localhost") }
 
     override fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService {
         val router = Router(config, this@UndertowSnitchService, emptySet(), parser)
@@ -143,14 +149,14 @@ class UndertowSnitchService(override val config: Config, val parser: Parser) : S
         }
     }
 
-    private fun HTTPMethod.toUndertow() = when (this) {
-        HTTPMethod.GET -> GET
-        HTTPMethod.POST -> POST
-        HTTPMethod.PUT -> PUT
-        HTTPMethod.DELETE -> DELETE
-        HTTPMethod.PATCH -> PATCH
-        HTTPMethod.HEAD -> HEAD
-        HTTPMethod.OPTIONS -> OPTIONS
+    private fun HTTPMethods.toUndertow() = when (this) {
+        HTTPMethods.GET -> GET
+        HTTPMethods.POST -> POST
+        HTTPMethods.PUT -> PUT
+        HTTPMethods.DELETE -> DELETE
+        HTTPMethods.PATCH -> PATCH
+        HTTPMethods.HEAD -> HEAD
+        HTTPMethods.OPTIONS -> OPTIONS
     }
 }
 

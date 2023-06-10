@@ -9,14 +9,14 @@ import me.snitchon.parameters.QueryParameter
 import me.snitchon.request.RequestWrapper
 import me.snitchon.request.filterValid
 import me.snitchon.types.Format
-import me.snitchon.types.HTTPMethod
+import me.snitchon.types.HTTPMethods
 import java.net.URLDecoder
 
 class UndertowRequestWrapper(val exchange: HttpServerExchange, inline val _body: () -> Any?) : RequestWrapper {
 
     override val body: () -> Any? get() = _body
 
-    override fun method(): HTTPMethod = HTTPMethod.fromString(exchange.requestMethod.toString())
+    override fun method(): HTTPMethods = HTTPMethods.fromString(exchange.requestMethod.toString())
 
     override fun params(name: String): String? =
         URLDecoder.decode(exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).parameters.get(name))

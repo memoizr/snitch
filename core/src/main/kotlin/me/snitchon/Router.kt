@@ -1,6 +1,5 @@
 package me.snitchon
 
-import me.snitchon.documentation.Config
 import me.snitchon.parameters.InvalidParametersException
 import me.snitchon.parameters.PathParam
 import me.snitchon.parsing.Parser
@@ -8,6 +7,7 @@ import me.snitchon.request.HandlerResponse
 import me.snitchon.request.RequestHandler
 import me.snitchon.response.HttpResponse
 import me.snitchon.service.Endpoint
+import me.snitchon.config.SnitchConfig
 import me.snitchon.service.SnitchService
 import me.snitchon.syntax.HttpMethodsSyntax
 import me.snitchon.types.EndpointBundle
@@ -16,7 +16,7 @@ import me.snitchon.types.StatusCodes
 import kotlin.reflect.full.starProjectedType
 
 class Router(
-    override val config: Config,
+    override val config: SnitchConfig,
     override val service: SnitchService,
     override val pathParams: Set<PathParam<out Any, out Any>> = emptySet(),
     override val parser: Parser

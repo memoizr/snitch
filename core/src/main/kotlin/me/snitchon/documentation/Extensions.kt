@@ -1,6 +1,7 @@
 package me.snitchon.documentation
 
-import me.snitchon.types.HTTPMethod
+import me.snitchon.types.ContentType
+import me.snitchon.types.HTTPMethods
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.starProjectedType
@@ -8,14 +9,14 @@ import kotlin.reflect.full.starProjectedType
 internal fun OpenApi.withPath(name: String, path: Path) =
     copy(paths = paths + (name to path))
 
-internal fun Path.withOperation(method: HTTPMethod, operation: Operation) = when (method) {
-    HTTPMethod.GET -> copy(get = operation)
-    HTTPMethod.POST -> copy(post = operation)
-    HTTPMethod.DELETE -> copy(delete = operation)
-    HTTPMethod.PUT -> copy(put = operation)
-    HTTPMethod.PATCH -> copy(patch = operation)
-    HTTPMethod.HEAD -> copy(head = operation)
-    HTTPMethod.OPTIONS -> copy(options = operation)
+internal fun Path.withOperation(method: HTTPMethods, operation: Operation) = when (method) {
+    HTTPMethods.GET -> copy(get = operation)
+    HTTPMethods.POST -> copy(post = operation)
+    HTTPMethods.DELETE -> copy(delete = operation)
+    HTTPMethods.PUT -> copy(put = operation)
+    HTTPMethods.PATCH -> copy(patch = operation)
+    HTTPMethods.HEAD -> copy(head = operation)
+    HTTPMethods.OPTIONS -> copy(options = operation)
 }
 
 internal fun Operation.withParameter(parameter: Parameters.Parameter) =

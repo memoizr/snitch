@@ -39,7 +39,7 @@ abstract class SnitchTest(service: (Int) -> RoutedService) {
     }
 
     protected val whenPerform = this
-    val port = Random().nextInt(5000) + 2000
+    protected open val port = Random().nextInt(5000) + 2000
 
     infix fun GET(endpoint: String): Expectation {
         return Expectation(port, HttpMethod.GET, endpoint)

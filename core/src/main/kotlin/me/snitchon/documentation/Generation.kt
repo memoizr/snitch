@@ -7,6 +7,7 @@ import me.snitchon.service.RoutedService
 import me.snitchon.response.format
 import me.snitchon.response.ok
 import me.snitchon.response.serializer
+import me.snitchon.types.ContentType
 import me.snitchon.types.EndpointBundle
 import me.snitchon.types.StatusCodes
 import java.io.File
@@ -14,8 +15,15 @@ import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.jvmErasure
 
-fun RoutedService.generateDocs(documentationSerializer: DocumentationSerializer = DefaultDocumentatoinSerializer): Spec {
-    val openApi = OpenApi(info = Info(router.config.title, "1.0"), servers = listOf(Server(router.config.host)))
+fun RoutedService.generateDocs(
+    documentationSerializer: DocumentationSerializer = DefaultDocumentatoinSerializer,
+    documentationConfig: DocumentationConfig = DocumentationConfig(
+        port = this.service.config.service.port,
+        basePath = this.service.config.service.basePath
+    )
+): Spec {
+    val openApi =
+        OpenApi(info = Info(documentationConfig.title, "1.0"), servers = listOf(Server(documentationConfig.host)))
     return router.endpoints
         .groupBy { it.endpoint.url }
         .map { entry ->
@@ -37,7 +45,8 @@ fun RoutedService.generateDocs(documentationSerializer: DocumentationSerializer 
                                 ContentType.APPLICATION_JSON
                             },
                             bundle.response.type,
-                            (bundle.response.statusCode.jvmErasure.objectInstance as? StatusCodes)?.code?.toString() ?: "200"
+                            (bundle.response.statusCode.jvmErasure.objectInstance as? StatusCodes)?.code?.toString()
+                                ?: "200"
                         )
                         .let {
                             if (bundle.endpoint.body.klass != Nothing::class) {

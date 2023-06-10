@@ -4,9 +4,8 @@ import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
 import com.memoizr.assertk.expect
 import me.snitchon.*
-import me.snitchon.documentation.ContentType
+import me.snitchon.types.ContentType
 import me.snitchon.documentation.generateDocs
-import me.snitchon.extensions.print
 import me.snitchon.parsers.GsonDocumentationSerializer
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsers.GsonJsonParser.parse

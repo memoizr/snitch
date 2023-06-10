@@ -5,7 +5,7 @@ import me.snitchon.parameters.ParametrizedPath
 import me.snitchon.parameters.PathParam
 import me.snitchon.request.Body
 import me.snitchon.service.Endpoint
-import me.snitchon.types.HTTPMethod.PATCH
+import me.snitchon.types.HTTPMethods.PATCH
 
 interface PatchMethodSyntax: MethodSyntax {
 

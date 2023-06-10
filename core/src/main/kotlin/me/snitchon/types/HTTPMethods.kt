@@ -1,6 +1,6 @@
 package me.snitchon.types
 
-enum class HTTPMethod {
+enum class HTTPMethods {
     GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD;
 
     companion object {

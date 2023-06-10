@@ -8,12 +8,12 @@ import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.request.Body
 import me.snitchon.request.RequestWrapper
-import me.snitchon.types.HTTPMethod
+import me.snitchon.types.HTTPMethods
 
 data class OpDescription(val description: String)
 
 data class Endpoint<B : Any>(
-    val httpMethod: HTTPMethod,
+    val httpMethod: HTTPMethods,
     val summary: String?,
     val description: String?,
     val url: String,

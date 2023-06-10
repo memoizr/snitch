@@ -3,12 +3,12 @@ package com.snitch.spark
 import me.snitchon.parsing.Parser
 import ch.qos.logback.classic.Logger
 import me.snitchon.*
-import me.snitchon.documentation.Config
+import me.snitchon.documentation.DocumentationConfig
 import me.snitchon.request.RequestWrapper
 import me.snitchon.service.RoutedService
 import me.snitchon.service.SnitchService
 import me.snitchon.response.ErrorHttpResponse
-import me.snitchon.types.HTTPMethod
+import me.snitchon.types.HTTPMethods
 import me.snitchon.response.HttpResponse
 import me.snitchon.response.SuccessfulHttpResponse
 import me.snitchon.types.EndpointBundle
@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 
 
 class SparkSnitchService(
-    override val config: Config,
+    override val config: DocumentationConfig,
     val parser: Parser
 ) : SnitchService {
     val http by lazy { Service.ignite().port(config.port) }
@@ -52,16 +52,16 @@ class SparkSnitchService(
     override fun registerMethod(it: EndpointBundle<*>, path: String) {
         val sparkPath = path.replace("{", ":").replace("}", "")
         when (it.endpoint.httpMethod) {
-            HTTPMethod.GET -> {
+            HTTPMethods.GET -> {
                 http.get(sparkPath, it.func)
             }
 
-            HTTPMethod.POST -> http.post(sparkPath, it.func)
-            HTTPMethod.PUT -> http.put(sparkPath, it.func)
-            HTTPMethod.PATCH -> http.patch(sparkPath, it.func)
-            HTTPMethod.HEAD -> http.head(sparkPath, it.func)
-            HTTPMethod.DELETE -> http.delete(sparkPath, it.func)
-            HTTPMethod.OPTIONS -> http.options(sparkPath, it.func)
+            HTTPMethods.POST -> http.post(sparkPath, it.func)
+            HTTPMethods.PUT -> http.put(sparkPath, it.func)
+            HTTPMethods.PATCH -> http.patch(sparkPath, it.func)
+            HTTPMethods.HEAD -> http.head(sparkPath, it.func)
+            HTTPMethods.DELETE -> http.delete(sparkPath, it.func)
+            HTTPMethods.OPTIONS -> http.options(sparkPath, it.func)
         }
     }
 

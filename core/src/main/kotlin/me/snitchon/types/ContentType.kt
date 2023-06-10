@@ -1,4 +1,4 @@
-package me.snitchon.documentation
+package me.snitchon.types
 
 enum class ContentType(val value: String) {
     APPLICATION_ATOM_XML("application/atom+xml"),
