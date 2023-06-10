@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 import com.memoizr.assertk.expect
 import me.snitchon.*
 import me.snitchon.types.ContentType
-import me.snitchon.documentation.generateDocs
+import me.snitchon.documentation.generateDocumentation
 import me.snitchon.parsers.GsonDocumentationSerializer
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsers.GsonJsonParser.parse
@@ -46,21 +46,21 @@ class DocumentationTest : SnitchTest(routes {
 
     @Test
     fun `uses custom serialization`() {
-        val docs = activeService.generateDocs(GsonDocumentationSerializer).spec
+        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).spec
 
         expect that docs.serialized contains "a_sample"
     }
 
     @Test
     fun `supports generic response types`() {
-        val docs = activeService.generateDocs(GsonDocumentationSerializer).spec
+        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).spec
 
         expect that docs.serialized contains "foo"
     }
 
     @Test
     fun `supports binary request types`() {
-        val docs = activeService.generateDocs(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
+        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
             .getAsJsonObject("paths")
             .getAsJsonObject("/bytearray")
             .getAsJsonObject("post")
@@ -72,7 +72,7 @@ class DocumentationTest : SnitchTest(routes {
 
     @Test
     fun `supports binary response types`() {
-        val docs = activeService.generateDocs(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
+        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
             .getAsJsonObject("paths")
             .getAsJsonObject("/bytearray")
             .getAsJsonObject("post")
@@ -85,7 +85,7 @@ class DocumentationTest : SnitchTest(routes {
 
     @Test
     fun `supports response status codes`() {
-        val docs = activeService.generateDocs(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
+        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
             .getAsJsonObject("paths")
             .getAsJsonObject("/created")
             .getAsJsonObject("get")

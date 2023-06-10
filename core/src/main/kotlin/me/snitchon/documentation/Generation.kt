@@ -15,7 +15,7 @@ import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.jvmErasure
 
-fun RoutedService.generateDocs(
+fun RoutedService.generateDocumentation(
     documentationSerializer: DocumentationSerializer = DefaultDocumentatoinSerializer,
     documentationConfig: DocumentationConfig = DocumentationConfig(
         port = this.service.config.service.port,
@@ -113,7 +113,6 @@ class Spec internal constructor(
     val router: Router,
     val routedService: RoutedService
 ) {
-
     fun servePublicDocumenation(): Spec {
         with(router.parser) {
             with(Router(router.config, routedService.service, emptySet(), router.parser)) {
@@ -134,6 +133,9 @@ class Spec internal constructor(
         return this
     }
 }
+
+fun RoutedService.serveDocumentation() =
+    generateDocumentation().servePublicDocumenation()
 
 private fun getDescription(param: Parameter<*, *>) =
     "${param.description} - ${param.pattern.description}${if (param.invalidAsMissing) " - Invalid as Missing" else ""}${if (param.emptyAsMissing) " - Empty as Missing" else ""}"

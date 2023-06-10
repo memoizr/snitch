@@ -2,7 +2,7 @@ package com.snitch
 
 import com.snitch.spark.UndertowSnitchService
 import me.snitchon.Router
-import me.snitchon.documentation.generateDocs
+import me.snitchon.documentation.generateDocumentation
 import me.snitchon.parsers.GsonDocumentationSerializer
 import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.service.RoutedService
@@ -19,6 +19,6 @@ fun routes(router: Router.() -> Unit): (Int) -> RoutedService = { port ->
         )
     ).setRoutes(router)
         .also {
-            it.generateDocs(GsonDocumentationSerializer)
+            it.generateDocumentation(GsonDocumentationSerializer)
         }
 }
