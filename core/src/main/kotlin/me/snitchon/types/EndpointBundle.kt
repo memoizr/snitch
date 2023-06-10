@@ -1,5 +1,6 @@
-package me.snitchon
+package me.snitchon.types
 
+import me.snitchon.ResponseWrapper
 import me.snitchon.request.RequestWrapper
 import me.snitchon.response.HttpResponse
 import me.snitchon.service.Endpoint

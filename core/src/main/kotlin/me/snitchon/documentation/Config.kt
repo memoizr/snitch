@@ -1,13 +1,10 @@
-package me.snitchon
-
-import ch.qos.logback.classic.Level
+package me.snitchon.documentation
 
 data class Config(
     val description: String = "",
     val title: String = "",
     val host: String = "http://localhost:3000",
     val port: Int = 3000,
-    val logLevel: Level = Level.INFO,
     val basePath: String = "",
     val docPath: String = "swagger-spec",
     val termsOfService: String? = null,
@@ -31,26 +28,13 @@ data class Config(
     val tagsSorter: String = "alpha"
 )
 
-data class ConfigContact(
-        val name: String,
-        val email: String,
-        val url: String
-)
+data class ConfigContact(val name: String, val email: String, val url: String)
 
-data class ConfigLicense(
-        val name: String,
-        val url: String)
+data class ConfigLicense(val name: String, val url: String)
 
-data class Project(
-        val groupId: String,
-        val artifactId: String
-)
+data class Project(val groupId: String, val artifactId: String)
 
-
-data class ExternalDoc(
-        val description: String,
-        val url: String
-)
+data class ExternalDoc(val description: String, val url: String)
 
 enum class DocExpansion { LIST, FULL, NONE }
 enum class Theme { OUTLINE, FEELING_BLUE, FLATTOP, MATERIAL, MONOKAI, MUTED, NEWSPAPER }

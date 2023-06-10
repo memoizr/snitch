@@ -1,7 +1,7 @@
 package me.snitchon.service
 
-import me.snitchon.Config
-import me.snitchon.EndpointBundle
+import me.snitchon.documentation.Config
+import me.snitchon.types.EndpointBundle
 import me.snitchon.response.HttpResponse
 import me.snitchon.request.RequestWrapper
 import me.snitchon.Router

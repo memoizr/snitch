@@ -1,5 +1,5 @@
 package me.snitchon.syntax
 
-import me.snitchon.Routerable
+import me.snitchon.types.Routed
 
-interface MethodSyntax: Routerable, DivSyntax
+interface MethodSyntax: Routed, DivSyntax

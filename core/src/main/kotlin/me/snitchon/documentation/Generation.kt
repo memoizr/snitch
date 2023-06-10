@@ -7,6 +7,7 @@ import me.snitchon.service.RoutedService
 import me.snitchon.response.format
 import me.snitchon.response.ok
 import me.snitchon.response.serializer
+import me.snitchon.types.EndpointBundle
 import me.snitchon.types.StatusCodes
 import java.io.File
 import java.io.FileOutputStream

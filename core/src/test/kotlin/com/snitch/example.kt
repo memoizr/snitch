@@ -1,7 +1,7 @@
 package com.snitch
 
 import com.snitch.spark.UndertowSnitchService
-import me.snitchon.Config
+import me.snitchon.documentation.Config
 import me.snitchon.documentation.generateDocs
 import me.snitchon.parsers.GsonDocumentationSerializer
 import me.snitchon.parsers.GsonJsonParser

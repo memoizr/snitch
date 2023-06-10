@@ -1,5 +1,6 @@
 package me.snitchon
 
+import me.snitchon.documentation.Config
 import me.snitchon.parameters.InvalidParametersException
 import me.snitchon.parameters.PathParam
 import me.snitchon.parsing.Parser
@@ -9,6 +10,8 @@ import me.snitchon.response.HttpResponse
 import me.snitchon.service.Endpoint
 import me.snitchon.service.SnitchService
 import me.snitchon.syntax.HttpMethodsSyntax
+import me.snitchon.types.EndpointBundle
+import me.snitchon.types.EndpointResponse
 import me.snitchon.types.StatusCodes
 import kotlin.reflect.full.starProjectedType
 
@@ -18,6 +21,7 @@ class Router(
     override val pathParams: Set<PathParam<out Any, out Any>> = emptySet(),
     override val parser: Parser
 ) : HttpMethodsSyntax {
+
     override val endpoints = mutableListOf<EndpointBundle<*>>()
 
     inline fun <B : Any, reified T : Any, S : StatusCodes> Endpoint<B>.addEndpoint(
@@ -52,9 +56,9 @@ class Router(
     ): Endpoint<B> = addEndpoint(handlerResponse)
 
     inline infix fun <B : Any, reified T : Any, reified S : StatusCodes> Endpoint<B>.isHandledBy(
-        noinline block: context(Parser) RequestHandler<B>.() -> HttpResponse<T, S>
+        noinline handler: context(Parser) RequestHandler<B>.() -> HttpResponse<T, S>
     ): Endpoint<B> = addEndpoint(
-        HandlerResponse(S::class.starProjectedType, T::class.starProjectedType, block)
+        HandlerResponse(S::class.starProjectedType, T::class.starProjectedType, handler)
     )
 }
 

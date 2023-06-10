@@ -8,6 +8,7 @@ import io.undertow.server.handlers.ExceptionHandler
 import io.undertow.util.HttpString
 import io.undertow.util.Methods.*
 import me.snitchon.*
+import me.snitchon.documentation.Config
 import me.snitchon.documentation.ContentType
 import me.snitchon.parsing.Parser
 import me.snitchon.request.RequestWrapper

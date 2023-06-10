@@ -1,10 +1,11 @@
-package me.snitchon
+package me.snitchon.types
 
+import me.snitchon.documentation.Config
 import me.snitchon.parameters.PathParam
 import me.snitchon.parsing.Parser
 import me.snitchon.service.SnitchService
 
-interface Routerable {
+interface Routed {
     val config: Config
     val service: SnitchService
     val pathParams: Set<PathParam<out Any, out Any>>

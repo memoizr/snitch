@@ -1,13 +1,13 @@
 package me.snitchon.syntax
 
-import me.snitchon.EndpointBundle
+import me.snitchon.types.EndpointBundle
 import me.snitchon.Router
-import me.snitchon.Routerable
+import me.snitchon.types.Routed
 import me.snitchon.leadingSlash
 import me.snitchon.parameters.ParametrizedPath
 import me.snitchon.parameters.PathParam
 
-interface DivSyntax: Routerable {
+interface DivSyntax: Routed {
     operator fun String.div(path: String) = this.leadingSlash + "/" + path
     operator fun String.div(path: PathParam<out Any, out Any>) = ParametrizedPath(this + "/{${path.name}}", setOf(path))
 

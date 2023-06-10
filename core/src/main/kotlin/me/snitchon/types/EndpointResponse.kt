@@ -1,4 +1,4 @@
-package me.snitchon
+package me.snitchon.types
 
 import kotlin.reflect.KType
 

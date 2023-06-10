@@ -2,21 +2,13 @@ package com.snitch
 
 import ch.qos.logback.classic.Level
 //import com.snitch.spark.SparkSnitchService
-import me.snitchon.Config
-import me.snitchon.DocExpansion
-import me.snitchon.Router
-import me.snitchon.parsers.GsonJsonParser
-import org.junit.rules.ExternalResource
-import org.junit.runner.Description
-import org.junit.runners.model.Statement
-import java.net.BindException
-import java.net.ConnectException
+import me.snitchon.documentation.Config
+import me.snitchon.documentation.DocExpansion
 
 val config = Config(description = "A test",
         basePath = "/$root",
         title = "Tunemoji API Documentation",
         port = 3000,
-        logLevel = Level.INFO,
         host = "http://localhost:3000/$root",
         docPath = "spec",
         docExpansion = DocExpansion.LIST
