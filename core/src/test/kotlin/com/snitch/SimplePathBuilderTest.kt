@@ -1,80 +1,82 @@
 package com.snitch
 
-import com.snitch.documentation.Description
-import com.snitch.documentation.Visibility
-import com.snitch.extensions.json
-import org.junit.Rule
+import me.snitchon.documentation.Description
+import me.snitchon.documentation.Visibility
+import me.snitchon.parsers.GsonJsonParser.serialized
+import me.snitchon.response.*
 import org.junit.Test
 
-class SimplePathBuilderTest : SparkTest() {
+class SimplePathBuilderTest : BaseTest(routes {
+    GET("foo") inSummary
+            "returns a foo" isDescribedAs "" isHandledBy
+            { TestResult("get value").ok }
 
-    @Rule
-    @JvmField
-    val rule = SparkTestRule(port) {
-        GET("foo") inSummary
-                "returns a foo" isDescribedAs "" isHandledBy
-                { TestResult("get value").ok }
+    PUT("/foo") isHandledBy { TestResult("put value").created }
+    POST("/foo") isHandledBy { TestResult("post value").created }
+    DELETE("/foo") isHandledBy { TestResult("delete value").ok }
 
-        PUT("/foo") isHandledBy { TestResult("put value").created }
-        POST("/foo") isHandledBy { TestResult("post value").created }
-        DELETE("/foo") isHandledBy { TestResult("delete value").ok }
+    GET("/error") isHandledBy {
+        if (false) TestResult("never happens").ok else "Something went wrong".badRequest
+    }
 
-        GET("/error") isHandledBy { if (false) TestResult("never happens").ok else badRequest("Something went wrong") }
-        GET("/forbidden") isHandledBy { if (false) TestResult("never happens").ok else forbidden("Forbidden") }
+    GET("/forbidden") isHandledBy {
+        if (false) TestResult("never happens").ok else "Forbidden".forbidden
+    }
 
-        GET("noslash/bar") isHandledBy { TestResult("success").ok }
-        PUT("noslash/bar") isHandledBy { TestResult("success").ok }
-        POST("noslash/bar") isHandledBy { TestResult("success").ok }
-        DELETE("noslash/bar") isHandledBy { TestResult("success").ok }
+    GET("noslash/bar") isHandledBy { TestResult("success").ok }
+    PUT("noslash/bar") isHandledBy { TestResult("success").ok }
+    POST("noslash/bar") isHandledBy { TestResult("success").ok }
+    DELETE("noslash/bar") isHandledBy { TestResult("success").ok }
 
-        GET("infixslash" / "bar") isHandledBy { TestResult("success").ok }
-        PUT("infixslash" / "bar") isHandledBy { TestResult("success").ok }
-        POST("infixslash" / "bar") isHandledBy { TestResult("success").ok }
-        DELETE("infixslash" / "bar") isHandledBy { TestResult("success").ok }
+    GET("infixslash" / "bar") isHandledBy { TestResult("success").ok }
+    PUT("infixslash" / "bar") isHandledBy { TestResult("success").ok }
+    POST("infixslash" / "bar") isHandledBy { TestResult("success").ok }
+    DELETE("infixslash" / "bar") isHandledBy { TestResult("success").ok }
 
-        "one" / {
-            GET("/a") isHandledBy { TestResult("get value").ok }
-            GET("/b") isHandledBy { TestResult("get value").ok }
-            "two" / {
-                GET("/c") isHandledBy { TestResult("get value").ok }
-            }
+    "one" / {
+        GET("/a") isHandledBy { TestResult("get value").ok }
+        GET("/b") isHandledBy { TestResult("get value").ok }
+        "two" / {
+            GET("/c") isHandledBy { TestResult("get value").ok }
         }
+    }
 
-        "hey" / "there" / {
-            GET("/a") isHandledBy { TestResult("get value").ok }
-        }
+    "hey" / "there" / {
+        GET("/a") isHandledBy { TestResult("get value").ok }
+    }
 
-        "v1" / {
-            GET() isHandledBy { TestResult("get value").ok }
-            GET(clipId) isHandledBy { TestResult("get value").ok }
-            GET("one" / clipId) isHandledBy { TestResult("get value").ok }
-        }
-
-        GET("params1" / clipId / "params2" / otherPathParam) isHandledBy { TestResult("${request[clipId]}${request[otherPathParam]}").ok }
-
-
+    "v1" / {
         GET() isHandledBy { TestResult("get value").ok }
+        GET(clipId) isHandledBy { TestResult("get value").ok }
+        GET("one" / clipId) isHandledBy { TestResult("get value").ok }
+    }
+
+    GET("params1" / clipId / "params2" / otherPathParam) isHandledBy { TestResult("${request[clipId]}${request[otherPathParam]}").ok }
 
 
-        "hey" / {
-            clipId / {
-                GET("/a").isHandledBy {
-                    TestResult("get value").ok
-                }
-                "level2" / {
-                    otherPathParam / {
-                        "nope" / {
-                            GET().isHandledBy {
-                                request[clipId]
-                                request[otherPathParam]
-                                TestResult("get value").ok
-                            }
+    GET() isHandledBy { TestResult("get value").ok }
+
+
+    "hey" / {
+        clipId / {
+            GET("/a").isHandledBy {
+                TestResult("get value").ok
+            }
+            "level2" / {
+                otherPathParam / {
+                    "nope" / {
+                        GET().isHandledBy {
+                            request[clipId]
+                            request[otherPathParam]
+                            TestResult("get value").ok
                         }
                     }
                 }
             }
         }
     }
+}
+) {
 
 
     @Test
@@ -90,8 +92,8 @@ class SimplePathBuilderTest : SparkTest() {
         whenPerform GET "/$root/hey/123/a" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/123" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/one/123" expectBodyJson TestResult("get value") expectCode 200
-        whenPerform GET "/$root/v1" expectBody TestResult("get value").json expectCode 200
-        whenPerform GET "/$root" expectBody TestResult("get value").json expectCode 200
+        whenPerform GET "/$root/v1" expectBody TestResult("get value").serialized expectCode 200
+        whenPerform GET "/$root" expectBody TestResult("get value").serialized expectCode 200
 
     }
 
@@ -105,8 +107,8 @@ class SimplePathBuilderTest : SparkTest() {
 
     @Test
     fun `returns error responses`() {
-        whenPerform GET "/$root/error" expectBodyJson badRequest<TestResult, String>("Something went wrong") expectCode 400
-        whenPerform GET "/$root/forbidden" expectBodyJson badRequest<TestResult, String>("Forbidden", 403) expectCode 403
+        whenPerform GET "/$root/error" expectBody """"Something went wrong"""" expectCode 400
+        whenPerform GET "/$root/forbidden" expectBody """"Forbidden"""" expectCode 403
     }
 
     @Test

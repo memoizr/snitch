@@ -1,31 +1,24 @@
 package com.snitch
 
-import com.snitch.documentation.Visibility
-import com.snitch.extensions.parseJson
+import me.snitchon.documentation.Visibility
 import com.google.gson.internal.LinkedTreeMap
-import org.junit.Rule
+import me.snitchon.response.ok
+import me.snitchon.parsers.GsonJsonParser.parseJson
 import org.junit.Test
 import kotlin.reflect.KClass
 
-class VisibilityTest: SparkTest() {
-
-lateinit var router: Router
-
-@Rule
-@JvmField
-val rule = SparkTestRule(port) {
-
+class VisibilityTest : BaseTest(routes {
     GET("optionally/private") with Visibility.INTERNAL isHandledBy { "Ok".ok }
 
     GET("default/as/public") isHandledBy {
 //        request.queryMap().get().get()
         TestResult("value").ok
     }
-    router = this
-}
+}) {
 
-@Test
-fun `sets visibility for routes`() {
+
+    @Test
+    fun `sets visibility for routes`() {
 //    expect that ((router.generateDocs().spec.print().parseJson<Json>()["paths"]
 //            ?.get("/optionally/private")
 //            ?.get("get")
@@ -37,13 +30,15 @@ fun `sets visibility for routes`() {
 //            "get" /
 //            "visibility" /
 //            Visibility::class isEqualTo Visibility.PUBLIC
-}
+    }
 }
 
-data class Json(val string: String = "",
-                val integer: Int = 0,
-                val float: Float = 0f,
-                val x: MutableMap<String, Any?> = LinkedTreeMap<String, Any?>()) : MutableMap<String, Any?> by x {
+data class Json(
+    val string: String = "",
+    val integer: Int = 0,
+    val float: Float = 0f,
+    val x: MutableMap<String, Any?> = LinkedTreeMap<String, Any?>()
+) : MutableMap<String, Any?> by x {
     override fun get(key: String): Json? {
         return x.get(key)?.let {
             when (it) {

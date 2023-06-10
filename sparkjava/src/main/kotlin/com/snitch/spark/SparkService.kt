@@ -1,25 +1,35 @@
 package com.snitch.spark
 
-import RoutedService
-import SnitchService
+import me.snitchon.parsing.Parser
 import ch.qos.logback.classic.Logger
-import com.snitch.Config
-import com.snitch.HTTPMethod
-import com.snitch.Router
+import me.snitchon.*
+import me.snitchon.documentation.DocumentationConfig
+import me.snitchon.request.RequestWrapper
+import me.snitchon.service.RoutedService
+import me.snitchon.service.SnitchService
+import me.snitchon.response.ErrorHttpResponse
+import me.snitchon.types.HTTPMethods
+import me.snitchon.response.HttpResponse
+import me.snitchon.response.SuccessfulHttpResponse
+import me.snitchon.types.EndpointBundle
 import org.slf4j.LoggerFactory
 import spark.Request
 import spark.Response
 import spark.Service
 import java.io.File
+import kotlin.reflect.KClass
 
 
-class SparkSnitchService(override val config: Config) : SnitchService {
+class SparkSnitchService(
+    override val config: DocumentationConfig,
+    val parser: Parser
+) : SnitchService {
     val http by lazy { Service.ignite().port(config.port) }
 
-    private val Router.EndpointBundle<*>.func: (request: Request, response: Response) -> Any
+    private val EndpointBundle<*>.func: (request: Request, response: Response) -> Any
         get() =
             { request, response ->
-                function(
+                handler(
                     SparkRequestWrapper(request),
                     SparkResponseWrapper(response)
                 )
@@ -30,30 +40,50 @@ class SparkSnitchService(override val config: Config) : SnitchService {
         if (!tmpDir.exists()) {
             tmpDir.mkdirs()
         }
-        println(tmpDir)
         http.externalStaticFileLocation(tmpDir.absolutePath)
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
         logger.level = config.logLevel
 
-        val router = Router(config, this)
+        val router = Router(config, this, emptySet(), parser)
         routerConfiguration(router)
         return RoutedService(this, router).startListening()
     }
 
-    override fun registerMethod(it: Router.EndpointBundle<*>, path: String) {
-        val sparkPath = path.replace("{",":").replace("}", "")
+    override fun registerMethod(it: EndpointBundle<*>, path: String) {
+        val sparkPath = path.replace("{", ":").replace("}", "")
         when (it.endpoint.httpMethod) {
-            HTTPMethod.GET -> { http.get(sparkPath, it.func) }
-            HTTPMethod.POST -> http.post(sparkPath, it.func)
-            HTTPMethod.PUT -> http.put(sparkPath, it.func)
-            HTTPMethod.PATCH -> http.patch(sparkPath, it.func)
-            HTTPMethod.HEAD -> http.head(sparkPath, it.func)
-            HTTPMethod.DELETE -> http.delete(sparkPath, it.func)
-            HTTPMethod.OPTIONS -> http.options(sparkPath, it.func)
+            HTTPMethods.GET -> {
+                http.get(sparkPath, it.func)
+            }
+
+            HTTPMethods.POST -> http.post(sparkPath, it.func)
+            HTTPMethods.PUT -> http.put(sparkPath, it.func)
+            HTTPMethods.PATCH -> http.patch(sparkPath, it.func)
+            HTTPMethods.HEAD -> http.head(sparkPath, it.func)
+            HTTPMethods.DELETE -> http.delete(sparkPath, it.func)
+            HTTPMethods.OPTIONS -> http.options(sparkPath, it.func)
         }
     }
 
-    fun stop() {
+    override fun start() {
+        http.awaitInitialization()
+    }
+
+    override fun <T : Exception, R : HttpResponse<*>> handleException(
+        exception: KClass<T>,
+        block: (T, RequestWrapper) -> R
+    ) {
+        http.exception(exception.java) { ex, req, res ->
+            val handled = block(ex, SparkRequestWrapper(req))
+            res.status(handled.statusCode)
+            when (handled) {
+                is SuccessfulHttpResponse<*> -> res.body(with(parser) { handled.body!!.serialized })
+                is ErrorHttpResponse<*, *> -> res.body(with(parser) { handled.details!!.serialized })
+            }
+        }
+    }
+
+    override fun stop() {
         http.stop()
     }
 }

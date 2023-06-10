@@ -1,6 +1,13 @@
 package com.snitch.spark
 
-import com.snitch.*
+import me.snitchon.*
+import me.snitchon.parameters.HeaderParameter
+import me.snitchon.parameters.PathParam
+import me.snitchon.parameters.QueryParameter
+import me.snitchon.request.RequestWrapper
+import me.snitchon.request.filterValid
+import me.snitchon.types.Format
+import me.snitchon.types.HTTPMethods
 import spark.Request
 import spark.Response
 
@@ -8,7 +15,7 @@ class SparkRequestWrapper(val request: Request) : RequestWrapper {
 
     override val body: String by lazy { request.body() }
 
-    override fun method(): HTTPMethod = HTTPMethod.fromString(request.requestMethod())
+    override fun method(): HTTPMethods = HTTPMethods.fromString(request.requestMethod())
 
     override fun params(name: String): String? = request.params(name)
 

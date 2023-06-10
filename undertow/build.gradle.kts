@@ -1,9 +1,10 @@
 plugins {
-    kotlin("jvm")
-    maven
+    kotlin("jvm") version "1.8.20"
+    `maven-publish`
+    `java-library`
 }
 
-group = "com.snitch.undertow"
+group = "com.snitch.spark"
 version = "1.0.0"
 
 repositories {
@@ -11,7 +12,27 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":core"))
+    api("io.undertow:undertow-core:2.3.6.Final")
+    api(project(":core"))
     implementation(kotlin("stdlib"))
-    implementation("io.undertow:undertow-core:2.2.3.Final")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
+        jvmTarget = "17"
+    }
+}
+
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "me.snitchon"
+            artifactId = "undertow"
+            version = "1.0"
+
+            from(components["java"])
+        }
+    }
 }

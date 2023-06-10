@@ -1,11 +1,14 @@
 package com.snitch
 
-import com.snitch.documentation.generateDocs
-import com.snitch.extensions.print
-import com.snitch.spark.SparkSnitchService
+import com.snitch.spark.UndertowSnitchService
+import me.snitchon.documentation.generateDocs
+import me.snitchon.parsers.GsonDocumentationSerializer
+import me.snitchon.parsers.GsonJsonParser
 
 fun main(args: Array<String>) {
-    SparkSnitchService(Config()).setRoutes(ServerRouter).generateDocs()
-        .print()
-        .writeDocsToStaticFolder()
+    UndertowSnitchService(GsonJsonParser)
+        .setRoutes(ServerRouter)
+        .startListening()
+        .generateDocs(GsonDocumentationSerializer)
+        .servePublicDocumenation()
 }

@@ -1,21 +1,50 @@
 package com.snitch
 
-import com.snitch.extensions.json
-import org.junit.Rule
+import me.snitchon.response.badRequest
+import me.snitchon.response.ok
+import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test
 
-class ErrorTest : SparkTest() {
-    @Rule
-    @JvmField
-    val rule = SparkTestRule(port) {
-        GET("errors")inSummary "does a foo" isHandledBy { badRequest<String, ErrorBody>(ErrorBody("hellothere", 3f)) }
+class ErrorTest : BaseTest(
+    {
+        routes {
+            GET("errors") inSummary "does a foo" isHandledBy {
+                ErrorBody("hellothere", 3f).badRequest
+            }
+            GET("exception") inSummary "does a foo" isHandledBy {
+                throw CustomException()
+                "".ok
+            }
+        }(it)
+            .handleException<CustomException, _> { ex, req ->
+                "Something bad happened".badRequest
+            }
     }
+) {
 
     @Test
     fun `supports typed path parameters`() {
-        whenPerform GET "/$root/errors" expectCode 400 expectBody badRequest<String, ErrorBody>(ErrorBody("hellothere", 3f)).json
+        with(GsonJsonParser) {
+            whenPerform GET "/$root/errors" expectCode 400 expectBody (
+                ErrorBody(
+                    "hellothere",
+                    3f
+                )
+            ).serialized
+        }
+    }
+
+    @Test
+    fun `supports custom exceptions`() {
+        GET("/$root/exception")
+            .expectCode(400)
+            .expect {
+                it.body().contains("Something bad happened")
+            }
     }
 
 }
 
 data class ErrorBody(val message: String, val float: Float)
+
+class CustomException : Exception()
