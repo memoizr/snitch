@@ -6,16 +6,20 @@ import me.snitchon.*
 import me.snitchon.parameters.HeaderParameter
 import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
+import me.snitchon.parsing.Parser
 import me.snitchon.request.RequestWrapper
 import me.snitchon.request.filterValid
 import me.snitchon.types.Format
 import me.snitchon.types.HTTPMethods
 import java.net.URLDecoder
 
-class UndertowRequestWrapper(val exchange: HttpServerExchange, inline val _body: () -> Any?) : RequestWrapper {
+class UndertowRequestWrapper(
+    override val parser: Parser,
+    val exchange: HttpServerExchange,
+    inline val _body: () -> Any?,
+) : RequestWrapper {
 
     override val body: () -> Any? get() = _body
-
     override fun method(): HTTPMethods = HTTPMethods.fromString(exchange.requestMethod.toString())
 
     override fun params(name: String): String? =

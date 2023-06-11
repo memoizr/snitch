@@ -13,6 +13,7 @@ import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.header
 import me.snitchon.parameters.optionalQuery
 import me.snitchon.parameters.path
+import me.snitchon.parsing.Parser
 import me.snitchon.request.Handler
 import me.snitchon.request.body
 import me.snitchon.request.headers
@@ -81,7 +82,7 @@ private val random = optionalQuery(
 object aFoo : Validator<Random, Random> {
     override val regex: Regex = "/^hello".toRegex()
     override val description: String = "a ranom parameter"
-    override val parse: (String) -> Random = { Random() }
+    override val parse: Parser.(String) -> Random = { Random() }
 }
 
 val ServerRouter: Router.() -> Unit = {

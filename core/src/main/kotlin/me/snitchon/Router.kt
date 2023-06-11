@@ -42,7 +42,8 @@ class Router(
                         body,
                         (headerParams + queryParams + pathParams),
                         request,
-                        response
+                        response,
+                        parser
                     )
                 ).also {
                     after(request, response)

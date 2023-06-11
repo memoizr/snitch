@@ -1,16 +1,15 @@
 package me.snitchon.request
 
+import me.snitchon.parameters.*
+import me.snitchon.parsing.Parser
 import me.snitchon.types.HTTPMethods
-import me.snitchon.parameters.HeaderParameter
-import me.snitchon.parameters.Parameter
-import me.snitchon.parameters.PathParam
-import me.snitchon.parameters.QueryParameter
 
 interface RequestWrapper {
     val body: () -> Any?
     fun params(name: String): String?
     fun headers(name: String): String?
     fun queryParams(name: String): String?
+    val parser: Parser
 
     fun method(): HTTPMethods
 
@@ -48,3 +47,25 @@ interface RequestWrapper {
         }
     }
 }
+
+inline operator fun <reified T : Any, R> RequestWrapper.get(param: PathParam<T, R>): R =
+    params(param.name)
+        .let { param.pattern.parse(parser, it.orEmpty()) }
+
+inline operator fun <reified T : Any?, R> RequestWrapper.get(param: QueryParam<T, R>): R =
+    queryParams(param.name)
+        .let { param.pattern.parse(parser, it.orEmpty()) }
+
+inline operator fun <reified T : Any?, R> RequestWrapper.get(param: OptionalQueryParam<T, R>): R =
+    queryParams(param.name)
+        .filterValid(param)
+        ?.let { param.pattern.parse(parser, it) } ?: param.default
+
+inline operator fun <reified T : Any?, R> RequestWrapper.get(param: HeaderParam<T, R>): R =
+    headers(param.name)
+        .let { param.pattern.parse(parser, it.orEmpty()) }
+
+inline operator fun <reified T : Any?, R> RequestWrapper.get(param: OptionalHeaderParam<T, R>): R =
+    headers(param.name)
+        .filterValid(param)
+        ?.let { param.pattern.parse(parser, it) } ?: param.default

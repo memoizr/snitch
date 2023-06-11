@@ -6,6 +6,7 @@ import com.snitch.me.snitchon.Validator
 import me.snitchon.parameters.optionalHeader
 import me.snitchon.parameters.optionalQuery
 import me.snitchon.parameters.path
+import me.snitchon.parsing.Parser
 import me.snitchon.request.headers
 import me.snitchon.request.queries
 import me.snitchon.response.ok
@@ -35,7 +36,7 @@ private data class UserId(val id: String)
 private object UserIdValidator : Validator<String, UserId> {
     override val description = "User id"
     override val regex = """^.+$""".toRegex(RegexOption.DOT_MATCHES_ALL)
-    override val parse: (String) -> UserId = { UserId(it) }
+    override val parse: Parser.(String) -> UserId = { UserId(it) }
 }
 
 class ValidationsTest : BaseTest(routes {

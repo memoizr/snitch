@@ -18,15 +18,10 @@ repositories {
 }
 
 dependencies {
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation("ch.qos.logback:logback-classic:1.2.9")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.21")
-
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
     implementation("org.yaml:snakeyaml:2.0")
 
     testImplementation(kotlin("test-junit"))
-//    testImplementation(project(":sparkjava"))
     testImplementation(project(":undertow"))
     testImplementation(project(":gsonparser"))
     testImplementation("com.github.memoizr:assertk-core:-SNAPSHOT")

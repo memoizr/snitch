@@ -17,7 +17,8 @@ data class RequestHandler<T : Any>
     private val _body: Body<T>?,
     val params: Set<Parameter<*, *>>,
     val request: RequestWrapper,
-    val response: ResponseWrapper
+    val response: ResponseWrapper,
+    val parser: Parser
 ) {
 
     val body: T by lazy { request.body() as T }
@@ -28,52 +29,31 @@ data class RequestHandler<T : Any>
     inline operator fun <reified T : Any, R> RequestWrapper.get(param: PathParam<T, R>): R =
         checkParamIsRegistered(param)
             .params(param.name)
-            .let { param.pattern.parse(it.orEmpty()) }
+            .let { param.pattern.parse(parser, it.orEmpty()) }
 
     inline operator fun <reified T : Any?, R> RequestWrapper.get(param: QueryParam<T, R>): R =
         checkParamIsRegistered(param)
             .queryParams(param.name)
-            .let { param.pattern.parse(it.orEmpty()) }
+            .let { param.pattern.parse(parser, it.orEmpty()) }
 
     inline operator fun <reified T : Any?, R> RequestWrapper.get(param: OptionalQueryParam<T, R>): R =
         checkParamIsRegistered(param)
             .queryParams(param.name)
             .filterValid(param)
-            ?.let { param.pattern.parse(it) } ?: param.default
+            ?.let { param.pattern.parse(parser, it) } ?: param.default
 
     inline operator fun <reified T : Any?, R> RequestWrapper.get(param: HeaderParam<T, R>): R =
         checkParamIsRegistered(param)
             .headers(param.name)
-            .let { param.pattern.parse(it.orEmpty()) }
+            .let { param.pattern.parse(parser, it.orEmpty()) }
 
     inline operator fun <reified T : Any?, R> RequestWrapper.get(param: OptionalHeaderParam<T, R>): R =
         checkParamIsRegistered(param)
             .headers(param.name)
             .filterValid(param)
-            ?.let { param.pattern.parse(it) } ?: param.default
+            ?.let { param.pattern.parse(parser, it) } ?: param.default
 }
 
-inline operator fun <reified T : Any, R> RequestWrapper.get(param: PathParam<T, R>): R =
-    params(param.name)
-        .let { param.pattern.parse(it.orEmpty()) }
-
-inline operator fun <reified T : Any?, R> RequestWrapper.get(param: QueryParam<T, R>): R =
-    queryParams(param.name)
-        .let { param.pattern.parse(it.orEmpty()) }
-
-inline operator fun <reified T : Any?, R> RequestWrapper.get(param: OptionalQueryParam<T, R>): R =
-    queryParams(param.name)
-        .filterValid(param)
-        ?.let { param.pattern.parse(it) } ?: param.default
-
-inline operator fun <reified T : Any?, R> RequestWrapper.get(param: HeaderParam<T, R>): R =
-    headers(param.name)
-        .let { param.pattern.parse(it.orEmpty()) }
-
-inline operator fun <reified T : Any?, R> RequestWrapper.get(param: OptionalHeaderParam<T, R>): R =
-    headers(param.name)
-        .filterValid(param)
-        ?.let { param.pattern.parse(it) } ?: param.default
 
 
 fun queries(vararg queryParameter: QueryParameter<*, *>) = queryParameter.asList()
@@ -92,11 +72,11 @@ data class Body<T : Any>(val klass: KClass<T>, val contentType: ContentType = Co
 
 data class UnregisteredParamException(val param: Parameter<*, *>) : Exception()
 
-class Handler<Request : Any, Response, S: StatusCodes>(val block: context(Parser) RequestHandler<Request>.() -> HttpResponse<Response, S>) {
+class Handler<Request : Any, Response, S : StatusCodes>(val block: context(Parser) RequestHandler<Request>.() -> HttpResponse<Response, S>) {
     operator fun getValue(
         nothing: Nothing?,
         property: KProperty<*>
-    ): HandlerResponse<Request, Response, S>{
+    ): HandlerResponse<Request, Response, S> {
         val type = property.returnType.arguments.get(1).type.print()
         val statusCode = property.returnType.arguments.get(2).type
 
