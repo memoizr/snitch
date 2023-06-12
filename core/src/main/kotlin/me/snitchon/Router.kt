@@ -36,17 +36,12 @@ class Router(
             this,
             EndpointResponse(endpointResponse.statusCodes, endpointResponse.type)
         ) { request ->
-            val invalidParams = request.getInvalidParams(pathParams, queryParams, headerParams)
-            if (invalidParams.isNotEmpty()) {
-                throw InvalidParametersException(invalidParams.foldRight(emptyList()) { error, acc -> acc + error })
-            } else {
-                before(request)
-                endpointResponse.handler(
-                    parser,
-                    Context(request)
-                ).also {
-                    after(request)
-                }
+            before(request)
+            endpointResponse.handler(
+                parser,
+                Context(request)
+            ).also {
+                after(request)
             }
         }
     }
@@ -64,7 +59,8 @@ class Router(
     fun queries(vararg queryParameter: QueryParameter<*, *>) = queryParameter.asList()
     fun headers(vararg headerParameter: HeaderParameter<*, *>) = headerParameter.asList()
     fun description(description: String) = OpDescription(description)
-    inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) = Body(T::class, contentType)
+    inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) =
+        Body(T::class, contentType)
 }
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this

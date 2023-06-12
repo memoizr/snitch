@@ -6,6 +6,7 @@ import com.snitch.me.snitchon.Validator
 import me.snitchon.parameters.optionalHeader
 import me.snitchon.parameters.optionalQuery
 import me.snitchon.parameters.path
+import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsing.Parser
 import org.junit.Test
 
@@ -48,6 +49,7 @@ class ValidationsTest : BaseTest(routes {
         request[allowInvalidQuery]
         request[stringSet]
         request[userId]
+        request[id]
         "ok".ok
     }
 }) {
@@ -55,10 +57,10 @@ class ValidationsTest : BaseTest(routes {
     @Test
     fun `validates routes`() {
         whenPerform GET "/$root/foo/3456" expectCode 200
-        whenPerform GET "/$root/foo/hey" expectBodyJson TestErrorHttpResponse<Any, List<String>>(
+        whenPerform GET "/$root/foo/hey" expectBody TestErrorHttpResponse<Any, List<String>>(
             400,
             listOf("""Path parameter `id` is invalid, expecting non negative integer, got `hey`""")
-        ) expectCode 400
+        ).serialized expectCode 400
         whenPerform GET "/$root/foo/134?offset=-34" expectBodyJson TestErrorHttpResponse<Any, List<String>>(
             400,
             listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `-34`""")

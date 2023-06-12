@@ -159,10 +159,10 @@ class ParametersTest : BaseTest(routes {
     @Test
     fun `supports header parameters`() {
         whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "foo") expectBodyJson TestResult("foo")
-        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "") expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "") expectBody TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Header parameter `q` is invalid, expecting non empty single-line string, got ``")
-        )
+        ).serialized
         whenPerform GET "/$root/headerspath" withHeaders mapOf() expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Required Header parameter `q` is missing")

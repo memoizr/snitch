@@ -1,4 +1,5 @@
 package com.snitch.me.snitchon
+
 import me.snitchon.parsing.Parser
 import kotlin.reflect.KClass
 import kotlin.text.RegexOption.*
@@ -6,19 +7,28 @@ import kotlin.text.RegexOption.*
 object NonNegativeInt : Validator<Int, Int> {
     override val description = "non negative integer"
     override val regex = """^\d+$""".toRegex()
-    override val parse: Parser.(String) -> Int = { it.toInt() }
+    override val parse: Parser.(String) -> Int = {
+        it.toInt().also {
+            if (it < 0) throw IllegalArgumentException()
+        }
+    }
 }
 
 object NonEmptyString : Validator<String, String> {
     override val description = "non empty string"
     override val regex = """^.+$""".toRegex(DOT_MATCHES_ALL)
-    override val parse: Parser.(String) -> String = { it }
+    override val parse: Parser.(String) -> String = {
+        if (it.isEmpty()) throw IllegalArgumentException() else it
+    }
 }
 
 object NonEmptySingleLineString : Validator<String, String> {
     override val description = "non empty single-line string"
     override val regex = """^.+$""".toRegex()
-    override val parse: Parser.(String) -> String = { it }
+    override val parse: Parser.(String) -> String = {
+        if (it.isEmpty() || it.lines().size != 1)
+            throw IllegalArgumentException() else
+        it }
 }
 
 object NonEmptyStringSet : Validator<String, Set<String>> {
@@ -46,7 +56,7 @@ class Enum<E : kotlin.Enum<*>>(e: KClass<E>) : Validator<E, E> {
     override val description: String = "A string of value: $values"
     override val parse: Parser.(String) -> E = {
         it.parse(e.java)
-   }
+    }
     override val regex: Regex = "^($values)$".toRegex()
 }
 

@@ -1,5 +1,6 @@
 package me.snitchon.request
 
+import me.snitchon.extensions.print
 import me.snitchon.parameters.*
 import me.snitchon.parsing.Parser
 import me.snitchon.response.CommonResponses
@@ -26,15 +27,14 @@ interface ImplementationRequestWrapper : CommonResponses {
     private fun invalidParameterMessage(query: String, it: Parameter<*, *>, value: String?) =
         """$query parameter `${it.name}` is invalid, expecting ${it.pattern.description}, got `$value`"""
 
-    fun getInvalidParams(
-        pathParams: Set<PathParam<out Any, *>>,
-        queryParams: Set<QueryParameter<*, *>>,
-        headerParams: Set<HeaderParameter<*, *>>,
-    ): List<String> {
-        return (pathParams.map { validateParam(it, getPathParam(it), "Path") } +
-                queryParams.map { validateParam(it, getQueryParam(it), "Query") } +
-                headerParams.map { validateParam(it, getHeaderParam(it), "Header") })
-            .filterNotNull()
+    fun getInvalidParams(): List<String> {
+        return params.map {
+            when (it) {
+                is PathParam<*, *> -> validateParam(it, getPathParam(it), "Path")
+                is QueryParameter<*, *> -> validateParam(it, getQueryParam(it), "Query")
+                is HeaderParameter<*, *> -> validateParam(it, getHeaderParam(it), "Header")
+            }
+        }.filterNotNull()
     }
 
     private fun validateParam(it: Parameter<*, *>, value: String?, path: String): String? {
@@ -50,32 +50,56 @@ interface ImplementationRequestWrapper : CommonResponses {
 
     operator fun <T : Any, R> get(param: PathParam<T, R>): R =
         checkParamIsRegistered(param)
-            .params(param.name)
-            .let { param.pattern.parse(parser, it.orEmpty()) }
+            .tryParam {
+                params(param.name)
+                    .let { param.pattern.parse(parser, it.orEmpty()) }
+            }
 
     operator fun <T : Any?, R> get(param: QueryParam<T, R>): R =
         checkParamIsRegistered(param)
-            .queryParams(param.name)
-            .let { param.pattern.parse(parser, it.orEmpty()) }
+            .tryParam {
+                queryParams(param.name)
+                    .let { param.pattern.parse(parser, it.orEmpty()) }
+            }
 
     operator fun <T : Any?, R> get(param: OptionalQueryParam<T, R>): R =
         checkParamIsRegistered(param)
-            .queryParams(param.name)
-            .filterValid(param)
-            ?.let { param.pattern.parse(parser, it) } ?: param.default
+            .tryParam {
+                queryParams(param.name)
+                    .filterValid(param)
+                    ?.let { param.pattern.parse(parser, it) } ?: param.default
+            }
 
     operator fun <T : Any?, R> get(param: HeaderParam<T, R>): R =
         checkParamIsRegistered(param)
-            .headers(param.name)
-            .let { param.pattern.parse(parser, it.orEmpty()) }
+            .tryParam {
+                headers(param.name)
+                    .let { param.pattern.parse(parser, it.orEmpty()) }
+            }
+
 
     operator fun <T : Any?, R> get(param: OptionalHeaderParam<T, R>): R =
         checkParamIsRegistered(param)
-            .headers(param.name)
-            .filterValid(param)
-            ?.let { param.pattern.parse(parser, it) } ?: param.default
+            .tryParam {
+                headers(param.name)
+//                    .filterValid(param)
+                    ?.let { param.pattern.parse(parser, it) } ?: param.default
+            }
 
-    private fun checkParamIsRegistered(param: Parameter<*, *>) =
-        if (!params.contains(param)) throw UnregisteredParamException(param) else this
 }
 
+private inline fun ImplementationRequestWrapper.checkParamIsRegistered(param: Parameter<*, *>) =
+    if (!params.contains(param)) throw UnregisteredParamException(param) else this
+
+private inline fun <R> ImplementationRequestWrapper.tryParam(block: () -> R) = try {
+    block()
+} catch (e: Exception) {
+    throw InvalidParametersException(getInvalidParams())
+}
+
+fun String?.filterValid(param: Parameter<*, *>): String? = when {
+    this == null -> null
+    param.emptyAsMissing && this.isEmpty() -> null
+    param.invalidAsMissing && !param.pattern.regex.matches(this) -> null
+    else -> this
+}
