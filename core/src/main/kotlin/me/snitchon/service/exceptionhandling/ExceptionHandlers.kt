@@ -5,7 +5,7 @@ import me.snitchon.parameters.InvalidParametersException
 import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.parsing.ParsingException
-import me.snitchon.request.UnregisteredParamException
+import me.snitchon.validation.UnregisteredParamException
 import me.snitchon.service.RoutedService
 import me.snitchon.types.ErrorResponse
 

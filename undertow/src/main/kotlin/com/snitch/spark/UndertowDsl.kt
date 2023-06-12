@@ -2,15 +2,13 @@ package com.snitch.spark
 
 import io.undertow.server.HttpServerExchange
 import io.undertow.util.PathTemplateMatch
-import me.snitchon.*
 import me.snitchon.parameters.HeaderParameter
 import me.snitchon.parameters.Parameter
 import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.parsing.Parser
-import me.snitchon.request.RequestWrapper
+import me.snitchon.request.ImplementationRequestWrapper
 import me.snitchon.request.filterValid
-import me.snitchon.types.Format
 import me.snitchon.types.HTTPMethods
 import java.net.URLDecoder
 
@@ -19,7 +17,7 @@ class UndertowRequestWrapper(
     override val params: Set<Parameter<*, *>>,
     val exchange: HttpServerExchange,
     inline val _body: () -> Any?,
-) : RequestWrapper {
+) : ImplementationRequestWrapper {
 
     override val body: () -> Any? get() = _body
     override fun method(): HTTPMethods = HTTPMethods.fromString(exchange.requestMethod.toString())

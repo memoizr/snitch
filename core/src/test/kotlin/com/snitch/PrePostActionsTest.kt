@@ -2,8 +2,6 @@ package com.snitch
 
 import com.memoizr.assertk.expect
 import com.snitch.me.snitchon.NonEmptyString
-import me.snitchon.request.get
-import me.snitchon.request.queries
 import me.snitchon.parameters.query
 import org.junit.Test
 

@@ -7,8 +7,6 @@ import me.snitchon.parameters.optionalHeader
 import me.snitchon.parameters.optionalQuery
 import me.snitchon.parameters.path
 import me.snitchon.parsing.Parser
-import me.snitchon.request.headers
-import me.snitchon.request.queries
 import org.junit.Test
 
 private val id = path("id", condition = NonNegativeInt)

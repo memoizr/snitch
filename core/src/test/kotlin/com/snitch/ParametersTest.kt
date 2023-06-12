@@ -10,9 +10,6 @@ import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsing.Parser
 import me.snitchon.request.Handler
-import me.snitchon.request.body
-import me.snitchon.request.headers
-import me.snitchon.request.queries
 import me.snitchon.types.Sealed
 import me.snitchon.types.ErrorResponse
 import org.junit.Test

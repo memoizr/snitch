@@ -1,13 +1,12 @@
 package me.snitchon.service
 
-import me.snitchon.ResponseWrapper
 import me.snitchon.documentation.Visibility
 import me.snitchon.parameters.HeaderParameter
 import me.snitchon.parameters.Parameter
 import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.request.Body
-import me.snitchon.request.RequestWrapper
+import me.snitchon.request.ImplementationRequestWrapper
 import me.snitchon.types.HTTPMethods
 
 data class OpDescription(val description: String)
@@ -23,8 +22,8 @@ data class Endpoint<B : Any>(
     val body: Body<B>,
     val tags: List<String>? = emptyList(),
     val visibility: Visibility = Visibility.PUBLIC,
-    val before: (RequestWrapper) -> Unit = {},
-    val after: (RequestWrapper) -> Unit = {},
+    val before: (ImplementationRequestWrapper) -> Unit = {},
+    val after: (ImplementationRequestWrapper) -> Unit = {},
 ) {
 
     infix fun withQuery(queryParameter: QueryParameter<*, *>) = copy(queryParams = queryParams + queryParameter)

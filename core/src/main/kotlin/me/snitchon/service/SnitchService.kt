@@ -3,7 +3,7 @@ package me.snitchon.service
 import me.snitchon.Router
 import me.snitchon.config.SnitchConfig
 import me.snitchon.parsing.Parser
-import me.snitchon.request.RequestWrapper
+import me.snitchon.request.ImplementationRequestWrapper
 import me.snitchon.response.HttpResponse
 import me.snitchon.types.EndpointBundle
 import kotlin.reflect.KClass
@@ -15,7 +15,7 @@ interface SnitchService {
 
     fun <T : Exception, R : HttpResponse<*, *>> handleException(
         exceptionClass: KClass<T>,
-        exceptionHandler: context(Parser) RequestWrapper.(T) -> R
+        exceptionHandler: context(Parser) ImplementationRequestWrapper.(T) -> R
     )
 }
 

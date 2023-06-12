@@ -2,7 +2,7 @@ package me.snitchon.service
 
 import me.snitchon.Router
 import me.snitchon.parsing.Parser
-import me.snitchon.request.RequestWrapper
+import me.snitchon.request.ImplementationRequestWrapper
 import me.snitchon.response.HttpResponse
 
 data class RoutedService(
@@ -25,7 +25,7 @@ data class RoutedService(
         onStop()
     }
 
-    inline fun <reified T : Exception, R : HttpResponse<*, *>> handleException(noinline block: context(Parser) RequestWrapper.(T) -> R): RoutedService {
+    inline fun <reified T : Exception, R : HttpResponse<*, *>> handleException(noinline block: context(Parser) ImplementationRequestWrapper.(T) -> R): RoutedService {
         service.handleException(T::class, block)
         return this
     }

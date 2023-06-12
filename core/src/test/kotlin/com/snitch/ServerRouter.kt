@@ -15,9 +15,6 @@ import me.snitchon.parameters.optionalQuery
 import me.snitchon.parameters.path
 import me.snitchon.parsing.Parser
 import me.snitchon.request.Handler
-import me.snitchon.request.body
-import me.snitchon.request.headers
-import me.snitchon.request.queries
 import me.snitchon.types.Format
 import me.snitchon.types.Sealed
 import java.util.*

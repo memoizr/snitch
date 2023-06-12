@@ -10,7 +10,6 @@ import me.snitchon.parsers.GsonDocumentationSerializer
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsers.GsonJsonParser.parse
 import me.snitchon.request.Handler
-import me.snitchon.request.body
 import me.snitchon.tests.SnitchTest
 import me.snitchon.types.Format
 import org.junit.Test
