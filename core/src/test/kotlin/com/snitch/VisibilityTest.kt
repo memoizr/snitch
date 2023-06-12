@@ -2,7 +2,6 @@ package com.snitch
 
 import me.snitchon.documentation.Visibility
 import com.google.gson.internal.LinkedTreeMap
-import me.snitchon.response.ok
 import me.snitchon.parsers.GsonJsonParser.parseJson
 import org.junit.Test
 import kotlin.reflect.KClass

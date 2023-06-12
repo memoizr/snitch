@@ -6,19 +6,16 @@ import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.parsing.ParsingException
 import me.snitchon.request.UnregisteredParamException
-import me.snitchon.response.ErrorHttpResponse
-import me.snitchon.response.badRequest
-import me.snitchon.response.serverError
 import me.snitchon.service.RoutedService
 import me.snitchon.types.ErrorResponse
 
 fun RoutedService.handleInvalidParameters() =
-    handleException<InvalidParametersException, _> { ex, wrap ->
+    handleException<InvalidParametersException, _> { ex ->
         ErrorResponse(400, ex.reasons).badRequest
     }
 
 fun RoutedService.handleUnregisteredParameters() =
-    handleException<UnregisteredParamException, _> { ex, wrap ->
+    handleException<UnregisteredParamException, _> { ex ->
         val type = when (ex.param) {
             is HeaderParameter -> "header"
             is QueryParameter -> "query"
@@ -32,6 +29,6 @@ fun RoutedService.handleUnregisteredParameters() =
     }
 
 fun RoutedService.handleParsingException() =
-    handleException<ParsingException, _> { ex, req ->
+    handleException<ParsingException, _> { ex ->
         ErrorResponse(400, "Invalid body parameter").badRequest
     }

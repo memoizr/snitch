@@ -3,7 +3,6 @@ package com.snitch
 import com.memoizr.assertk.expect
 import com.snitch.spark.UndertowSnitchService
 import me.snitchon.parsers.GsonJsonParser
-import me.snitchon.response.ok
 import me.snitchon.config.loadConfigFromFile
 import me.snitchon.config.parse
 import me.snitchon.tests.SnitchTest

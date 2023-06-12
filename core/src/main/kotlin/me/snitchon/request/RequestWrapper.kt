@@ -4,7 +4,7 @@ import me.snitchon.parameters.*
 import me.snitchon.parsing.Parser
 import me.snitchon.types.HTTPMethods
 
-interface RequestWrapper {
+interface RequestWrapper: CommonResponses {
     val body: () -> Any?
     fun params(name: String): String?
     fun headers(name: String): String?

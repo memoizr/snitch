@@ -11,11 +11,8 @@ import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsers.GsonJsonParser.parse
 import me.snitchon.request.Handler
 import me.snitchon.request.body
-import me.snitchon.response.created
 import me.snitchon.tests.SnitchTest
 import me.snitchon.types.Format
-import me.snitchon.response.format
-import me.snitchon.response.ok
 import org.junit.Test
 
 private val listHandler by Handler<Nothing, _, _> {
@@ -46,21 +43,21 @@ class DocumentationTest : SnitchTest(routes {
 
     @Test
     fun `uses custom serialization`() {
-        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).spec
+        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).documentation.spec
 
         expect that docs.serialized contains "a_sample"
     }
 
     @Test
     fun `supports generic response types`() {
-        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).spec
+        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).documentation.spec
 
         expect that docs.serialized contains "foo"
     }
 
     @Test
     fun `supports binary request types`() {
-        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
+        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).documentation.spec.parse(JsonObject::class.java)
             .getAsJsonObject("paths")
             .getAsJsonObject("/bytearray")
             .getAsJsonObject("post")
@@ -72,7 +69,7 @@ class DocumentationTest : SnitchTest(routes {
 
     @Test
     fun `supports binary response types`() {
-        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
+        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).documentation.spec.parse(JsonObject::class.java)
             .getAsJsonObject("paths")
             .getAsJsonObject("/bytearray")
             .getAsJsonObject("post")
@@ -85,7 +82,7 @@ class DocumentationTest : SnitchTest(routes {
 
     @Test
     fun `supports response status codes`() {
-        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).spec.parse(JsonObject::class.java)
+        val docs = activeService.generateDocumentation(GsonDocumentationSerializer).documentation.spec.parse(JsonObject::class.java)
             .getAsJsonObject("paths")
             .getAsJsonObject("/created")
             .getAsJsonObject("get")

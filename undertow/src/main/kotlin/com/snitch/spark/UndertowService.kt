@@ -28,14 +28,14 @@ import kotlin.reflect.KClass
 
 @Suppress("UNCHECKED_CAST")
 class UndertowSnitchService(
-    val parser: Parser,
+    private val parser: Parser,
     override val config: SnitchConfig = SnitchConfig()
 ) : SnitchService {
 
     private lateinit var service: Undertow
     private val handlers = mutableListOf<ExceptionHandler>()
     private val exceptionHandlers =
-        LinkedHashMap<KClass<*>, context(Parser) (Exception, RequestWrapper) -> HttpResponse<*,*>>()
+        LinkedHashMap<KClass<*>, context(Parser) RequestWrapper.(Exception) -> HttpResponse<*, *>>()
 
     private val routingHandler = RoutingHandler()
     private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.service.port, "localhost") }
@@ -43,28 +43,22 @@ class UndertowSnitchService(
     override fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService {
         val router = Router(config, this@UndertowSnitchService, emptySet(), parser)
         routerConfiguration(router)
-        return RoutedService(this, router)
+        return RoutedService(
+            service = this,
+            router = router,
+            onStart = ::start,
+            onStop = ::stop
+        )
             .handleInvalidParameters()
             .handleUnregisteredParameters()
             .handleParsingException()
     }
 
-    override fun start() {
-        service = handlers
-            .fold(serviceBuilder) { builder, routingHandler -> builder.setHandler(routingHandler) }
-            .build()
-        service.start()
-    }
-
-    override fun stop() {
-        service.stop()
-    }
-
-    override fun <T : Exception, R : HttpResponse<*,*>> handleException(
+    override fun <T : Exception, R : HttpResponse<*, *>> handleException(
         exceptionClass: KClass<T>,
-        exceptionHandler: context (Parser) (T, RequestWrapper) -> R
+        exceptionHandler: context (Parser) RequestWrapper.(T) -> R
     ) {
-        exceptionHandlers[exceptionClass] = exceptionHandler as context(Parser) (Exception, RequestWrapper) -> R
+        exceptionHandlers[exceptionClass] = exceptionHandler as context(Parser) RequestWrapper.(Exception) -> R
     }
 
     override fun registerMethod(endpointBundle: EndpointBundle<*>, path: String) {
@@ -81,11 +75,23 @@ class UndertowSnitchService(
                         val ex: Throwable = exchange.getAttachment(ExceptionHandler.THROWABLE)
                         exceptionHandlers[ex::class]?.invoke(
                             parser,
+                            UndertowRequestWrapper(parser, exchange) { null },
                             ex as Exception,
-                            UndertowRequestWrapper(parser, exchange) { null })?.dispatch(exchange)
+                        )?.dispatch(exchange)
                     }
                 })
         }
+    }
+
+    private fun start() {
+        service = handlers
+            .fold(serviceBuilder) { builder, routingHandler -> builder.setHandler(routingHandler) }
+            .build()
+        service.start()
+    }
+
+    private fun stop() {
+        service.stop()
     }
 
     context (Parser)
@@ -116,21 +122,21 @@ class UndertowSnitchService(
     }
 
     context (Parser)
-    private fun HttpResponse<*,*>.dispatch(exchange: HttpServerExchange) {
+    private fun HttpResponse<*, *>.dispatch(exchange: HttpServerExchange) {
         when (this) {
-            is SuccessfulHttpResponse<*,*> -> dispatchSuccessfulResponse(exchange)
+            is SuccessfulHttpResponse<*, *> -> dispatchSuccessfulResponse(exchange)
             is ErrorHttpResponse<*, *, *> -> dispatchFailedResponse(exchange)
         }
     }
 
     context (Parser)
-    private fun <T> ErrorHttpResponse<*,T,*>.dispatchFailedResponse(exchange: HttpServerExchange) {
+    private fun <T> ErrorHttpResponse<*, T, *>.dispatchFailedResponse(exchange: HttpServerExchange) {
         exchange.setStatusCode(this.statusCode.code)
         exchange.responseHeaders.put(HttpString("content-type"), Format.Json.type)
         exchange.responseSender.send(this.details?.serialized)
     }
 
-    private fun SuccessfulHttpResponse<*,*>.dispatchSuccessfulResponse(exchange: HttpServerExchange) {
+    private fun SuccessfulHttpResponse<*, *>.dispatchSuccessfulResponse(exchange: HttpServerExchange) {
         exchange.setStatusCode(this.statusCode.code)
         exchange.responseHeaders.put(HttpString("content-type"), this._format.type)
         if (this._format == Format.Json) {

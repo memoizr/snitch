@@ -4,14 +4,9 @@ import me.snitchon.*
 import me.snitchon.types.Format.*
 import me.snitchon.parameters.Parameter
 import me.snitchon.service.RoutedService
-import me.snitchon.response.format
-import me.snitchon.response.ok
-import me.snitchon.response.serializer
 import me.snitchon.types.ContentType
 import me.snitchon.types.EndpointBundle
 import me.snitchon.types.StatusCodes
-import java.io.File
-import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.jvmErasure
 
@@ -21,7 +16,7 @@ fun RoutedService.generateDocumentation(
         port = this.service.config.service.port,
         basePath = this.service.config.service.basePath
     )
-): Spec {
+): DocumentedService {
     val openApi =
         OpenApi(info = Info(documentationConfig.title, "1.0"), servers = listOf(Server(documentationConfig.host)))
     return router.endpoints
@@ -104,34 +99,28 @@ fun RoutedService.generateDocumentation(
             }
         }.fold(openApi) { a, b -> a.withPath(b.first, b.second) }
         .let {
-            Spec(with(router.parser) { it.serialized }, router, this)
+            DocumentedService(this, Spec(with(router.parser) { it.serialized }, router))
         }
 }
 
 class Spec internal constructor(
     val spec: String,
     val router: Router,
-    val routedService: RoutedService
-) {
-    fun servePublicDocumenation(): Spec {
-        with(router.parser) {
-            with(Router(router.config, routedService.service, emptySet(), router.parser)) {
-                val path = "/"// config.publicDocumentationPath.ensureLeadingSlash()
-                val docPath = "/spec.json"//.ensureLeadingSlash()
-//            routedService.service.registerMethod(
-                with(router.parser) {
-                    GET(path).isHandledBy {
-                        index(docPath).ok.format(TextHTML)
-                    }
-                    GET(docPath).isHandledBy {
-                        spec.ok.format(Json).serializer { it }
-                    }
-                }
-                endpoints.forEach { router.service.registerMethod(it, it.endpoint.url) }
-            }
+)
+
+fun DocumentedService.servePublicDocumenation(): DocumentedService {
+    with(Router(service.router.config, service.service, emptySet(), service.router.parser)) {
+        val path = "/"// config.publicDocumentationPath.ensureLeadingSlash()
+        val docPath = "/spec.json"//.ensureLeadingSlash()
+        GET(path).isHandledBy {
+            index(docPath).ok.format(TextHTML)
         }
-        return this
+        GET(docPath).isHandledBy {
+            documentation.spec.ok.format(Json).serializer { it }
+        }
+        endpoints.forEach { service.registerMethod(it, it.endpoint.url) }
     }
+    return this
 }
 
 fun RoutedService.serveDocumentation() =
@@ -139,15 +128,6 @@ fun RoutedService.serveDocumentation() =
 
 private fun getDescription(param: Parameter<*, *>) =
     "${param.description} - ${param.pattern.description}${if (param.invalidAsMissing) " - Invalid as Missing" else ""}${if (param.emptyAsMissing) " - Empty as Missing" else ""}"
-
-internal fun writeToFile(content: String, destination: String) {
-    File(destination.split("/").dropLast(1).joinToString("")).apply { if (!exists()) mkdirs() }
-    content.byteInputStream().use { input ->
-        FileOutputStream(destination).use { output ->
-            input.copyTo(output)
-        }
-    }
-}
 
 fun index(docPath: String) = """
 <!DOCTYPE html>

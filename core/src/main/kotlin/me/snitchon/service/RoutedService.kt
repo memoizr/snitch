@@ -1,29 +1,31 @@
 package me.snitchon.service
 
-import me.snitchon.response.HttpResponse
-import me.snitchon.request.RequestWrapper
 import me.snitchon.Router
 import me.snitchon.parsing.Parser
+import me.snitchon.request.RequestWrapper
+import me.snitchon.response.HttpResponse
 
 data class RoutedService(
     val service: SnitchService,
-    val router: Router
+    val router: Router,
+    private val onStart: () -> Unit,
+    private val onStop: () -> Unit,
 ) {
-    fun startListening(): RoutedService {
+    fun start(): RoutedService {
         router.endpoints.forEach {
             val path: String = service.config.service.basePath + it.endpoint.url
             service.registerMethod(it, path)
         }
 
-        service.start()
+        onStart()
         return this
     }
 
-    fun stopListening() {
-        service.stop()
+    fun stop() {
+        onStop()
     }
 
-    inline fun <reified T : Exception, R : HttpResponse<*,*>> handleException(noinline block: context(Parser) (T, RequestWrapper) -> R): RoutedService {
+    inline fun <reified T : Exception, R : HttpResponse<*, *>> handleException(noinline block: context(Parser) RequestWrapper.(T) -> R): RoutedService {
         service.handleException(T::class, block)
         return this
     }

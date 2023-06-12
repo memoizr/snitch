@@ -12,12 +12,10 @@ interface SnitchService {
     val config: SnitchConfig
     fun registerMethod(endpointBundle: EndpointBundle<*>, path: String)
     fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService
-    fun start()
-    fun stop()
 
     fun <T : Exception, R : HttpResponse<*, *>> handleException(
         exceptionClass: KClass<T>,
-        exceptionHandler: context(Parser) (T, RequestWrapper) -> R
+        exceptionHandler: context(Parser) RequestWrapper.(T) -> R
     )
 }
 

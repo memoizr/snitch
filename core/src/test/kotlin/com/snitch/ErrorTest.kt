@@ -1,7 +1,5 @@
 package com.snitch
 
-import me.snitchon.response.badRequest
-import me.snitchon.response.ok
 import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test
 
@@ -16,7 +14,7 @@ class ErrorTest : BaseTest(
                 "".ok
             }
         }(it)
-            .handleException<CustomException, _> { ex, req ->
+            .handleException<CustomException, _> { ex ->
                 "Something bad happened".badRequest
             }
     }

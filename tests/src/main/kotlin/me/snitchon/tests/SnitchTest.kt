@@ -31,11 +31,11 @@ abstract class SnitchTest(service: (Int) -> RoutedService) {
     val activeService by lazy { service(port) }
 
     open fun before() {
-        activeService.startListening()
+        activeService.start()
     }
 
     open fun after() {
-        activeService.stopListening()
+        activeService.stop()
     }
 
     protected val whenPerform = this
@@ -129,8 +129,10 @@ abstract class SnitchTest(service: (Int) -> RoutedService) {
             com.memoizr.assertk.expect that response.body() isEqualTo body
         }
 
-        infix fun expectCode(code: Int) = apply {
-            com.memoizr.assertk.expect that response.statusCode() isEqualTo code
+        infix fun expectCode(expected: Int) = apply {
+            val actual = response.statusCode()
+            assert(actual == expected)
+            { "Expecting code: $expected, but got: $actual" }
         }
 
         infix fun expect(block: (HttpResponse<String>) -> Unit): Expectation {

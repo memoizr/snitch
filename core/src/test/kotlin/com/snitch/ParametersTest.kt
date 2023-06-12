@@ -13,9 +13,7 @@ import me.snitchon.request.Handler
 import me.snitchon.request.body
 import me.snitchon.request.headers
 import me.snitchon.request.queries
-import me.snitchon.response.ErrorHttpResponse
 import me.snitchon.types.Sealed
-import me.snitchon.response.ok
 import me.snitchon.types.ErrorResponse
 import org.junit.Test
 import java.text.SimpleDateFormat
