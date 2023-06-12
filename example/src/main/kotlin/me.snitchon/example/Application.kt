@@ -4,8 +4,6 @@ import com.snitch.spark.UndertowSnitchService
 import me.snitchon.Router
 import me.snitchon.config.SnitchConfig
 import me.snitchon.config.SnitchConfig.Service
-import me.snitchon.documentation.generateDocumentation
-import me.snitchon.documentation.servePublicDocumenation
 import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.service.RoutedService
 

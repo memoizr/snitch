@@ -1,20 +1,18 @@
 package com.snitch.spark
 
-import io.undertow.Handlers.exceptionHandler
 import io.undertow.Undertow
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.RoutingHandler
-import io.undertow.server.handlers.ExceptionHandler
 import io.undertow.util.HttpString
 import io.undertow.util.Methods.*
 import me.snitchon.Router
+import me.snitchon.config.SnitchConfig
 import me.snitchon.parsing.Parser
 import me.snitchon.request.RequestWrapper
 import me.snitchon.response.ErrorHttpResponse
 import me.snitchon.response.HttpResponse
 import me.snitchon.response.SuccessfulHttpResponse
 import me.snitchon.service.RoutedService
-import me.snitchon.config.SnitchConfig
 import me.snitchon.service.SnitchService
 import me.snitchon.service.exceptionhandling.handleInvalidParameters
 import me.snitchon.service.exceptionhandling.handleParsingException
@@ -33,7 +31,7 @@ class UndertowSnitchService(
 ) : SnitchService {
 
     private lateinit var service: Undertow
-    private val handlers = mutableListOf<ExceptionHandler>()
+    private val handlers = mutableListOf<RoutingHandler>()
     private val exceptionHandlers =
         LinkedHashMap<KClass<*>, context(Parser) RequestWrapper.(Exception) -> HttpResponse<*, *>>()
 
@@ -63,23 +61,13 @@ class UndertowSnitchService(
 
     override fun registerMethod(endpointBundle: EndpointBundle<*>, path: String) {
         with(parser) {
-            val handler = routingHandler.add(
-                endpointBundle.endpoint.httpMethod.toUndertow(),
-                path,
-                endpointBundle.undertowHandler
+            handlers.add(
+                routingHandler.add(
+                    endpointBundle.endpoint.httpMethod.toUndertow(),
+                    path,
+                    endpointBundle.undertowHandler
+                )
             )
-
-            handlers.add(exceptionHandler(handler)
-                .also {
-                    it.addExceptionHandler(Exception::class.java) { exchange ->
-                        val ex: Throwable = exchange.getAttachment(ExceptionHandler.THROWABLE)
-                        exceptionHandlers[ex::class]?.invoke(
-                            parser,
-                            UndertowRequestWrapper(parser, exchange) { null },
-                            ex as Exception,
-                        )?.dispatch(exchange)
-                    }
-                })
         }
     }
 
@@ -117,8 +105,18 @@ class UndertowSnitchService(
 
     context (Parser)
     private fun EndpointBundle<*>.handle(exchange: HttpServerExchange, b: () -> Any?) {
-        handler(UndertowRequestWrapper(parser, exchange, b), UndertowResponseWrapper(exchange))
-            .dispatch(exchange)
+        exchange.dispatch(Runnable {
+            try {
+                handler(UndertowRequestWrapper(parser, exchange, b), UndertowResponseWrapper(exchange))
+                    .dispatch(exchange)
+            } catch (ex: Exception) {
+                exceptionHandlers[ex::class]?.invoke(
+                    parser,
+                    UndertowRequestWrapper(parser, exchange) { null },
+                    ex,
+                )?.dispatch(exchange)
+            }
+        })
     }
 
     context (Parser)

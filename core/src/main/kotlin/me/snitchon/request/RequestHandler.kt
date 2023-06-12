@@ -15,14 +15,13 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 
-data class RequestHandler<T : Any>
-    (
+data class RequestHandler<T : Any>(
     private val _body: Body<T>?,
     val params: Set<Parameter<*, *>>,
     val request: RequestWrapper,
     val response: ResponseWrapper,
     val parser: Parser
-): CommonResponses {
+) : CommonResponses {
 
     val body: T by lazy { request.body() as T }
 
@@ -56,7 +55,6 @@ data class RequestHandler<T : Any>
             .filterValid(param)
             ?.let { param.pattern.parse(parser, it) } ?: param.default
 }
-
 
 
 fun queries(vararg queryParameter: QueryParameter<*, *>) = queryParameter.asList()
