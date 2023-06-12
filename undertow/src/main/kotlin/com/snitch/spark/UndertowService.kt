@@ -107,12 +107,12 @@ class UndertowSnitchService(
     private fun EndpointBundle<*>.handle(exchange: HttpServerExchange, b: () -> Any?) {
         exchange.dispatch(Runnable {
             try {
-                handler(UndertowRequestWrapper(parser, exchange, b), UndertowResponseWrapper(exchange))
+                handler(UndertowRequestWrapper(parser, params, exchange, b))
                     .dispatch(exchange)
             } catch (ex: Exception) {
                 exceptionHandlers[ex::class]?.invoke(
                     parser,
-                    UndertowRequestWrapper(parser, exchange) { null },
+                    UndertowRequestWrapper(parser, params, exchange) { null },
                     ex,
                 )?.dispatch(exchange)
             }

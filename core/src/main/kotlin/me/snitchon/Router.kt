@@ -30,7 +30,7 @@ class Router(
         endpoints += EndpointBundle(
             this,
             EndpointResponse(endpointResponse.statusCodes, endpointResponse.type)
-        ) { request, response ->
+        ) { request ->
             val invalidParams = request.getInvalidParams(pathParams, queryParams, headerParams)
             if (invalidParams.isNotEmpty()) {
                 throw InvalidParametersException(invalidParams.foldRight(emptyList()) { error, acc -> acc + error })
@@ -38,15 +38,9 @@ class Router(
                 before(request)
                 endpointResponse.handler(
                     parser,
-                    RequestHandler(
-                        body,
-                        (headerParams + queryParams + pathParams),
-                        request,
-                        response,
-                        parser
-                    )
+                    RequestHandler(request)
                 ).also {
-                    after(request, response)
+                    after(request)
                 }
             }
         }

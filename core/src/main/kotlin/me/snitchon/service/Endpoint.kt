@@ -24,7 +24,7 @@ data class Endpoint<B : Any>(
     val tags: List<String>? = emptyList(),
     val visibility: Visibility = Visibility.PUBLIC,
     val before: (RequestWrapper) -> Unit = {},
-    val after: (RequestWrapper, ResponseWrapper) -> Unit = { _, res -> res},
+    val after: (RequestWrapper) -> Unit = {},
 ) {
 
     infix fun withQuery(queryParameter: QueryParameter<*, *>) = copy(queryParams = queryParams + queryParameter)

@@ -6,6 +6,7 @@ import me.snitchon.types.HTTPMethods
 
 interface RequestWrapper: CommonResponses {
     val body: () -> Any?
+    val params: Set<Parameter<*,*>>
     fun params(name: String): String?
     fun headers(name: String): String?
     fun queryParams(name: String): String?

@@ -16,7 +16,7 @@ class PrePostActionsTest : BaseTest(routes{
         .with(queries(param))
         .copy(before = {
             list.add(it[param] + "One")
-        }, after = { req, res ->
+        }, after = { req ->
             list.add(req[param] + "Three")
         }
         )

@@ -4,6 +4,7 @@ import io.undertow.server.HttpServerExchange
 import io.undertow.util.PathTemplateMatch
 import me.snitchon.*
 import me.snitchon.parameters.HeaderParameter
+import me.snitchon.parameters.Parameter
 import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.parsing.Parser
@@ -15,6 +16,7 @@ import java.net.URLDecoder
 
 class UndertowRequestWrapper(
     override val parser: Parser,
+    override val params: Set<Parameter<*, *>>,
     val exchange: HttpServerExchange,
     inline val _body: () -> Any?,
 ) : RequestWrapper {
@@ -37,10 +39,4 @@ class UndertowRequestWrapper(
 
     override fun getHeaderParam(param: HeaderParameter<*, *>) =
         headers(param.name).filterValid(param)
-}
-
-
-class UndertowResponseWrapper(val exchange: HttpServerExchange) : ResponseWrapper {
-    override fun setStatus(code: Int) = Unit
-    override fun setType(type: Format) = Unit
 }

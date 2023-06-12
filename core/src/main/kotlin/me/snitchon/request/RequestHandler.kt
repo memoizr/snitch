@@ -2,7 +2,6 @@ package me.snitchon.request
 
 import me.snitchon.response.HttpResponse
 import me.snitchon.service.OpDescription
-import me.snitchon.ResponseWrapper
 import me.snitchon.types.ContentType
 import me.snitchon.extensions.print
 import me.snitchon.parameters.*
@@ -15,15 +14,12 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 
-data class RequestHandler<T : Any>(
-    private val _body: Body<T>?,
-    val params: Set<Parameter<*, *>>,
+@JvmInline
+value class RequestHandler<T : Any>(
     val request: RequestWrapper,
-    val response: ResponseWrapper,
-    val parser: Parser
 ) : CommonResponses {
 
-    val body: T by lazy { request.body() as T }
+    val body: T get () = request.body() as T
 
     fun RequestWrapper.checkParamIsRegistered(param: Parameter<*, *>) =
         if (!params.contains(param)) throw UnregisteredParamException(param) else this
