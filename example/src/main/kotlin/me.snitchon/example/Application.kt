@@ -1,6 +1,6 @@
 package me.snitchon.example
 
-import com.snitch.spark.UndertowSnitchService
+import undertow.snitch.spark.UndertowSnitchService
 import me.snitchon.Router
 import me.snitchon.config.SnitchConfig
 import me.snitchon.config.SnitchConfig.Service

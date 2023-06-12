@@ -1,4 +1,4 @@
-package com.snitch.spark
+package undertow.snitch.spark
 
 import io.undertow.Undertow
 import io.undertow.server.HttpServerExchange

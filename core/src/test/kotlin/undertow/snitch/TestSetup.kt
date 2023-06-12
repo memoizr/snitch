@@ -1,6 +1,6 @@
-package com.snitch
+package undertow.snitch
 
-import com.snitch.spark.UndertowSnitchService
+import undertow.snitch.spark.UndertowSnitchService
 import me.snitchon.Router
 import me.snitchon.documentation.generateDocumentation
 import me.snitchon.parsers.GsonDocumentationSerializer

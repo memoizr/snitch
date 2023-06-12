@@ -1,4 +1,4 @@
-package com.snitch.spark
+package undertow.snitch.spark
 
 import io.undertow.server.HttpServerExchange
 import io.undertow.util.PathTemplateMatch
@@ -38,3 +38,5 @@ class UndertowRequestWrapper(
     override fun getHeaderParam(param: HeaderParameter<*, *>) =
         headers(param.name).filterValid(param)
 }
+
+val ImplementationRequestWrapper.undertow get() = this as UndertowRequestWrapper

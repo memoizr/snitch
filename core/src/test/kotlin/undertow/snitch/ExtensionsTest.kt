@@ -1,4 +1,4 @@
-package com.snitch
+package undertow.snitch
 
 import com.memoizr.assertk.isEqualTo
 import me.snitchon.types.Sealed

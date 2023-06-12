@@ -1,4 +1,4 @@
-package com.snitch
+package undertow.snitch
 
 import com.snitch.me.snitchon.NonNegativeInt
 import com.snitch.me.snitchon.StringSet

@@ -6,6 +6,7 @@ import me.snitchon.parsing.Parser
 import me.snitchon.response.CommonResponses
 import me.snitchon.types.HTTPMethods
 import me.snitchon.validation.UnregisteredParamException
+import java.rmi.UnexpectedException
 
 interface ImplementationRequestWrapper : CommonResponses {
     val body: () -> Any?
@@ -82,7 +83,7 @@ interface ImplementationRequestWrapper : CommonResponses {
         checkParamIsRegistered(param)
             .tryParam {
                 headers(param.name)
-//                    .filterValid(param)
+                    .filterValid(param)
                     ?.let { param.pattern.parse(parser, it) } ?: param.default
             }
 
@@ -100,6 +101,6 @@ private inline fun <R> ImplementationRequestWrapper.tryParam(block: () -> R) = t
 fun String?.filterValid(param: Parameter<*, *>): String? = when {
     this == null -> null
     param.emptyAsMissing && this.isEmpty() -> null
-    param.invalidAsMissing && !param.pattern.regex.matches(this) -> null
+    param.invalidAsMissing -> null
     else -> this
 }

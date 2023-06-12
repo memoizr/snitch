@@ -1,4 +1,4 @@
-package com.snitch
+package undertow.snitch
 
 import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName

@@ -1,7 +1,7 @@
-package com.snitch
+package undertow.snitch
 
 import com.memoizr.assertk.expect
-import com.snitch.spark.UndertowSnitchService
+import undertow.snitch.spark.UndertowSnitchService
 import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.config.loadConfigFromFile
 import me.snitchon.config.parse

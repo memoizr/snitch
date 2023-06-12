@@ -1,4 +1,4 @@
-package com.snitch
+package undertow.snitch
 
 import me.snitchon.documentation.Description
 import me.snitchon.documentation.Visibility

@@ -1,4 +1,4 @@
-package com.snitch
+package undertow.snitch
 
 import me.snitchon.service.RoutedService
 import me.snitchon.tests.SnitchTest
