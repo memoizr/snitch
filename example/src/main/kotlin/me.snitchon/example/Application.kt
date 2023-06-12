@@ -1,28 +1,36 @@
 package me.snitchon.example
 
 import undertow.snitch.spark.UndertowSnitchService
-import me.snitchon.Router
 import me.snitchon.config.SnitchConfig
 import me.snitchon.config.SnitchConfig.Service
+import me.snitchon.example.DBModule.db
 import me.snitchon.parsers.GsonJsonParser
-import me.snitchon.service.RoutedService
+import me.snitchon.service.exceptionhandling.handleInvalidParameters
+import me.snitchon.service.exceptionhandling.handleParsingException
+import me.snitchon.service.exceptionhandling.handleUnregisteredParameters
+import me.snitchon.types.ErrorResponse
+import org.jetbrains.exposed.sql.*
+import java.util.*
 
 object Application {
-    private lateinit var server: RoutedService
-
     fun start(port: Int) = UndertowSnitchService(
         GsonJsonParser,
         SnitchConfig(Service(port = port))
     )
         .setRoutes(router)
-        .also { server = it }
-
-    fun stop() {
-        server.stop()
-    }
+        .handleInvalidParameters()
+        .handleParsingException()
+        .handleUnregisteredParameters()
+        .handleException<ValidationException, _> {
+            ErrorResponse(400, it.reason).badRequest
+        }
+        .handleException<Throwable, _> {
+            "somethingwentwrong".serverError
+        }
+        .also { db().addMissingColumns() }
 }
 
-val router: Router.() -> Unit = {
-    GET("/health/liveness")
-        .isHandledBy { "ok".ok }
+fun String.isValidEmail(): Boolean {
+    val emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
+    return emailRegex.matches(this)
 }
