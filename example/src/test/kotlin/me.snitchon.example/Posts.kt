@@ -2,12 +2,13 @@ package me.snitchon.example
 
 import me.snitchon.example.ApplicationModule.clock
 import me.snitchon.example.ApplicationModule.now
-import me.snitchon.example.UsersRepositoryModule.usersRepository
+import me.snitchon.example.database.RepositoriesModule.usersRepository
 import me.snitchon.example.api.CreatePostRequest
 import me.snitchon.example.api.PostResponse
 import me.snitchon.example.api.PostsResponse
 import me.snitchon.example.api.UserViewResponse
-import me.snitchon.extensions.print
+import me.snitchon.example.security.createJWT
+import me.snitchon.example.types.*
 import me.snitchon.parsers.GsonJsonParser.serialized
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.Test
@@ -36,9 +37,6 @@ class Posts : BaseTest() {
         POST("/users/${user.id}/posts")
             .withHeaders(mapOf("X-Access-Token" to validToken))
             .withBody(createPostRequest)
-            .expect {
-                it.body().print()
-            }
             .expectCode(201)
 
         GET("/users/${user.id}/posts")

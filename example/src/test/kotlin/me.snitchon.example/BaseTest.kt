@@ -1,6 +1,7 @@
 package me.snitchon.example
 
-import me.snitchon.example.DBModule.connection
+import me.snitchon.example.database.DBModule
+import me.snitchon.example.database.DBModule.connection
 import me.snitchon.tests.SnitchTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -12,8 +13,8 @@ abstract class BaseTest : SnitchTest({ Application.start(it) }) {
 
     @BeforeEach
     override fun before() {
-        DBModule.db().createSchema()
-        activeService.service.onStop { DBModule.db().dropSchema() }
+        DBModule.postgresDatabase().createSchema()
+        activeService.service.onStop { DBModule.postgresDatabase().dropSchema() }
         super.before()
     }
 

@@ -1,39 +1,23 @@
-package me.snitchon.example
+package me.snitchon.example.api.users
 
-import com.snitch.me.snitchon.NonEmptyString
-import com.snitch.me.snitchon.Validator
 import me.snitchon.Router
-import me.snitchon.example.CryptoModule.hasher
-import me.snitchon.example.UsersRepositoryModule.postsRepository
-import me.snitchon.example.UsersRepositoryModule.usersRepository
+import me.snitchon.example.security.SecurityModule.hasher
+import me.snitchon.example.database.RepositoriesModule.postsRepository
+import me.snitchon.example.database.RepositoriesModule.usersRepository
 import me.snitchon.example.api.CreatePostRequest
+import me.snitchon.example.api.CreateUserRequest
+import me.snitchon.example.api.Headers.accessToken
+import me.snitchon.example.api.LoginRequest
+import me.snitchon.example.api.Paths.userId
+import me.snitchon.example.api.auth.authenticated
 import me.snitchon.example.api.toResponse
-import me.snitchon.example.types.PostContent
-import me.snitchon.example.types.PostTitle
-import me.snitchon.extensions.print
-import me.snitchon.parameters.header
-import me.snitchon.parameters.path
-import me.snitchon.parsing.Parser
+import me.snitchon.example.database.TransactionResult
+import me.snitchon.example.security.createJWT
+import me.snitchon.example.types.*
 import me.snitchon.request.handle
 import me.snitchon.request.parsing
-import me.snitchon.service.Endpoint
 import org.jetbrains.exposed.sql.transactions.transaction
 
-val userId = path("userId", condition = NonEmptyString)
-val accessToken = header("X-Access-Token", condition = ValidAccessToken)
-
-object ValidAccessToken : Validator<String, UserId> {
-    override val description = "valid jwt"
-    override val regex = """^.+$""".toRegex(RegexOption.DOT_MATCHES_ALL)
-    override val parse: Parser.(String) -> UserId = {
-        try {
-            UserId(verifyJWT(it).body.get("userId", String::class.java))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw IllegalArgumentException("foo")
-        }
-    }
-}
 
 val usersController: Router.() -> Unit = {
     POST("users")
@@ -54,16 +38,6 @@ val usersController: Router.() -> Unit = {
         .isHandledBy(getPosts)
 }
 
-
-private fun <B : Any> Endpoint<B>.authenticated(): Endpoint<B> = copy(
-    headerParams = headerParams + accessToken,
-    before = {
-        it.headers(accessToken.name)
-            ?.let { verifyJWT(it) }
-    }
-)
-
-
 val getPosts by handle {
     transaction {
         postsRepository().getPosts(request[accessToken])
@@ -71,7 +45,7 @@ val getPosts by handle {
     }.ok
 }
 
-val createPost by parsing<CreatePostRequest>() handle {
+private val createPost by parsing<CreatePostRequest>() handle {
     transaction {
         postsRepository().putPost(
             CreatePostAction(
@@ -84,7 +58,7 @@ val createPost by parsing<CreatePostRequest>() handle {
     "Created".created
 }
 
-val userLoginHandler by parsing<LoginRequest>() handle {
+private val userLoginHandler by parsing<LoginRequest>() handle {
     transaction { usersRepository().findHashBy(Email(body.email)) }
         .let {
             if (hasher().match(body.password, it?.second ?: Hash(""))) createJWT(it!!.first).ok

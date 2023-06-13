@@ -1,7 +1,8 @@
-package me.snitchon.example
+package me.snitchon.example.database
 
 import life.shank.ShankModule
 import life.shank.single
+import me.snitchon.example.PostgresDatabase
 import org.jetbrains.exposed.sql.Database
 
 object DBModule : ShankModule {
@@ -13,5 +14,5 @@ object DBModule : ShankModule {
             password = "postgres"
         )
     }
-    val db = single { -> DB(connection()) }
+    val postgresDatabase = single { -> PostgresDatabase(connection()) }
 }

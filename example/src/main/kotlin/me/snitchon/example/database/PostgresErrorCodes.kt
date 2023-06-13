@@ -1,4 +1,4 @@
-package me.snitchon.example.repository;
+package me.snitchon.example.database;
 
 enum class PostgresErrorCodes(val sqlState: String) {
     UNIQUE_VIOLATION("23505"),
@@ -7,11 +7,10 @@ enum class PostgresErrorCodes(val sqlState: String) {
     DATATYPE_MISMATCH("42804"),
     SYNTAX_ERROR("42601"),
     INSUFFICIENT_PRIVILEGE("42501");
-
-
 }
-private val sqlStateMap = PostgresErrorCodes.values().associateBy(PostgresErrorCodes::sqlState)
+
+private val errorCodes = PostgresErrorCodes.values().associateBy(PostgresErrorCodes::sqlState)
 fun String.toErrorCode(): PostgresErrorCodes? {
-    return sqlStateMap[this]
+    return errorCodes[this]
 }
 

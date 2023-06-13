@@ -1,6 +1,4 @@
-package me.snitchon.example
-
-import me.snitchon.example.repository.PostgresErrorCodes
+package me.snitchon.example.database
 
 sealed class TransactionResult {
     object Success : TransactionResult()

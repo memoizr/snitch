@@ -1,5 +1,7 @@
 package me.snitchon.example
 
+import me.snitchon.example.api.CreateUserRequest
+import me.snitchon.example.api.LoginRequest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import ro.kreator.aRandom
