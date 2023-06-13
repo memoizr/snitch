@@ -23,6 +23,7 @@ import me.snitchon.types.Format
 import me.snitchon.types.HTTPMethods
 import java.nio.ByteBuffer
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 @Suppress("UNCHECKED_CAST")
 class UndertowSnitchService(
@@ -30,10 +31,11 @@ class UndertowSnitchService(
     override val config: SnitchConfig = SnitchConfig()
 ) : SnitchService {
 
+    private var onStop: () -> Unit = {}
     private lateinit var service: Undertow
     private val handlers = mutableListOf<RoutingHandler>()
     private val exceptionHandlers =
-        LinkedHashMap<KClass<*>, context(Parser) ImplementationRequestWrapper.(Exception) -> HttpResponse<*, *>>()
+        LinkedHashMap<KClass<*>, context(Parser) ImplementationRequestWrapper.(Throwable) -> HttpResponse<*, *>>()
 
     private val routingHandler = RoutingHandler()
     private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.service.port, "localhost") }
@@ -52,11 +54,16 @@ class UndertowSnitchService(
             .handleParsingException()
     }
 
-    override fun <T : Exception, R : HttpResponse<*, *>> handleException(
+    override fun onStop(action: () -> Unit): SnitchService = also {
+        onStop = action
+    }
+
+    override fun <T : Throwable, R : HttpResponse<*, *>> handleException(
         exceptionClass: KClass<T>,
         exceptionHandler: context (Parser) ImplementationRequestWrapper.(T) -> R
     ) {
-        exceptionHandlers[exceptionClass] = exceptionHandler as context(Parser) ImplementationRequestWrapper.(Exception) -> R
+        exceptionHandlers[exceptionClass] =
+            exceptionHandler as context(Parser) ImplementationRequestWrapper.(Throwable) -> R
     }
 
     override fun registerMethod(endpointBundle: EndpointBundle<*>, path: String) {
@@ -79,6 +86,7 @@ class UndertowSnitchService(
     }
 
     private fun stop() {
+        onStop()
         service.stop()
     }
 
@@ -109,12 +117,14 @@ class UndertowSnitchService(
             try {
                 handler(UndertowRequestWrapper(parser, params, exchange, b))
                     .dispatch(exchange)
-            } catch (ex: Exception) {
-                exceptionHandlers[ex::class]?.invoke(
-                    parser,
-                    UndertowRequestWrapper(parser, params, exchange) { null },
-                    ex,
-                )?.dispatch(exchange)
+            } catch (ex: Throwable) {
+                exceptionHandlers.keys
+                    .find { ex::class.isSubclassOf(it) }?.let { exceptionHandlers[it] }
+                    ?.invoke(
+                        parser,
+                        UndertowRequestWrapper(parser, params, exchange) { null },
+                        ex,
+                    )?.dispatch(exchange)
             }
         })
     }

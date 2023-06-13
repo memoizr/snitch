@@ -15,6 +15,7 @@ dependencies {
     api("io.undertow:undertow-core:2.3.6.Final")
     api(project(":core"))
     implementation(kotlin("stdlib"))
+    implementation(kotlin("reflect"))
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

@@ -1,12 +1,10 @@
 package me.snitchon.request
 
-import me.snitchon.extensions.print
 import me.snitchon.parameters.*
 import me.snitchon.parsing.Parser
 import me.snitchon.response.CommonResponses
 import me.snitchon.types.HTTPMethods
 import me.snitchon.validation.UnregisteredParamException
-import java.rmi.UnexpectedException
 
 interface ImplementationRequestWrapper : CommonResponses {
     val body: () -> Any?
