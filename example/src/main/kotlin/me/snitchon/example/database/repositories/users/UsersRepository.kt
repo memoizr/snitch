@@ -7,6 +7,6 @@ import me.snitchon.example.types.Hash
 import me.snitchon.example.types.UserId
 
 interface UsersRepository {
-    fun putUser(user: CreateUserAction): TransactionResult
+    fun putUser(user: CreateUserAction): TransactionResult<UserId>
     fun findHashBy(email: Email): Pair<UserId, Hash>?
 }

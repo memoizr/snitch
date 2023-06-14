@@ -3,7 +3,6 @@ package undertow.snitch
 import me.snitchon.documentation.Description
 import me.snitchon.documentation.Visibility
 import me.snitchon.parsers.GsonJsonParser.serialized
-import me.snitchon.response.*
 import org.junit.Test
 
 class SimplePathBuilderTest : BaseTest(routes {
@@ -16,11 +15,11 @@ class SimplePathBuilderTest : BaseTest(routes {
     DELETE("/foo") isHandledBy { TestResult("delete value").ok }
 
     GET("/error") isHandledBy {
-        if (false) TestResult("never happens").ok else "Something went wrong".badRequest
+        if (false) TestResult("never happens").ok else "Something went wrong".badRequest()
     }
 
     GET("/forbidden") isHandledBy {
-        if (false) TestResult("never happens").ok else "Forbidden".forbidden
+        if (false) TestResult("never happens").ok else "Forbidden".forbidden()
     }
 
     GET("noslash/bar") isHandledBy { TestResult("success").ok }

@@ -5,8 +5,8 @@ import me.snitchon.types.Format
 import me.snitchon.types.Format.*
 import me.snitchon.types.StatusCodes
 
-sealed class HttpResponse<T, out S> {
-    abstract val statusCode: S
+sealed class HttpResponse<T, out S: StatusCodes> {
+    abstract val statusCode: StatusCodes
     abstract val headers: Map<String, String>
     abstract val value: context(Parser) () -> Any?
 }
@@ -29,7 +29,7 @@ data class SuccessfulHttpResponse<T, S: StatusCodes>(
 ) : HttpResponse<T, S>()
 
 data class ErrorHttpResponse<T, E, S: StatusCodes>(
-    override val statusCode: S,
+    override val statusCode: StatusCodes,
     val details: E,
     override val value: context(Parser) () -> Any? = { details?.serialized },
     override val headers: Map<String, String> = emptyMap(),

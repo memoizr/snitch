@@ -1,6 +1,6 @@
 package me.snitchon.example.database
 
-sealed class TransactionResult {
-    object Success : TransactionResult()
-    class Failure(val code: PostgresErrorCodes?) : TransactionResult()
+sealed class TransactionResult<T> {
+    data class Success<T>(val id: T) : TransactionResult<T>()
+    class Failure<T>(val code: PostgresErrorCodes?) : TransactionResult<T>()
 }

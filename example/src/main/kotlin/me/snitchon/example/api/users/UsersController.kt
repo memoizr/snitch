@@ -19,7 +19,6 @@ import me.snitchon.request.parsing
 import me.snitchon.types.ErrorResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
-
 val usersController: Router.() -> Unit = {
     POST("users")
         .with(body<CreateUserRequest>())
@@ -42,22 +41,19 @@ val usersController: Router.() -> Unit = {
         .authenticated()
         .isHandledBy(deletePost)
 
-    // get individual post
     GET("users" / userId / "posts" / postId)
         .authenticated()
         .isHandledBy(getPost)
 
-    // update individual post
     PUT("users" / userId / "posts" / postId)
         .authenticated()
         .with(body<UpdatePostRequest>())
         .isHandledBy(updatePost)
-
 }
-//updatePost
+
 private val updatePost by parsing<UpdatePostRequest>() handle {
     if (request[userId].print() != principal.value) {
-        ErrorResponse(403, "forbidden").forbidden
+        ErrorResponse(403, "forbidden").forbidden()
     } else {
         transaction {
             postsRepository().updatePost(
@@ -72,18 +68,17 @@ private val updatePost by parsing<UpdatePostRequest>() handle {
     }
 }
 
-//getPost
 private val getPost by handle {
     transaction {
         postsRepository().getPost(PostId(request[postId]))
             ?.toResponse?.ok
-            ?: "notFound".notFound
+            ?: "notFound".notFound()
     }
 }
 
-val deletePost by handle {
+private val deletePost by handle {
     if (request[userId].print() != principal.value.print()) {
-        ErrorResponse(403, "forbidden").forbidden
+        ErrorResponse(403, "forbidden").forbidden()
     } else {
         transaction {
             postsRepository().deletePost(principal, PostId(request[postId]))
@@ -91,7 +86,7 @@ val deletePost by handle {
     }
 }
 
-val getPosts by handle {
+private val getPosts by handle {
     transaction {
         postsRepository().getPosts(request[accessToken])
             .toResponse
@@ -99,10 +94,10 @@ val getPosts by handle {
 }
 
 private val createPost by parsing<CreatePostRequest>() handle {
-    if (request[userId].print() != principal.value.print()) {
-        ErrorResponse(403, "forbidden").forbidden
+    if (request[userId].print() != principal.value) {
+        ErrorResponse(403, "forbidden").forbidden()
     } else {
-        transaction {
+        val result = transaction {
             postsRepository().putPost(
                 CreatePostAction(
                     principal,
@@ -111,7 +106,10 @@ private val createPost by parsing<CreatePostRequest>() handle {
                 )
             )
         }
-        SuccessfulCreation().created
+        when (result) {
+            is TransactionResult.Success -> SuccessfulCreation(result.id.value).created
+            is TransactionResult.Failure -> FailedCreation().badRequest()
+        }
     }
 }
 
@@ -119,13 +117,13 @@ private val userLoginHandler by parsing<LoginRequest>() handle {
     transaction { usersRepository().findHashBy(Email(body.email)) }
         .let {
             if (hasher().match(body.password, it?.second ?: Hash(""))) createJWT(it!!.first).ok
-            else InvalidCredentials().badRequest
+            else InvalidCredentials().badRequest()
         }
 }
 
 private val createUser by parsing<CreateUserRequest>() handle {
     when (
-        transaction {
+        val result = transaction {
             usersRepository().putUser(
                 CreateUserAction(
                     UserName(body.name),
@@ -135,7 +133,7 @@ private val createUser by parsing<CreateUserRequest>() handle {
             )
         }
     ) {
-        is TransactionResult.Success -> SuccessfulCreation().created
-        is TransactionResult.Failure -> EmailExists().badRequest
+        is TransactionResult.Success -> SuccessfulCreation(result.id.value).created
+        is TransactionResult.Failure -> EmailExists().badRequest()
     }
 }

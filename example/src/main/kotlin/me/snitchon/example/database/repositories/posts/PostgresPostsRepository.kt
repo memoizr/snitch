@@ -3,22 +3,30 @@ package me.snitchon.example.database.repositories.posts
 import me.snitchon.example.ApplicationModule
 import me.snitchon.example.database.Posts
 import me.snitchon.example.database.Posts.id
+import me.snitchon.example.database.TransactionResult
 import me.snitchon.example.database.Users
+import me.snitchon.example.database.toErrorCode
 import me.snitchon.example.types.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import java.sql.SQLException
 import java.util.*
 
 class PostgresPostsRepository() : PostsRepository {
-    override fun putPost(post: CreatePostAction) {
-        Posts.insert {
-            it[id] = post.id?.value ?: UUID.randomUUID().toString()
-            it[title] = post.title.value
-            it[content] = post.content.value
-            it[creatorId] = post.creator.value
-            it[createdAt] = post.createDate ?: ApplicationModule.now()
+    override fun putPost(post: CreatePostAction): TransactionResult<PostId> =
+        try {
+            TransactionResult.Success(
+                Posts.insert {
+                    it[id] = post.id?.value ?: UUID.randomUUID().toString()
+                    it[title] = post.title.value
+                    it[content] = post.content.value
+                    it[creatorId] = post.creator.value
+                    it[createdAt] = post.createDate ?: ApplicationModule.now()
+                }.let { PostId(it[id]) }
+            )
+        } catch (e: SQLException) {
+            TransactionResult.Failure(e.sqlState.toErrorCode())
         }
-    }
 
     override fun getPosts(userId: UserId) =
         Posts
@@ -44,18 +52,18 @@ class PostgresPostsRepository() : PostsRepository {
         }
     }
 
-    override fun updatePost(updatePostAction: UpdatePostAction){
+    override fun updatePost(updatePostAction: UpdatePostAction) {
         Posts.update({
-            Posts.id eq updatePostAction.id.value
+            id eq updatePostAction.id.value
         }) {
-            updatePostAction.title?.value?.let {t -> it[title] = t}
-            updatePostAction.content?.value?.let {c -> it[content] = c}
+            updatePostAction.title?.value?.let { t -> it[title] = t }
+            updatePostAction.content?.value?.let { c -> it[content] = c }
         }
     }
 
     override fun getPost(postId: PostId): Post? {
         val post = Posts.select {
-            Posts.id eq postId.value
+            id eq postId.value
         }.firstOrNull() ?: return null
 
         val user = Users.select {

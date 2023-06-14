@@ -7,7 +7,7 @@ class ErrorTest : BaseTest(
     {
         routes {
             GET("errors") inSummary "does a foo" isHandledBy {
-                ErrorBody("hellothere", 3f).badRequest
+                ErrorBody("hellothere", 3f).badRequest()
             }
             GET("exception") inSummary "does a foo" isHandledBy {
                 throw CustomException()
@@ -15,7 +15,7 @@ class ErrorTest : BaseTest(
             }
         }(it)
             .handleException<CustomException, _> { ex ->
-                "Something bad happened".badRequest
+                "Something bad happened".badRequest()
             }
     }
 ) {

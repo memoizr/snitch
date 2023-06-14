@@ -13,27 +13,21 @@ interface CommonResponses {
     val <T> T.ok
         get() = SuccessfulHttpResponse(StatusCodes.OK, this)
 
-    val <T> T.created
+    val <T> T.created: SuccessfulHttpResponse<T, StatusCodes.CREATED>
         get() = SuccessfulHttpResponse(StatusCodes.CREATED, this)
 
     val <T> T.accepted
         get() = SuccessfulHttpResponse(StatusCodes.ACCEPTED, this)
 
-    val <T> T.noContent
-        get() = SuccessfulHttpResponse(StatusCodes.NO_CONTENT, this)
+    val <T> T.noContent get() = SuccessfulHttpResponse(StatusCodes.NO_CONTENT, this)
 
-    val <T> T.badRequest
-        get() = ErrorHttpResponse<T, _, _>(StatusCodes.BAD_REQUEST, this)
+    fun <T, E, S: StatusCodes> E.badRequest() = ErrorHttpResponse<T, _, S>(StatusCodes.BAD_REQUEST, this)
 
-    val <T> T.unauthorized
-        get() = ErrorHttpResponse<T, _, _>(StatusCodes.UNAUTHORIZED, this)
+    fun <T, E, S: StatusCodes> E.unauthorized() = ErrorHttpResponse<T, _,S>(StatusCodes.UNAUTHORIZED, this)
 
-    val <T> T.forbidden
-        get() = ErrorHttpResponse<T, _, _>(StatusCodes.FORBIDDEN, this)
+    fun <T, E, S: StatusCodes> E.forbidden() = ErrorHttpResponse<T, _, S>(StatusCodes.FORBIDDEN, this)
 
-    val <T> T.notFound
-        get() = ErrorHttpResponse<T, _, _>(StatusCodes.NOT_FOUND, this)
+    fun <T, E, S: StatusCodes> E.notFound() = ErrorHttpResponse<T, _, S>(StatusCodes.NOT_FOUND, this)
 
-    val <T> T.serverError
-        get() = ErrorHttpResponse<T, _, _>(StatusCodes.INTERNAL_SERVER_ERROR, this)
+    fun <T, E, S: StatusCodes> E.serverError() = ErrorHttpResponse<T, _, S>(StatusCodes.INTERNAL_SERVER_ERROR, this)
 }

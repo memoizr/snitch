@@ -11,7 +11,7 @@ import me.snitchon.types.ErrorResponse
 
 fun RoutedService.handleInvalidParameters() =
     handleException<InvalidParametersException, _> { ex ->
-        ErrorResponse(400, ex.reasons).badRequest
+        ErrorResponse(400, ex.reasons).badRequest()
     }
 
 fun RoutedService.handleUnregisteredParameters() =
@@ -25,10 +25,10 @@ fun RoutedService.handleUnregisteredParameters() =
         ErrorResponse(
             500,
             "Attempting to use unregistered $type parameter `${ex.param.name}`"
-        ).serverError
+        ).serverError()
     }
 
 fun RoutedService.handleParsingException() =
     handleException<ParsingException, _> { ex ->
-        ErrorResponse(400, "Invalid body parameter").badRequest
+        ErrorResponse(400, "Invalid body parameter").badRequest()
     }
