@@ -2,21 +2,24 @@ package me.snitchon.example.api.users
 
 import me.snitchon.Router
 import me.snitchon.example.api.*
-import me.snitchon.example.security.SecurityModule.hasher
-import me.snitchon.example.database.RepositoriesModule.postsRepository
-import me.snitchon.example.database.RepositoriesModule.usersRepository
 import me.snitchon.example.api.Headers.accessToken
 import me.snitchon.example.api.Paths.postId
 import me.snitchon.example.api.Paths.userId
 import me.snitchon.example.api.auth.authenticated
 import me.snitchon.example.api.auth.principal
-import me.snitchon.example.database.TransactionResult
+import me.snitchon.example.api.auth.principalMatches
+import me.snitchon.example.database.RepositoriesModule.postsRepository
+import me.snitchon.example.database.RepositoriesModule.usersRepository
+import me.snitchon.example.security.SecurityModule.hasher
 import me.snitchon.example.security.createJWT
 import me.snitchon.example.types.*
 import me.snitchon.extensions.print
+import me.snitchon.parameters.PathParam
+import me.snitchon.request.Context
 import me.snitchon.request.handle
 import me.snitchon.request.parsing
 import me.snitchon.types.ErrorResponse
+import me.snitchon.types.StatusCodes
 import org.jetbrains.exposed.sql.transactions.transaction
 
 val usersController: Router.() -> Unit = {
@@ -26,19 +29,22 @@ val usersController: Router.() -> Unit = {
 
     POST("users" / "login")
         .with(body<LoginRequest>())
-        .isHandledBy(userLoginHandler)
+        .isHandledBy(userLogin)
 
     POST("users" / userId / "posts")
         .authenticated()
+        .principalMatches(userId)
         .with(body<CreatePostRequest>())
         .isHandledBy(createPost)
 
     GET("users" / userId / "posts")
         .authenticated()
+        .principalMatches(userId)
         .isHandledBy(getPosts)
 
     DELETE("users" / userId / "posts" / postId)
         .authenticated()
+        .principalMatches(userId)
         .isHandledBy(deletePost)
 
     GET("users" / userId / "posts" / postId)
@@ -47,43 +53,35 @@ val usersController: Router.() -> Unit = {
 
     PUT("users" / userId / "posts" / postId)
         .authenticated()
+        .principalMatches(userId)
         .with(body<UpdatePostRequest>())
         .isHandledBy(updatePost)
 }
 
 private val updatePost by parsing<UpdatePostRequest>() handle {
-    if (request[userId].print() != principal.value) {
-        ErrorResponse(403, "forbidden").forbidden()
-    } else {
-        transaction {
-            postsRepository().updatePost(
-                UpdatePostAction(
-                    PostId(request[postId]),
-                    PostTitle(body.title),
-                    PostContent(body.content),
-                )
+    transaction {
+        postsRepository().updatePost(
+            UpdatePostAction(
+                PostId(request[postId]),
+                PostTitle(body.title),
+                PostContent(body.content),
             )
-        }
-        Unit.noContent
-    }
+        )
+    }.noContent
 }
 
 private val getPost by handle {
     transaction {
         postsRepository().getPost(PostId(request[postId]))
             ?.toResponse?.ok
-            ?: "notFound".notFound()
+            ?: `404`()
     }
 }
 
 private val deletePost by handle {
-    if (request[userId].print() != principal.value.print()) {
-        ErrorResponse(403, "forbidden").forbidden()
-    } else {
-        transaction {
-            postsRepository().deletePost(principal, PostId(request[postId]))
-        }.noContent
-    }
+    transaction {
+        postsRepository().deletePost(principal, PostId(request[postId]))
+    }.noContent
 }
 
 private val getPosts by handle {
@@ -94,46 +92,51 @@ private val getPosts by handle {
 }
 
 private val createPost by parsing<CreatePostRequest>() handle {
-    if (request[userId].print() != principal.value) {
-        ErrorResponse(403, "forbidden").forbidden()
-    } else {
-        val result = transaction {
-            postsRepository().putPost(
-                CreatePostAction(
-                    principal,
-                    PostTitle(body.title),
-                    PostContent(body.content),
-                )
+    transaction {
+        postsRepository().putPost(
+            CreatePostAction(
+                principal,
+                PostTitle(body.title),
+                PostContent(body.content),
             )
-        }
-        when (result) {
-            is TransactionResult.Success -> SuccessfulCreation(result.id.value).created
-            is TransactionResult.Failure -> FailedCreation().badRequest()
-        }
+        )
+    }.mapSuccess {
+        SuccessfulCreation(value).created
+    }.mapFailure {
+        FailedCreation().badRequest()
     }
 }
 
-private val userLoginHandler by parsing<LoginRequest>() handle {
+private val userLogin by parsing<LoginRequest>() handle {
     transaction { usersRepository().findHashBy(Email(body.email)) }
-        .let {
-            if (hasher().match(body.password, it?.second ?: Hash(""))) createJWT(it!!.first).ok
-            else InvalidCredentials().badRequest()
-        }
+        ?.let {
+            if (hasher().match(body.password, it.second))
+                createJWT(it.first).ok
+            else null
+        } ?: InvalidCredentials().badRequest()
 }
 
 private val createUser by parsing<CreateUserRequest>() handle {
-    when (
-        val result = transaction {
-            usersRepository().putUser(
-                CreateUserAction(
-                    UserName(body.name),
-                    Email(body.email),
-                    Password(body.password).hash
-                )
+    transaction {
+        usersRepository().putUser(
+            CreateUserAction(
+                UserName(body.name),
+                Email(body.email),
+                Password(body.password).hash
             )
-        }
-    ) {
-        is TransactionResult.Success -> SuccessfulCreation(result.id.value).created
-        is TransactionResult.Failure -> EmailExists().badRequest()
+        )
+    }.mapSuccess {
+        SuccessfulCreation(value).created
+    }.mapFailure {
+        EmailExists().badRequest()
     }
 }
+
+private fun <T, S : StatusCodes> Context<*>.`403`() =
+    ErrorResponse(403, "forbidden").forbidden<T, _, S>()
+
+private fun <T, S : StatusCodes> Context<*>.`404`() =
+    ErrorResponse(404, "forbidden").notFound<T, _, S>()
+
+private fun Context<*>.principalIsNot(param: PathParam<out Any, *>) =
+    request[param] != principal.value

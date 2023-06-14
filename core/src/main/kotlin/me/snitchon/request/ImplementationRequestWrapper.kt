@@ -93,7 +93,7 @@ private inline fun ImplementationRequestWrapper.checkParamIsRegistered(param: Pa
 private inline fun <R> ImplementationRequestWrapper.tryParam(block: () -> R) = try {
     block()
 } catch (e: Exception) {
-    throw InvalidParametersException(getInvalidParams())
+    throw InvalidParametersException(e, getInvalidParams())
 }
 
 fun String?.filterValid(param: Parameter<*, *>): String? = when {

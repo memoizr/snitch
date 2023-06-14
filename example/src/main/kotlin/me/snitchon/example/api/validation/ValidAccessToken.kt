@@ -9,10 +9,6 @@ object ValidAccessToken : Validator<String, UserId> {
     override val description = "valid jwt"
     override val regex = """^.+$""".toRegex(RegexOption.DOT_MATCHES_ALL)
     override val parse: Parser.(String) -> UserId = {
-        try {
-            UserId(verifyJWT(it).body.get("userId", String::class.java))
-        } catch (e: Exception) {
-            throw IllegalArgumentException("foo")
-        }
+        UserId(verifyJWT(it).body.get("userId", String::class.java))
     }
 }

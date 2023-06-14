@@ -1,5 +1,6 @@
 package me.snitchon.example
 
+import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.MalformedJwtException
 import undertow.snitch.spark.UndertowSnitchService
 import me.snitchon.config.SnitchConfig
@@ -7,6 +8,7 @@ import me.snitchon.config.SnitchConfig.Service
 import me.snitchon.documentation.generateDocumentation
 import me.snitchon.documentation.servePublicDocumenation
 import me.snitchon.example.database.DBModule.postgresDatabase
+import me.snitchon.example.types.ForbiddenException
 import me.snitchon.example.types.ValidationException
 import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.service.RoutedService
@@ -30,7 +32,9 @@ object Application {
 }
 
 fun main() {
-    Application.start(8080)
+    postgresDatabase().createSchema()
+    postgresDatabase().addMissingColumns()
+    Application.start(3000)
         .start()
         .generateDocumentation()
         .servePublicDocumenation()
@@ -40,13 +44,17 @@ fun RoutedService.handleExceptions(): RoutedService =
     handleInvalidParameters()
         .handleParsingException()
         .handleUnregisteredParameters()
-        .handleException(MalformedJwtException::class) {
-            it.printStackTrace()
-            ErrorResponse(401, "unauthorized").unauthorized()
-        }
         .handleException(ValidationException::class) {
             it.printStackTrace()
             ErrorResponse(400, it.reason).badRequest()
+        }
+        .handleException(JwtException::class) {
+            it.printStackTrace()
+            ErrorResponse(401, "unauthorized").unauthorized()
+        }
+        .handleException(ForbiddenException::class) {
+            it.printStackTrace()
+            ErrorResponse(403, "forbidden").forbidden()
         }
         .handleException(Throwable::class) {
             it.printStackTrace()

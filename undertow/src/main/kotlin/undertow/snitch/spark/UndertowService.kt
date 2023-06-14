@@ -7,6 +7,7 @@ import io.undertow.util.HttpString
 import io.undertow.util.Methods.*
 import me.snitchon.Router
 import me.snitchon.config.SnitchConfig
+import me.snitchon.extensions.print
 import me.snitchon.parsing.Parser
 import me.snitchon.request.ImplementationRequestWrapper
 import me.snitchon.response.ErrorHttpResponse
@@ -121,6 +122,7 @@ class UndertowSnitchService(
                 ex.printStackTrace()
                 exceptionHandlers.keys
                     .find { ex::class.isSubclassOf(it) }?.let { exceptionHandlers[it] }
+                    .print()
                     ?.invoke(
                         parser,
                         UndertowRequestWrapper(parser, params, exchange) { null },
