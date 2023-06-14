@@ -23,4 +23,10 @@ data class CreatePostAction(
     val id: PostId? = null,
 )
 
+data class UpdatePostAction(
+    val id: PostId,
+    val title: PostTitle? = null,
+    val content: PostContent? = null,
+)
+
 data class LoginAction(val email: Email, val password: Password)

@@ -1,21 +1,22 @@
 package me.snitchon.example.api.users
 
 import me.snitchon.Router
+import me.snitchon.example.api.*
 import me.snitchon.example.security.SecurityModule.hasher
 import me.snitchon.example.database.RepositoriesModule.postsRepository
 import me.snitchon.example.database.RepositoriesModule.usersRepository
-import me.snitchon.example.api.CreatePostRequest
-import me.snitchon.example.api.CreateUserRequest
 import me.snitchon.example.api.Headers.accessToken
-import me.snitchon.example.api.LoginRequest
+import me.snitchon.example.api.Paths.postId
 import me.snitchon.example.api.Paths.userId
 import me.snitchon.example.api.auth.authenticated
-import me.snitchon.example.api.toResponse
+import me.snitchon.example.api.auth.principal
 import me.snitchon.example.database.TransactionResult
 import me.snitchon.example.security.createJWT
 import me.snitchon.example.types.*
+import me.snitchon.extensions.print
 import me.snitchon.request.handle
 import me.snitchon.request.parsing
+import me.snitchon.types.ErrorResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
 
@@ -36,6 +37,58 @@ val usersController: Router.() -> Unit = {
     GET("users" / userId / "posts")
         .authenticated()
         .isHandledBy(getPosts)
+
+    DELETE("users" / userId / "posts" / postId)
+        .authenticated()
+        .isHandledBy(deletePost)
+
+    // get individual post
+    GET("users" / userId / "posts" / postId)
+        .authenticated()
+        .isHandledBy(getPost)
+
+    // update individual post
+    PUT("users" / userId / "posts" / postId)
+        .authenticated()
+        .with(body<UpdatePostRequest>())
+        .isHandledBy(updatePost)
+
+}
+//updatePost
+private val updatePost by parsing<UpdatePostRequest>() handle {
+    if (request[userId].print() != principal.value) {
+        ErrorResponse(403, "forbidden").forbidden
+    } else {
+        transaction {
+            postsRepository().updatePost(
+                UpdatePostAction(
+                    PostId(request[postId]),
+                    PostTitle(body.title),
+                    PostContent(body.content),
+                )
+            )
+        }
+        Unit.noContent
+    }
+}
+
+//getPost
+private val getPost by handle {
+    transaction {
+        postsRepository().getPost(PostId(request[postId]))
+            ?.toResponse?.ok
+            ?: "notFound".notFound
+    }
+}
+
+val deletePost by handle {
+    if (request[userId].print() != principal.value.print()) {
+        ErrorResponse(403, "forbidden").forbidden
+    } else {
+        transaction {
+            postsRepository().deletePost(principal, PostId(request[postId]))
+        }.noContent
+    }
 }
 
 val getPosts by handle {
@@ -46,16 +99,20 @@ val getPosts by handle {
 }
 
 private val createPost by parsing<CreatePostRequest>() handle {
-    transaction {
-        postsRepository().putPost(
-            CreatePostAction(
-                request[accessToken],
-                PostTitle(body.title),
-                PostContent(body.content),
+    if (request[userId].print() != principal.value.print()) {
+        ErrorResponse(403, "forbidden").forbidden
+    } else {
+        transaction {
+            postsRepository().putPost(
+                CreatePostAction(
+                    principal,
+                    PostTitle(body.title),
+                    PostContent(body.content),
+                )
             )
-        )
+        }
+        SuccessfulCreation().created
     }
-    "Created".created
 }
 
 private val userLoginHandler by parsing<LoginRequest>() handle {
@@ -76,11 +133,9 @@ private val createUser by parsing<CreateUserRequest>() handle {
                     Password(body.password).hash
                 )
             )
-        }) {
-        is TransactionResult.Success -> Unit.created
+        }
+    ) {
+        is TransactionResult.Success -> SuccessfulCreation().created
         is TransactionResult.Failure -> EmailExists().badRequest
     }
 }
-
-class InvalidCredentials(val reason: String = "invalid credentials")
-class EmailExists(val reason: String = "email already exists")

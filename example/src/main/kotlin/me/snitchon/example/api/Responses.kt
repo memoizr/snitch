@@ -31,3 +31,8 @@ val UserView.toResponse
         id = id.value,
         name = name.value
     )
+
+data class SuccessfulCreation(val message: String = "successfully created")
+
+class InvalidCredentials(val reason: String = "invalid credentials")
+class EmailExists(val reason: String = "email already exists")

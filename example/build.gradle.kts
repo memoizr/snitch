@@ -27,7 +27,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
     runtimeOnly("io.jsonwebtoken:jjwt-gson:0.11.2")
 
-    testImplementation("com.github.memoizr:momster:60c14d8499")
+    testImplementation("com.github.memoizr:momster:ff351f597e")
     testImplementation(project(":tests"))
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")

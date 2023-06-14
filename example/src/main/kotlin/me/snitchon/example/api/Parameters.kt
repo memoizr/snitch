@@ -7,6 +7,7 @@ import me.snitchon.parameters.path
 
 object Paths {
     val userId = path("userId", condition = NonEmptyString)
+    val postId = path("postId", condition = NonEmptyString)
 }
 
 object Headers {
