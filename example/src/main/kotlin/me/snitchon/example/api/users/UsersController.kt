@@ -8,12 +8,12 @@ import me.snitchon.example.api.Paths.userId
 import me.snitchon.example.api.auth.authenticated
 import me.snitchon.example.api.auth.principal
 import me.snitchon.example.api.auth.principalMatches
+import me.snitchon.example.database.PostgresErrorCodes.UNIQUE_VIOLATION
 import me.snitchon.example.database.RepositoriesModule.postsRepository
 import me.snitchon.example.database.RepositoriesModule.usersRepository
 import me.snitchon.example.security.SecurityModule.hasher
 import me.snitchon.example.security.createJWT
 import me.snitchon.example.types.*
-import me.snitchon.extensions.print
 import me.snitchon.parameters.PathParam
 import me.snitchon.request.Context
 import me.snitchon.request.handle
@@ -87,8 +87,8 @@ private val deletePost by handle {
 private val getPosts by handle {
     transaction {
         postsRepository().getPosts(request[accessToken])
-            .toResponse
-    }.ok
+            .toResponse.ok
+    }
 }
 
 private val createPost by parsing<CreatePostRequest>() handle {
@@ -128,7 +128,10 @@ private val createUser by parsing<CreateUserRequest>() handle {
     }.mapSuccess {
         SuccessfulCreation(value).created
     }.mapFailure {
-        EmailExists().badRequest()
+        when (code) {
+           UNIQUE_VIOLATION -> EmailExists().badRequest()
+           else -> `500`()
+        }
     }
 }
 
@@ -137,6 +140,9 @@ private fun <T, S : StatusCodes> Context<*>.`403`() =
 
 private fun <T, S : StatusCodes> Context<*>.`404`() =
     ErrorResponse(404, "forbidden").notFound<T, _, S>()
+
+private fun <T, S : StatusCodes> Context<*>.`500`() =
+    ServerError().serverError<T, _, S>()
 
 private fun Context<*>.principalIsNot(param: PathParam<out Any, *>) =
     request[param] != principal.value

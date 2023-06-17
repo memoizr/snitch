@@ -16,7 +16,7 @@ class MappedTransactionResult<R, T, S : StatusCodes>(
     val successMapping: R.() -> SuccessfulHttpResponse<T, S>,
 ) {
     fun <E> mapFailure(
-        failureMapping: TransactionResult.Failure<R>.() -> ErrorHttpResponse<T, E, S>
+        failureMapping: TransactionResult.Failure<R>.() -> ErrorHttpResponse<T, out E, S>
     ): HttpResponse<T, S> =
         when (transactionResult) {
             is TransactionResult.Success -> successMapping(transactionResult.id)

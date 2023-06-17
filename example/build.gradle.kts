@@ -23,6 +23,9 @@ dependencies {
 
     implementation("com.github.memoizr:shank:3.0.0")
     implementation("io.jsonwebtoken:jjwt-api:0.11.2")
+    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("net.logstash.logback:logstash-logback-encoder:6.6")
+
 
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
     runtimeOnly("io.jsonwebtoken:jjwt-gson:0.11.2")

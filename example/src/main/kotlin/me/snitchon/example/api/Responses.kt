@@ -37,3 +37,4 @@ class FailedCreation(val reason: String = "unsuccessful creation")
 
 class InvalidCredentials(val reason: String = "invalid credentials")
 class EmailExists(val reason: String = "email already exists")
+class ServerError(val reason: String = "Server error")
