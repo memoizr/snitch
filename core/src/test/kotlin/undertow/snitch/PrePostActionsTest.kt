@@ -20,7 +20,7 @@ class PrePostActionsTest : BaseTest(routes {
             "ok".ok
         }
 
-    all({
+    apply({
         doBefore { list.add(this[param] + "Global") }
     }) {
         GET("global")

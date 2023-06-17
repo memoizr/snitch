@@ -356,7 +356,7 @@ internal data class Info(
     val license: License? = null
 )
 
-@Target(AnnotationTarget.VALUE_PARAMETER)
+@Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @Repeatable()
 annotation class Description(

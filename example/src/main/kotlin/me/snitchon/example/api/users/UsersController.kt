@@ -7,7 +7,8 @@ import me.snitchon.example.api.Paths.postId
 import me.snitchon.example.api.Paths.userId
 import me.snitchon.example.api.auth.authenticated
 import me.snitchon.example.api.auth.principal
-import me.snitchon.example.api.auth.principalMatches
+import me.snitchon.example.api.auth.principalOf
+import me.snitchon.example.api.auth.withPrincipalMatchingParameter
 import me.snitchon.example.database.PostgresErrorCodes.UNIQUE_VIOLATION
 import me.snitchon.example.database.RepositoriesModule.postsRepository
 import me.snitchon.example.database.RepositoriesModule.usersRepository
@@ -23,39 +24,21 @@ import me.snitchon.types.StatusCodes
 import org.jetbrains.exposed.sql.transactions.transaction
 
 val usersController: Router.() -> Unit = {
-    POST("users")
-        .with(body<CreateUserRequest>())
-        .isHandledBy(createUser)
+    "users" / {
+        POST() with body<CreateUserRequest>() isHandledBy createUser
+        POST("login") with body<LoginRequest>() isHandledBy userLogin
 
-    POST("users" / "login")
-        .with(body<LoginRequest>())
-        .isHandledBy(userLogin)
+        userId / "posts" / {
+            authenticated {
+                GET() principalOf userId isHandledBy getPosts
+                POST() principalOf userId with body<CreatePostRequest>() isHandledBy createPost
 
-    POST("users" / userId / "posts")
-        .authenticated()
-        .principalMatches(userId)
-        .with(body<CreatePostRequest>())
-        .isHandledBy(createPost)
-
-    GET("users" / userId / "posts")
-        .authenticated()
-        .principalMatches(userId)
-        .isHandledBy(getPosts)
-
-    DELETE("users" / userId / "posts" / postId)
-        .authenticated()
-        .principalMatches(userId)
-        .isHandledBy(deletePost)
-
-    GET("users" / userId / "posts" / postId)
-        .authenticated()
-        .isHandledBy(getPost)
-
-    PUT("users" / userId / "posts" / postId)
-        .authenticated()
-        .principalMatches(userId)
-        .with(body<UpdatePostRequest>())
-        .isHandledBy(updatePost)
+                GET(postId) isHandledBy getPost
+                PUT(postId) principalOf userId with body<UpdatePostRequest>() isHandledBy updatePost
+                DELETE(postId) principalOf userId isHandledBy deletePost
+            }
+        }
+    }
 }
 
 private val updatePost by parsing<UpdatePostRequest>() handle {
@@ -129,8 +112,8 @@ private val createUser by parsing<CreateUserRequest>() handle {
         SuccessfulCreation(value).created
     }.mapFailure {
         when (code) {
-           UNIQUE_VIOLATION -> EmailExists().badRequest()
-           else -> `500`()
+            UNIQUE_VIOLATION -> EmailExists().badRequest()
+            else -> `500`()
         }
     }
 }

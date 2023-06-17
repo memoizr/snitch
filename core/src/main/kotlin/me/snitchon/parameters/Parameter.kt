@@ -41,7 +41,6 @@ data class PathParam<T,R>(
     override val name: String,
     override val pattern: Validator<T, R>,
     override val description: String) : Parameter<T, R>(type, name, pattern, description, true, false) {
-    operator fun div(path: String) = this.path + "/" + path
 }
 
 data class HeaderParam<T,R>(
@@ -192,7 +191,7 @@ inline fun <reified T, R> header(
 )
 
 inline fun <reified T, R> path(name: String, description: String = "", condition: Validator<T, R>) = PathParam(
-        null,
+        "{${name}}",
         T::class.java,
         name,
         condition,

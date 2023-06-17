@@ -1,6 +1,5 @@
 package me.snitchon
 
-import me.snitchon.parameters.InvalidParametersException
 import me.snitchon.parameters.PathParam
 import me.snitchon.parsing.Parser
 import me.snitchon.types.HandlerResponse
@@ -63,7 +62,7 @@ class Router(
     inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) =
         Body(T::class, contentType)
 
-    fun all(action: Endpoint<*>.() -> Endpoint<*>, routerConfig: Router.() -> Unit) {
+    fun apply(action: Endpoint<*>.() -> Endpoint<*>, routerConfig: Router.() -> Unit) {
         val router = Router(config, service, pathParams, parser)
         router.routerConfig()
 
@@ -84,6 +83,10 @@ class Router(
             }
         }
     }
+}
+
+fun (Router.() -> Unit).applyToAll(action: Endpoint<*>.() -> Endpoint<*>): Router.() -> Unit = {
+    this@applyToAll(this.also { apply(action, this@applyToAll  ) })
 }
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this

@@ -9,7 +9,7 @@ import ro.kreator.customize
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class BaseTest : SnitchTest({ Application.start(it) }) {
+abstract class BaseTest : SnitchTest({ Application.setup(it) }) {
     init {
         connection()
         customize<Email> { Email("${randomString()}@${randomString()}.com") }

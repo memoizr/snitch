@@ -11,6 +11,8 @@ interface DivSyntax: Routed {
     operator fun String.div(path: String) = this.leadingSlash + "/" + path
     operator fun String.div(path: PathParam<out Any, out Any>) = ParametrizedPath(this + "/{${path.name}}", setOf(path))
 
+    operator fun PathParam<out Any, out Any>.div(string: String) = ParametrizedPath("/{${name}}" + string.leadingSlash, pathParams + this)
+
     operator fun String.div(block: Router.() -> Unit) {
         val router = Router(config, service, pathParams, parser)
         router.block()
@@ -56,16 +58,36 @@ interface DivSyntax: Routed {
         }
     }
 
-    operator fun String.invoke(block: Router.() -> Unit) {
-        val router = Router(config, service, pathParams, parser)
-        router.block()
-        endpoints += router.endpoints.map {
-            EndpointBundle(
-                it.endpoint.copy(tags = it.endpoint.tags?.plus(this)),
-                it.response,
-                it.handlerResponse,
-                it.handler
-            )
-        }
-    }
+//    operator fun ParametrizedPath.invoke(block: Router.() -> Unit) {
+//        val router = Router(config, service, pathParams, parser)
+//        router.block()
+//        endpoints += router.endpoints.map {
+//            EndpointBundle(
+////                it.endpoint.copy(tags = it.endpoint.tags?.plus(path)),
+//                it.endpoint.copy(
+//                    url = this.path.leadingSlash + it.endpoint.url,
+//                    pathParams = it.endpoint.pathParams + this.pathParameters
+//                ),
+//                it.response,
+//                it.handlerResponse,
+//                it.handler
+//            )
+//        }
+//    }
+
+//    operator fun String.invoke(block: Router.() -> Unit) {
+//        val router = Router(config, service, pathParams, parser)
+//        router.block()
+//        endpoints += router.endpoints.map {
+//            EndpointBundle(
+//                it.endpoint.copy(
+//                    url = this.leadingSlash + it.endpoint.url.leadingSlash,
+//                    tags = it.endpoint.tags?.plus(this)),
+//                it.response,
+//                it.handlerResponse,
+//                it.handler
+//            )
+//        }
+//    }
+
 }

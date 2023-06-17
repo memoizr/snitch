@@ -6,7 +6,6 @@ import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.FileAppender
 import io.jsonwebtoken.JwtException
-import io.jsonwebtoken.MalformedJwtException
 import undertow.snitch.spark.UndertowSnitchService
 import me.snitchon.config.SnitchConfig
 import me.snitchon.config.SnitchConfig.Service
@@ -46,7 +45,7 @@ object Application {
         rootLogger.level = Level.INFO
         rootLogger.addAppender(fileAppender)
     }
-    fun start(port: Int): RoutedService {
+    fun setup(port: Int): RoutedService {
 
         setUpDatabase()
 
@@ -63,7 +62,7 @@ object Application {
 fun main() {
     postgresDatabase().createSchema()
     postgresDatabase().addMissingColumns()
-    Application.start(3000)
+    Application.setup(3000)
         .start()
         .generateDocumentation()
         .servePublicDocumenation()
