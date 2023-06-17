@@ -1,6 +1,6 @@
 package me.snitchon.syntax
 
-import me.snitchon.leadingSlash
+import me.snitchon.router.leadingSlash
 import me.snitchon.parameters.ParametrizedPath
 import me.snitchon.parameters.PathParam
 import me.snitchon.request.Body

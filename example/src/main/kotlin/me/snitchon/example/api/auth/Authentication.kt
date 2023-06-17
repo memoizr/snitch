@@ -1,7 +1,7 @@
 package me.snitchon.example.api.auth
 
 import io.jsonwebtoken.JwtException
-import me.snitchon.Router
+import me.snitchon.router.Router
 import me.snitchon.example.api.Headers.accessToken
 import me.snitchon.example.security.verifyJWT
 import me.snitchon.example.types.ForbiddenException

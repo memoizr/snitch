@@ -5,7 +5,7 @@ import io.undertow.server.HttpServerExchange
 import io.undertow.server.RoutingHandler
 import io.undertow.util.HttpString
 import io.undertow.util.Methods.*
-import me.snitchon.Router
+import me.snitchon.router.Router
 import me.snitchon.config.SnitchConfig
 import me.snitchon.extensions.print
 import me.snitchon.parsing.Parser

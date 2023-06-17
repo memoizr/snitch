@@ -1,8 +1,8 @@
 package me.snitchon.documentation
 
-import me.snitchon.*
 import me.snitchon.types.Format.*
 import me.snitchon.parameters.Parameter
+import me.snitchon.router.Router
 import me.snitchon.service.RoutedService
 import me.snitchon.types.ContentType
 import me.snitchon.types.EndpointBundle

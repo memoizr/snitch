@@ -1,4 +1,4 @@
-package undertow.snitch
+package me.snitchon
 
 import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
@@ -26,7 +26,7 @@ private val genericHandler by Handler<Nothing,_, _> {
     GenericResponse(GenericResponse(Foo1("hey"))).ok
 }
 
-class DocumentationTest : SnitchTest(routes {
+class DocumentationTest : SnitchTest(testRoutes {
     GET("one")
         .isHandledBy { SampleClass("hey", listOf()).ok }
     GET("two")

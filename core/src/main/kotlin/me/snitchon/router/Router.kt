@@ -1,4 +1,4 @@
-package me.snitchon
+package me.snitchon.router
 
 import me.snitchon.parameters.PathParam
 import me.snitchon.parsing.Parser

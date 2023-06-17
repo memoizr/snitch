@@ -1,4 +1,4 @@
-package undertow.snitch
+package me.snitchon
 
 import undertow.snitch.spark.UndertowSnitchService
 import me.snitchon.documentation.generateDocumentation

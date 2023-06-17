@@ -1,7 +1,5 @@
 package me.snitchon.parameters
 
-import me.snitchon.leadingSlash
-
 data class ParametrizedPath(val path: String, val pathParameters: Set<PathParam<out Any, out Any>>) {
     operator fun div(path: String) = copy(path = this.path + "/" + path)
     operator fun div(path: PathParam<out Any, out Any>) =

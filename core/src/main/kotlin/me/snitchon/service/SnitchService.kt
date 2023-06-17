@@ -1,6 +1,6 @@
 package me.snitchon.service
 
-import me.snitchon.Router
+import me.snitchon.router.Router
 import me.snitchon.config.SnitchConfig
 import me.snitchon.parsing.Parser
 import me.snitchon.request.ImplementationRequestWrapper

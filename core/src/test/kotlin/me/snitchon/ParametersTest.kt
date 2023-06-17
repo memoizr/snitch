@@ -1,4 +1,4 @@
-package undertow.snitch
+package me.snitchon
 
 import me.snitchon.documentation.Visibility
 import com.snitch.me.snitchon.NonEmptySingleLineString
@@ -10,6 +10,7 @@ import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsing.Parser
 import me.snitchon.request.Handler
+import me.snitchon.router.routes
 import me.snitchon.types.Sealed
 import me.snitchon.types.ErrorResponse
 import org.junit.Test
@@ -65,7 +66,7 @@ object DateValidator : Validator<Date, Date> {
     override val parse: Parser.(String) -> Date = { SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(it) }
 }
 
-class ParametersTest : BaseTest(routes {
+class ParametersTest : BaseTest(testRoutes {
     GET("stringpath" / stringParam) isHandledBy { TestResult(request[stringParam]).ok }
     GET("intpath" / intparam) isHandledBy { IntTestResult(request[intparam]).ok }
 

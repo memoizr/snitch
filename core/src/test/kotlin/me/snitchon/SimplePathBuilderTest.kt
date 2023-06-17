@@ -1,12 +1,12 @@
-package undertow.snitch
+package me.snitchon
 
 import me.snitchon.documentation.Description
 import me.snitchon.documentation.Visibility
-import me.snitchon.extensions.print
 import me.snitchon.parsers.GsonJsonParser.serialized
+import me.snitchon.router.routes
 import org.junit.Test
 
-class SimplePathBuilderTest : BaseTest(routes {
+class SimplePathBuilderTest : BaseTest(testRoutes {
     GET("foo") inSummary
             "returns a foo" isDescribedAs "" isHandledBy
             { TestResult("get value").ok }

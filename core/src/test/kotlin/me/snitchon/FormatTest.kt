@@ -1,12 +1,13 @@
-package undertow.snitch
+package me.snitchon
 
 import com.memoizr.assertk.expect
+import me.snitchon.router.routes
 import me.snitchon.types.Format.ImageJpeg
 import me.snitchon.types.Format.VideoMP4
 import org.junit.Test
 import java.io.File
 
-class FormatTest : BaseTest(routes{
+class FormatTest : BaseTest(testRoutes {
     GET("json") isHandledBy { "ok".ok }
     GET("bytearray") isHandledBy {
         "ok".ok.format(VideoMP4) }

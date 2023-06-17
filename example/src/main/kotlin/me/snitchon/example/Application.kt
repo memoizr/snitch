@@ -50,7 +50,7 @@ object Application {
         setUpDatabase()
 
         return UndertowSnitchService(GsonJsonParser, SnitchConfig(Service(port = port)))
-            .setRoutes(router)
+            .setRoutes(rootRouter)
             .handleExceptions()
     }
 

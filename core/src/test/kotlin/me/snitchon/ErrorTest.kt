@@ -1,11 +1,12 @@
-package undertow.snitch
+package me.snitchon
 
 import me.snitchon.parsers.GsonJsonParser
+import me.snitchon.router.routes
 import org.junit.Test
 
 class ErrorTest : BaseTest(
     {
-        routes {
+        testRoutes {
             GET("errors") inSummary "does a foo" isHandledBy {
                 ErrorBody("hellothere", 3f).badRequest()
             }

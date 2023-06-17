@@ -1,4 +1,4 @@
-package undertow.snitch
+package me.snitchon
 
 import com.google.gson.annotations.SerializedName
 import com.snitch.me.snitchon.NonEmptyString
@@ -15,6 +15,7 @@ import me.snitchon.parameters.optionalQuery
 import me.snitchon.parameters.path
 import me.snitchon.parsing.Parser
 import me.snitchon.request.Handler
+import me.snitchon.router.Router
 import me.snitchon.types.Format
 import me.snitchon.types.Sealed
 import java.util.*

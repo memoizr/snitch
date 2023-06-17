@@ -1,15 +1,10 @@
 package me.snitchon.example
 
-import me.snitchon.Router
-import me.snitchon.example.api.auth.authenticated
+import me.snitchon.example.api.health.healthController
 import me.snitchon.example.api.users.usersController
-import me.snitchon.routes
+import me.snitchon.router.routes
 
-val router: Router.() -> Unit = {
+val rootRouter = routes {
     "health" / healthController
     "users" / usersController
-}
-
-val healthController = routes {
-    GET("/liveness").isHandledBy { "ok".ok }
 }

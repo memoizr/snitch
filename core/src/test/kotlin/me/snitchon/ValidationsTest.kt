@@ -1,4 +1,4 @@
-package undertow.snitch
+package me.snitchon
 
 import com.snitch.me.snitchon.NonNegativeInt
 import com.snitch.me.snitchon.StringSet
@@ -8,6 +8,7 @@ import me.snitchon.parameters.optionalQuery
 import me.snitchon.parameters.path
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsing.Parser
+import me.snitchon.router.routes
 import org.junit.Test
 
 private val id = path("id", condition = NonNegativeInt)
@@ -37,7 +38,7 @@ private object UserIdValidator : Validator<String, UserId> {
     override val parse: Parser.(String) -> UserId = { UserId(it) }
 }
 
-class ValidationsTest : BaseTest(routes {
+class ValidationsTest : BaseTest(testRoutes {
     GET("foo" / id) with queries(
         offset,
         allowInvalidQuery,

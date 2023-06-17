@@ -1,15 +1,16 @@
-package undertow.snitch
+package me.snitchon
 
 import com.memoizr.assertk.expect
 import com.snitch.me.snitchon.NonEmptyString
 import me.snitchon.parameters.query
+import me.snitchon.router.routes
 import org.junit.Test
 
 private val list = mutableListOf<String>()
 
 private val param = query("p", condition = NonEmptyString)
 
-class PrePostActionsTest : BaseTest(routes {
+class PrePostActionsTest : BaseTest(testRoutes {
     GET("foo")
         .with(queries(param))
         .doBefore { list.add(this[param] + "One") }

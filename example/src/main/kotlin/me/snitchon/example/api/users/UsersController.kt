@@ -18,7 +18,7 @@ import me.snitchon.parameters.PathParam
 import me.snitchon.request.Context
 import me.snitchon.request.handle
 import me.snitchon.request.parsing
-import me.snitchon.routes
+import me.snitchon.router.routes
 import me.snitchon.types.ErrorResponse
 import me.snitchon.types.StatusCodes
 import org.jetbrains.exposed.sql.transactions.transaction

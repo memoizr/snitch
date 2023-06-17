@@ -1,9 +1,9 @@
 package me.snitchon.syntax
 
 import me.snitchon.types.EndpointBundle
-import me.snitchon.Router
+import me.snitchon.router.Router
 import me.snitchon.types.Routed
-import me.snitchon.leadingSlash
+import me.snitchon.router.leadingSlash
 import me.snitchon.parameters.ParametrizedPath
 import me.snitchon.parameters.PathParam
 

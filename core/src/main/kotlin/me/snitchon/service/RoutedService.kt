@@ -1,10 +1,9 @@
 package me.snitchon.service
 
-import me.snitchon.Router
+import me.snitchon.router.Router
 import me.snitchon.parsing.Parser
 import me.snitchon.request.ImplementationRequestWrapper
 import me.snitchon.response.HttpResponse
-import me.snitchon.types.ErrorResponse
 import me.snitchon.types.StatusCodes
 import kotlin.reflect.KClass
 
@@ -19,11 +18,6 @@ data class RoutedService(
             val path: String = service.config.service.basePath + it.endpoint.url
             service.registerMethod(it, path)
         }
-
-//        service.handleException(Exception::class) {
-//            it.printStackTrace()
-//            ErrorResponse(500, "Something went wrong").serverError
-//        }
 
         onStart()
         return this
