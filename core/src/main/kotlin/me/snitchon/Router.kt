@@ -34,14 +34,15 @@ class Router(
     ): Endpoint<B> = apply {
         endpoints += EndpointBundle(
             this,
-            EndpointResponse(endpointResponse.statusCodes, endpointResponse.type)
+            EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
+            endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
         ) { request ->
             before(request)
             endpointResponse.handler(
                 parser,
                 Context(request)
             ).also {
-                after(request)
+                after(request, it)
             }
         }
     }
@@ -61,6 +62,28 @@ class Router(
     fun description(description: String) = OpDescription(description)
     inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) =
         Body(T::class, contentType)
+
+    fun all(action: Endpoint<*>.() -> Endpoint<*>, routerConfig: Router.() -> Unit) {
+        val router = Router(config, service, pathParams, parser)
+        router.routerConfig()
+
+        endpoints += router.endpoints.map {
+            val endpoint = it.endpoint.action()
+            EndpointBundle(
+                endpoint,
+                EndpointResponse(it.handlerResponse.statusCodes, it.handlerResponse.type),
+                it.handlerResponse,
+            ) { request ->
+                endpoint.before(request)
+                it.handlerResponse.handler(
+                    parser,
+                    Context(request)
+                ).also {
+                    endpoint.after(request, it)
+                }
+            }
+        }
+    }
 }
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this

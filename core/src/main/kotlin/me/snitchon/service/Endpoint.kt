@@ -7,6 +7,7 @@ import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.request.Body
 import me.snitchon.request.ImplementationRequestWrapper
+import me.snitchon.response.HttpResponse
 import me.snitchon.types.HTTPMethods
 
 data class OpDescription(val description: String)
@@ -22,8 +23,8 @@ data class Endpoint<B : Any>(
     val body: Body<B>,
     val tags: List<String>? = emptyList(),
     val visibility: Visibility = Visibility.PUBLIC,
-    val before: (ImplementationRequestWrapper) -> Unit = {},
-    val after: (ImplementationRequestWrapper) -> Unit = {},
+    val before: ImplementationRequestWrapper.() -> Unit = {},
+    val after: ImplementationRequestWrapper.(HttpResponse<*,*>) -> Unit = {},
 ) {
 
     infix fun withQuery(queryParameter: QueryParameter<*, *>) = copy(queryParams = queryParams + queryParameter)
@@ -55,4 +56,13 @@ data class Endpoint<B : Any>(
             }
         }
     }
+
+    infix fun doBefore(action: ImplementationRequestWrapper.() -> Unit) = copy(before = {
+        before(this)
+        action(this)
+    })
+    infix fun doAfter(action: ImplementationRequestWrapper.(HttpResponse<*,*>) -> Unit) = copy(after = {
+        after(this,it)
+        action(this,it)
+    })
 }

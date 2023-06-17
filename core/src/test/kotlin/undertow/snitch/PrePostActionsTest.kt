@@ -9,19 +9,31 @@ private val list = mutableListOf<String>()
 
 private val param = query("p", condition = NonEmptyString)
 
-class PrePostActionsTest : BaseTest(routes{
+class PrePostActionsTest : BaseTest(routes {
     GET("foo")
         .with(queries(param))
-        .copy(before = {
-            list.add(it[param] + "One")
-        }, after = { req ->
-            list.add(req[param] + "Three")
-        }
-        )
+        .doBefore { list.add(this[param] + "One") }
+        .doBefore { list.add(this[param] + "And") }
+        .doAfter { list.add(this[param] + "Three") }
         .isHandledBy {
             list.add(request[param] + "Two")
             "ok".ok
         }
+
+    all({
+        doBefore { list.add(this[param] + "Global") }
+    }) {
+        GET("global")
+            .with(queries(param))
+            .doBefore { list.add(this[param] + "One") }
+            .doAfter {
+                list.add(this[param] + "Three")
+            }
+            .isHandledBy {
+                list.add(request[param] + "Two")
+                "ok".ok
+            }
+    }
 
 }) {
 
@@ -29,6 +41,14 @@ class PrePostActionsTest : BaseTest(routes{
     fun `validates routes`() {
         whenPerform GET "/$root/foo?p=X" expectCode 200 expectBody """"ok""""
 
-        expect that list isEqualTo listOf("XOne", "XTwo", "XThree")
+        expect that list isEqualTo listOf("XOne", "XAnd", "XTwo", "XThree")
+        list.clear()
+    }
+
+    @Test
+    fun `supports global config`() {
+        whenPerform GET "/$root/global?p=X" expectCode 200 expectBody """"ok""""
+
+        expect that list isEqualTo listOf("XOne", "XGlobal", "XTwo", "XThree")
     }
 }

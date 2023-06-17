@@ -18,7 +18,8 @@ interface DivSyntax: Routed {
             EndpointBundle(
                 it.endpoint.copy(url = this.leadingSlash + it.endpoint.url),
                 it.response,
-                it.handler
+                it.handlerResponse,
+                it.handler,
             )
         }
     }
@@ -31,7 +32,10 @@ interface DivSyntax: Routed {
                 it.endpoint.copy(
                     url = this.path.leadingSlash + it.endpoint.url,
                     pathParams = it.endpoint.pathParams + this.pathParameters
-                ), it.response, it.handler
+                ),
+                it.response,
+                it.handlerResponse,
+                it.handler
             )
         }
         endpoints += router.endpoints
@@ -46,6 +50,7 @@ interface DivSyntax: Routed {
             EndpointBundle(
                 it.endpoint.copy(url = url, pathParams = it.endpoint.pathParams + this.copy(url)),
                 it.response,
+                it.handlerResponse,
                 it.handler
             )
         }
@@ -58,6 +63,7 @@ interface DivSyntax: Routed {
             EndpointBundle(
                 it.endpoint.copy(tags = it.endpoint.tags?.plus(this)),
                 it.response,
+                it.handlerResponse,
                 it.handler
             )
         }
