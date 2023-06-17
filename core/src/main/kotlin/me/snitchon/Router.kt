@@ -23,7 +23,8 @@ class Router(
     override val config: SnitchConfig,
     override val service: SnitchService,
     override val pathParams: Set<PathParam<out Any, out Any>> = emptySet(),
-    override val parser: Parser
+    override val parser: Parser,
+    override val path: String,
 ) : HttpMethodsSyntax {
 
     override val endpoints = mutableListOf<EndpointBundle<*>>()
@@ -63,7 +64,7 @@ class Router(
         Body(T::class, contentType)
 
     fun apply(action: Endpoint<*>.() -> Endpoint<*>, routerConfig: Router.() -> Unit) {
-        val router = Router(config, service, pathParams, parser)
+        val router = Router(config, service, pathParams, parser, path)
         router.routerConfig()
 
         endpoints += router.endpoints.map {
@@ -88,5 +89,7 @@ class Router(
 fun (Router.() -> Unit).applyToAll(action: Endpoint<*>.() -> Endpoint<*>): Router.() -> Unit = {
     this@applyToAll(this.also { apply(action, this@applyToAll  ) })
 }
+
+fun routes(routes: Router.() -> Unit) = routes
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this

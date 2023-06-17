@@ -42,7 +42,7 @@ class UndertowSnitchService(
     private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.service.port, "localhost") }
 
     override fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService {
-        val router = Router(config, this@UndertowSnitchService, emptySet(), parser)
+        val router = Router(config, this@UndertowSnitchService, emptySet(), parser, "")
         routerConfiguration(router)
         return RoutedService(
             service = this,

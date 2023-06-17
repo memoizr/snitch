@@ -109,7 +109,7 @@ class Spec internal constructor(
 )
 
 fun DocumentedService.servePublicDocumenation(): DocumentedService {
-    with(Router(service.router.config, service.service, emptySet(), service.router.parser)) {
+    with(Router(service.router.config, service.service, emptySet(), service.router.parser, service.router.path)) {
         val path = "/"// config.publicDocumentationPath.ensureLeadingSlash()
         val docPath = "/spec.json"//.ensureLeadingSlash()
         GET(path).isHandledBy {

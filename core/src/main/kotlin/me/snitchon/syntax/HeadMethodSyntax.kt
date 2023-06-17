@@ -13,7 +13,7 @@ interface HeadMethodSyntax: MethodSyntax {
         httpMethod = HEAD,
         summary = null,
         description = null,
-        url = "",
+        url = this.path,
         pathParams = pathParams,
         queryParams = emptySet(),
         headerParams = emptySet(),
@@ -24,7 +24,7 @@ interface HeadMethodSyntax: MethodSyntax {
         httpMethod = HEAD,
         summary = null,
         description = null,
-        url = path.leadingSlash,
+        url = this.path + path.leadingSlash,
         pathParams = emptySet(),
         queryParams = emptySet(),
         headerParams = emptySet(),
@@ -35,12 +35,12 @@ interface HeadMethodSyntax: MethodSyntax {
         httpMethod = HEAD,
         summary = null,
         description = null,
-        url = path.path.leadingSlash,
+        url = this.path + path.path.leadingSlash,
         pathParams = path.pathParameters,
         queryParams = emptySet(),
         headerParams = emptySet(),
         body = Body(Nothing::class)
     )
 
-    infix fun HEAD(path: PathParam<out Any, out Any>) = HEAD("" / path)
+    infix fun HEAD(path: PathParam<out Any, out Any>) = HEAD(this.path / path)
 }

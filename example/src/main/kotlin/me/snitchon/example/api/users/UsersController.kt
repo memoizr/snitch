@@ -1,6 +1,5 @@
 package me.snitchon.example.api.users
 
-import me.snitchon.Router
 import me.snitchon.example.api.*
 import me.snitchon.example.api.Headers.accessToken
 import me.snitchon.example.api.Paths.postId
@@ -8,35 +7,34 @@ import me.snitchon.example.api.Paths.userId
 import me.snitchon.example.api.auth.authenticated
 import me.snitchon.example.api.auth.principal
 import me.snitchon.example.api.auth.principalOf
-import me.snitchon.example.api.auth.withPrincipalMatchingParameter
 import me.snitchon.example.database.PostgresErrorCodes.UNIQUE_VIOLATION
 import me.snitchon.example.database.RepositoriesModule.postsRepository
 import me.snitchon.example.database.RepositoriesModule.usersRepository
 import me.snitchon.example.security.SecurityModule.hasher
 import me.snitchon.example.security.createJWT
 import me.snitchon.example.types.*
+import me.snitchon.extensions.print
 import me.snitchon.parameters.PathParam
 import me.snitchon.request.Context
 import me.snitchon.request.handle
 import me.snitchon.request.parsing
+import me.snitchon.routes
 import me.snitchon.types.ErrorResponse
 import me.snitchon.types.StatusCodes
 import org.jetbrains.exposed.sql.transactions.transaction
 
-val usersController: Router.() -> Unit = {
-    "users" / {
-        POST() with body<CreateUserRequest>() isHandledBy createUser
-        POST("login") with body<LoginRequest>() isHandledBy userLogin
+val usersController = routes {
+    POST() with body<CreateUserRequest>() isHandledBy createUser
+    POST("login") with body<LoginRequest>() isHandledBy userLogin
 
-        userId / "posts" / {
-            authenticated {
-                GET() principalOf userId isHandledBy getPosts
-                POST() principalOf userId with body<CreatePostRequest>() isHandledBy createPost
+    userId / "posts" / {
+        authenticated {
+            GET() principalOf userId isHandledBy getPosts
+            POST() principalOf userId with body<CreatePostRequest>() isHandledBy createPost
 
-                GET(postId) isHandledBy getPost
-                PUT(postId) principalOf userId with body<UpdatePostRequest>() isHandledBy updatePost
-                DELETE(postId) principalOf userId isHandledBy deletePost
-            }
+            GET(postId) isHandledBy getPost
+            PUT(postId).print() principalOf userId with body<UpdatePostRequest>() isHandledBy updatePost
+            DELETE(postId) principalOf userId isHandledBy deletePost
         }
     }
 }

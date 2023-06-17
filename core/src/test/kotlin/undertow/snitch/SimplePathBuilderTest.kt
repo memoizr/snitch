@@ -2,6 +2,7 @@ package undertow.snitch
 
 import me.snitchon.documentation.Description
 import me.snitchon.documentation.Visibility
+import me.snitchon.extensions.print
 import me.snitchon.parsers.GsonJsonParser.serialized
 import org.junit.Test
 
@@ -74,13 +75,18 @@ class SimplePathBuilderTest : BaseTest(routes {
             }
         }
     }
+    endpoints.map {
+        it.endpoint
+    }.forEach {
+        println("${it.httpMethod} ${it.url}")
+    }
 }
 ) {
 
 
     @Test
     fun `supports nested routes`() {
-        whenPerform GET "/$root/hey/123/level2/3459/nope" expectBodyJson TestResult("get value") expectCode 200
+        whenPerform GET "/$root/hey/123/level2/3459/nope" expectBody TestResult("get value").serialized expectCode 200
 
         whenPerform GET "/$root/one/a" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/one/b" expectBodyJson TestResult("get value") expectCode 200
