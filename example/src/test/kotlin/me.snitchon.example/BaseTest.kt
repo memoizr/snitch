@@ -20,6 +20,7 @@ abstract class BaseTest : SnitchTest({ Application.setup(it) }) {
         val chars = ('a'..'z') + ('A'..'Z') + ('0'..'9')
         return List(length) { chars.random() }.joinToString("")
     }
+
     @BeforeAll
     fun beforeAll() {
         super.before()

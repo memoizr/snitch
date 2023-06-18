@@ -3,7 +3,6 @@ package me.snitchon
 import com.memoizr.assertk.expect
 import com.snitch.me.snitchon.NonEmptyString
 import me.snitchon.parameters.query
-import me.snitchon.router.routes
 import org.junit.Test
 
 private val list = mutableListOf<String>()
@@ -22,8 +21,6 @@ class PrePostActionsTest : BaseTest(testRoutes {
         }
 
     apply({
-        doBefore { list.add(this[param] + "Global") }
-    }) {
         GET("global")
             .with(queries(param))
             .doBefore { list.add(this[param] + "One") }
@@ -34,6 +31,8 @@ class PrePostActionsTest : BaseTest(testRoutes {
                 list.add(request[param] + "Two")
                 "ok".ok
             }
+    }) {
+        doBefore { list.add(this[param] + "Global") }
     }
 
 }) {

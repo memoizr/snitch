@@ -18,12 +18,13 @@ fun <B : Any> Endpoint<B>.authenticated(): Endpoint<B> = copy(
         ?.let { verifyJWT(it) }
 }
 
-fun Router.authenticated(routes: Router.() -> Unit) = apply({ authenticated() }) {
+fun Router.authenticated(routes: Router.() -> Unit) = apply({
     routes()
-}
-fun Router.withPrincipalMatchingParameter(pathParam: PathParam<out Any, *>, routes: Router.() -> Unit) = apply({ principalOf(pathParam) }) {
+}) { authenticated() }
+
+fun Router.withPrincipalMatchingParameter(pathParam: PathParam<out Any, *>, routes: Router.() -> Unit) = apply({
     routes()
-}
+}) { principalOf(pathParam) }
 
 infix fun <B : Any> Endpoint<B>.principalOf(pathParam: PathParam<out Any, *>): Endpoint<B> = copy(
     pathParams = pathParams.map {

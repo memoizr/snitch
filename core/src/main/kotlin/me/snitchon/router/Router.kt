@@ -63,7 +63,7 @@ class Router(
     inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) =
         Body(T::class, contentType)
 
-    fun apply(action: Endpoint<*>.() -> Endpoint<*>, routerConfig: Router.() -> Unit) {
+    fun apply(routerConfig: Router.() -> Unit, action: Endpoint<*>.() -> Endpoint<*>) {
         val router = Router(config, service, pathParams, parser, path)
         router.routerConfig()
 
@@ -87,7 +87,7 @@ class Router(
 }
 
 fun (Router.() -> Unit).applyToAll(action: Endpoint<*>.() -> Endpoint<*>): Router.() -> Unit = {
-    this@applyToAll(this.also { apply(action, this@applyToAll  ) })
+    this@applyToAll(this.also { apply(this@applyToAll, action) })
 }
 
 fun routes(routes: Router.() -> Unit) = routes

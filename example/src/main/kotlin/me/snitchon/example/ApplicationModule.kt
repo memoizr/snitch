@@ -12,5 +12,5 @@ import java.time.temporal.ChronoUnit
 object ApplicationModule : ShankModule {
     val clock = single { -> Clock.systemUTC() }
     val now = new { -> Instant.now(clock()).truncatedTo(ChronoUnit.MILLIS) }
-    val logger = single { -> LoggerFactory.getLogger("app") }
+    val logger = single { -> ExampleLoggerImpl(LoggerFactory.getLogger("app")) }
 }
