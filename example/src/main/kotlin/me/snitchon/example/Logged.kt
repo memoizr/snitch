@@ -5,7 +5,7 @@ import me.snitchon.router.Router
 import undertow.snitch.spark.undertow
 
 fun Router.logged(routes: Router.() -> Unit) {
-    apply(routes) {
+    applyToAll(routes) {
         doBefore {
             val method = method().name
             val path = undertow.exchange.requestPath

@@ -122,7 +122,6 @@ class UndertowSnitchService(
                 ex.printStackTrace()
                 exceptionHandlers.keys
                     .find { ex::class.isSubclassOf(it) }?.let { exceptionHandlers[it] }
-                    .print()
                     ?.invoke(
                         parser,
                         UndertowRequestWrapper(parser, params, exchange) { null },

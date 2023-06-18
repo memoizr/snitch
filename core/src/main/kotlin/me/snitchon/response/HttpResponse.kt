@@ -5,13 +5,21 @@ import me.snitchon.types.Format
 import me.snitchon.types.Format.*
 import me.snitchon.types.StatusCodes
 
-sealed class HttpResponse<T, out S: StatusCodes> {
+sealed class HttpResponse<T, out S : StatusCodes> {
     abstract val statusCode: StatusCodes
     abstract val headers: Map<String, String>
     abstract val value: context(Parser) () -> Any?
+
+    fun map(
+        failure: ErrorHttpResponse<T, *, S>.() -> HttpResponse<*, *> = {this},
+                success: SuccessfulHttpResponse<T, S>.() -> HttpResponse<*, *>,
+    ): HttpResponse<*, *> = when (this) {
+        is SuccessfulHttpResponse -> this.success()
+        is ErrorHttpResponse<T, *, S> -> this.failure()
+    }
 }
 
-data class SuccessfulHttpResponse<T, S: StatusCodes>(
+data class SuccessfulHttpResponse<T, out S : StatusCodes>(
     override val statusCode: S,
     val body: T,
     val _format: Format = Json,
@@ -28,9 +36,9 @@ data class SuccessfulHttpResponse<T, S: StatusCodes>(
     override val headers: Map<String, String> = emptyMap(),
 ) : HttpResponse<T, S>()
 
-data class ErrorHttpResponse<T, E, S: StatusCodes>(
+data class ErrorHttpResponse<T, E, out S : StatusCodes>(
     override val statusCode: StatusCodes,
     val details: E,
     override val value: context(Parser) () -> Any? = { details?.serialized },
     override val headers: Map<String, String> = emptyMap(),
-) : HttpResponse<T,S>()
+) : HttpResponse<T, S>()

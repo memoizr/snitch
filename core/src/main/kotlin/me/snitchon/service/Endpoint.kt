@@ -9,6 +9,7 @@ import me.snitchon.request.Body
 import me.snitchon.request.ImplementationRequestWrapper
 import me.snitchon.response.HttpResponse
 import me.snitchon.types.HTTPMethods
+import me.snitchon.types.StatusCodes
 
 data class OpDescription(val description: String)
 
@@ -24,7 +25,8 @@ data class Endpoint<B : Any>(
     val tags: List<String>? = emptyList(),
     val visibility: Visibility = Visibility.PUBLIC,
     val before: ImplementationRequestWrapper.() -> Unit = {},
-    val after: ImplementationRequestWrapper.(HttpResponse<*,*>) -> Unit = {},
+    val after: ImplementationRequestWrapper.(HttpResponse<*, *>) -> Unit = {},
+    val decorator: ImplementationRequestWrapper.(() -> HttpResponse<*, *>) -> HttpResponse<*, *> = { it() },
 ) {
 
     infix fun withQuery(queryParameter: QueryParameter<*, *>) = copy(queryParams = queryParams + queryParameter)
@@ -57,12 +59,21 @@ data class Endpoint<B : Any>(
         }
     }
 
+
+//    class FF(
+//        wrap: ImplementationRequestWrapper, ): ImplementationRequestWrapper by wrap {
+//        val next: () -> HttpResponse<*,*> =
+//    }
+
+    infix fun decorate(decoration: ImplementationRequestWrapper.(() -> HttpResponse<*, *>) -> HttpResponse<out Any?, StatusCodes>) = copy(decorator = decoration)
+
     infix fun doBefore(action: ImplementationRequestWrapper.() -> Unit) = copy(before = {
         before(this)
         action(this)
     })
-    infix fun doAfter(action: ImplementationRequestWrapper.(HttpResponse<*,*>) -> Unit) = copy(after = {
-        after(this,it)
-        action(this,it)
+
+    infix fun doAfter(action: ImplementationRequestWrapper.(HttpResponse<*, *>) -> Unit) = copy(after = {
+        after(this, it)
+        action(this, it)
     })
 }

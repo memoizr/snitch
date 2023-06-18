@@ -37,12 +37,14 @@ class Router(
             EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
             endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
         ) { request ->
-            before(request)
-            endpointResponse.handler(
-                parser,
-                Context(request)
-            ).also {
-                after(request, it)
+            decorator(request) {
+                before(request)
+                endpointResponse.handler(
+                    parser,
+                    Context(request)
+                ).also {
+                    after(request, it)
+                }
             }
         }
     }
@@ -63,7 +65,9 @@ class Router(
     inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) =
         Body(T::class, contentType)
 
-    fun apply(routerConfig: Router.() -> Unit, action: Endpoint<*>.() -> Endpoint<*>) {
+    fun decorateAll(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit = { it: Routes -> applyToAll(it, action)}
+
+    fun applyToAll(routerConfig: Router.() -> Unit, action: Endpoint<*>.() -> Endpoint<*>) {
         val router = Router(config, service, pathParams, parser, path)
         router.routerConfig()
 
@@ -74,12 +78,14 @@ class Router(
                 EndpointResponse(it.handlerResponse.statusCodes, it.handlerResponse.type),
                 it.handlerResponse,
             ) { request ->
-                endpoint.before(request)
-                it.handlerResponse.handler(
-                    parser,
-                    Context(request)
-                ).also {
-                    endpoint.after(request, it)
+                endpoint.decorator(request) {
+                    endpoint.before(request)
+                    it.handlerResponse.handler(
+                        parser,
+                        Context(request)
+                    ).also {
+                        endpoint.after(request, it)
+                    }
                 }
             }
         }
@@ -87,9 +93,11 @@ class Router(
 }
 
 fun (Router.() -> Unit).applyToAll(action: Endpoint<*>.() -> Endpoint<*>): Router.() -> Unit = {
-    this@applyToAll(this.also { apply(this@applyToAll, action) })
+    this@applyToAll(this.also { applyToAll(this@applyToAll, action) })
 }
 
 fun routes(routes: Router.() -> Unit) = routes
+
+typealias Routes = Router.() -> Unit
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this
