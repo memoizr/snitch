@@ -105,14 +105,14 @@ class ParametersTest : BaseTest(testRoutes {
 
     @Test
     fun `supports typed path parameters`() {
-        whenPerform GET "/$root/stringpath/hellothere" expectBodyJson TestResult("hellothere")
-        whenPerform GET "/$root/intpath/300" expectBodyJson IntTestResult(300)
+        whenPerform GET "/stringpath/hellothere" expectBodyJson TestResult("hellothere")
+        whenPerform GET "/intpath/300" expectBodyJson IntTestResult(300)
     }
 
     @Test
     fun `validates path parameters`() {
-        whenPerform GET "/$root/intpath2/4545/end" expectBody IntTestResult(4545).serialized
-        whenPerform GET "/$root/intpath2/hello/end" expectBody ErrorResponse(
+        whenPerform GET "/intpath2/4545/end" expectBody IntTestResult(4545).serialized
+        whenPerform GET "/intpath2/hello/end" expectBody ErrorResponse(
             400,
             listOf("Path parameter `intParam` is invalid, expecting non negative integer, got `hello`")
         ).serialized
@@ -120,27 +120,27 @@ class ParametersTest : BaseTest(testRoutes {
 
     @Test
     fun `supports query parameters`() {
-        whenPerform GET "/$root/queriespath?q=foo" expectBodyJson TestResult("foo")
-        whenPerform GET "/$root/queriespath?q=foo%0Abar" expectBodyJson TestResult("foo\nbar")
-        whenPerform GET "/$root/queriespath?q=" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/queriespath?q=foo" expectBodyJson TestResult("foo")
+        whenPerform GET "/queriespath?q=foo%0Abar" expectBodyJson TestResult("foo\nbar")
+        whenPerform GET "/queriespath?q=" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Query parameter `q` is invalid, expecting non empty string, got ``")
         )
-        whenPerform GET "/$root/queriespath" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/queriespath" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Required Query parameter `q` is missing")
         )
 
-        whenPerform GET "/$root/queriespath2?int=3434" expectBodyJson IntTestResult(3434)
-        whenPerform GET "/$root/queriespath2?int=" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/queriespath2?int=3434" expectBodyJson IntTestResult(3434)
+        whenPerform GET "/queriespath2?int=" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Required Query parameter `int` is missing")
         )
-        whenPerform GET "/$root/queriespath2?int=hello" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/queriespath2?int=hello" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Query parameter `int` is invalid, expecting non negative integer, got `hello`")
         )
-        whenPerform GET "/$root/queriespath2?int=-34" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/queriespath2?int=-34" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Query parameter `int` is invalid, expecting non negative integer, got `-34`")
         )
@@ -149,36 +149,36 @@ class ParametersTest : BaseTest(testRoutes {
     @Test
     fun `supports default values for query parameters`() {
         with (GsonJsonParser) {
-            whenPerform GET "/$root/queriespath3?offset=42" expectBody IntTestResult(42).serialized
-            whenPerform GET "/$root/queriespath3" expectBody IntTestResult(30).serialized
+            whenPerform GET "/queriespath3?offset=42" expectBody IntTestResult(42).serialized
+            whenPerform GET "/queriespath3" expectBody IntTestResult(30).serialized
 
-            whenPerform GET "/$root/queriespath4?limit=42" expectBody NullableIntTestResult(42).serialized
-            whenPerform GET "/$root/queriespath4" expectBody """{}"""
+            whenPerform GET "/queriespath4?limit=42" expectBody NullableIntTestResult(42).serialized
+            whenPerform GET "/queriespath4" expectBody """{}"""
         }
     }
 
     @Test
     fun `supports header parameters`() {
-        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "foo") expectBodyJson TestResult("foo")
-        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "") expectBody TestErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/headerspath" withHeaders mapOf(qHead.name to "foo") expectBodyJson TestResult("foo")
+        whenPerform GET "/headerspath" withHeaders mapOf(qHead.name to "") expectBody TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Header parameter `q` is invalid, expecting non empty single-line string, got ``")
         ).serialized
-        whenPerform GET "/$root/headerspath" withHeaders mapOf() expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/headerspath" withHeaders mapOf() expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Required Header parameter `q` is missing")
         )
 
-        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to 3434) expectBodyJson IntTestResult(3434)
-        whenPerform GET "/$root/headerspath2" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/headerspath2" withHeaders mapOf(intHead.name to 3434) expectBodyJson IntTestResult(3434)
+        whenPerform GET "/headerspath2" expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Required Header parameter `int` is missing")
         )
-        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to "hello") expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/headerspath2" withHeaders mapOf(intHead.name to "hello") expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Header parameter `int` is invalid, expecting non negative integer, got `hello`")
         )
-        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to -34) expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
+        whenPerform GET "/headerspath2" withHeaders mapOf(intHead.name to -34) expectBodyJson TestErrorHttpResponse<TestResult, List<String>>(
             400,
             listOf("Header parameter `int` is invalid, expecting non negative integer, got `-34`")
         )
@@ -187,15 +187,15 @@ class ParametersTest : BaseTest(testRoutes {
     @Test
     fun `supports default values for header parameters`() {
         with (GsonJsonParser) {
-            whenPerform GET "/$root/headerspath3" withHeaders mapOf(offsetHead.name to 42) expectBody IntTestResult(42).serialized
-            whenPerform GET "/$root/headerspath3" expectBody IntTestResult(666).serialized
-            whenPerform GET "/$root/headerspath3" expectBody IntTestResult(666).serialized
+            whenPerform GET "/headerspath3" withHeaders mapOf(offsetHead.name to 42) expectBody IntTestResult(42).serialized
+            whenPerform GET "/headerspath3" expectBody IntTestResult(666).serialized
+            whenPerform GET "/headerspath3" expectBody IntTestResult(666).serialized
 
-            whenPerform GET "/$root/headerspath4" withHeaders mapOf(limitHead.name to 42) expectBody NullableIntTestResult(
+            whenPerform GET "/headerspath4" withHeaders mapOf(limitHead.name to 42) expectBody NullableIntTestResult(
                 42
             ).serialized
-            whenPerform GET "/$root/headerspath4" withHeaders mapOf(limitHead.name to "") expectBody """{}"""
-            whenPerform GET "/$root/headerspath4" expectBody """{}"""
+            whenPerform GET "/headerspath4" withHeaders mapOf(limitHead.name to "") expectBody """{}"""
+            whenPerform GET "/headerspath4" expectBody """{}"""
         }
     }
 
@@ -203,7 +203,7 @@ class ParametersTest : BaseTest(testRoutes {
 
     @Test
     fun `supports body parameter`() {
-        whenPerform POST "/$root/bodyparam" withBody bodyParam expectBody BodyTestResult(42, 33).serialized
+        whenPerform POST "/bodyparam" withBody bodyParam expectBody BodyTestResult(42, 33).serialized
     }
 
     @Test
@@ -211,22 +211,22 @@ class ParametersTest : BaseTest(testRoutes {
         val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         val date = "2018-06-30T02:59:51-00:00"
         with (GsonJsonParser) {
-            whenPerform GET "/$root/customParsing?time=$date" expectBody DateResult(df.parse(date)).serialized
+            whenPerform GET "/customParsing?time=$date" expectBody DateResult(df.parse(date)).serialized
         }
     }
 
     @Test
     fun `forbids using parameters which aren't registered`() {
         with (GsonJsonParser) {
-            whenPerform GET "/$root/sneakyqueryparams" expectBody ErrorResponse(
+            whenPerform GET "/sneakyqueryparams" expectBody ErrorResponse(
                 500,
                 "Attempting to use unregistered query parameter `param`"
             ).serialized
-            whenPerform GET "/$root/sneakyheaderparams" expectBody ErrorResponse(
+            whenPerform GET "/sneakyheaderparams" expectBody ErrorResponse(
                 500,
                 "Attempting to use unregistered header parameter `param`"
             ).serialized
-            whenPerform GET "/$root/sneakypathparams/343" expectBody ErrorResponse(
+            whenPerform GET "/sneakypathparams/343" expectBody ErrorResponse(
                 500,
                 "Attempting to use unregistered path parameter `param`"
             ).serialized
@@ -235,7 +235,7 @@ class ParametersTest : BaseTest(testRoutes {
 
     @Test
     fun `returns error for failed parsing of body parameter`() {
-        whenPerform POST "/$root/bodyparam" withBody "lolol" expectCode 400 expectBody """{"statusCode":400,"details":"Invalid body parameter"}"""
+        whenPerform POST "/bodyparam" withBody "lolol" expectCode 400 expectBody """{"statusCode":400,"details":"Invalid body parameter"}"""
     }
 
     data class IntTestResult(val result: Int)

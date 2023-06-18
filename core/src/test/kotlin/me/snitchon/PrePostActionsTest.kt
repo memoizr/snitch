@@ -40,7 +40,7 @@ class PrePostActionsTest : BaseTest(testRoutes {
 
     @Test
     fun `validates routes`() {
-        whenPerform GET "/$root/foo?p=X" expectCode 200 expectBody """"ok""""
+        whenPerform GET "/foo?p=X" expectCode 200 expectBody """"ok""""
 
         expect that list isEqualTo listOf("XOne", "XAnd", "XTwo", "XThree")
         list.clear()
@@ -48,7 +48,7 @@ class PrePostActionsTest : BaseTest(testRoutes {
 
     @Test
     fun `supports global config`() {
-        whenPerform GET "/$root/global?p=X" expectCode 200 expectBody """"ok""""
+        whenPerform GET "/global?p=X" expectCode 200 expectBody """"ok""""
 
         expect that list isEqualTo listOf("XOne", "XGlobal", "XTwo", "XThree")
     }

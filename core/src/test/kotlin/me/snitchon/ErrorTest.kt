@@ -24,7 +24,7 @@ class ErrorTest : BaseTest(
     @Test
     fun `supports typed path parameters`() {
         with(GsonJsonParser) {
-            whenPerform GET "/$root/errors" expectCode 400 expectBody (
+            whenPerform GET "/errors" expectCode 400 expectBody (
                 ErrorBody(
                     "hellothere",
                     3f
@@ -35,7 +35,7 @@ class ErrorTest : BaseTest(
 
     @Test
     fun `supports custom exceptions`() {
-        GET("/$root/exception")
+        GET("/exception")
             .expectCode(400)
             .expect {
                 it.body().contains("Something bad happened")

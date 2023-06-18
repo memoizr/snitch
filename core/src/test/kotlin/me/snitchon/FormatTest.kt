@@ -17,18 +17,18 @@ class FormatTest : BaseTest(testRoutes {
 
     @Test
     fun `returns correct format`() {
-        whenPerform GET "/$root/json" expect {
+        whenPerform GET "/json" expect {
             expect that it.headers().map()["content-type"] isEqualTo listOf("application/json")
         }
 
-        whenPerform GET "/$root/bytearray" expect {
+        whenPerform GET "/bytearray" expect {
             expect that it.headers().map()["content-type"] isEqualTo listOf("video/mp4")
         }
     }
 
     @Test
     fun `preserves binary formats`() {
-        whenPerform GET "/$root/image" expect {
+        whenPerform GET "/image" expect {
             expect that it.headers().map()["Content-Type"] isEqualTo listOf("image/jpeg")
         }
     }
