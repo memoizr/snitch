@@ -26,7 +26,7 @@ data class Endpoint<B : Any>(
     val visibility: Visibility = Visibility.PUBLIC,
     val before: ImplementationRequestWrapper.() -> Unit = {},
     val after: ImplementationRequestWrapper.(HttpResponse<*, *>) -> Unit = {},
-    val decorator: ImplementationRequestWrapper.(() -> HttpResponse<*, *>) -> HttpResponse<*, *> = { it() },
+    val decorator: FF.() -> HttpResponse<*, *> = { next() },
 ) {
 
     infix fun withQuery(queryParameter: QueryParameter<*, *>) = copy(queryParams = queryParams + queryParameter)
@@ -60,12 +60,8 @@ data class Endpoint<B : Any>(
     }
 
 
-//    class FF(
-//        wrap: ImplementationRequestWrapper, ): ImplementationRequestWrapper by wrap {
-//        val next: () -> HttpResponse<*,*> =
-//    }
 
-    infix fun decorate(decoration: ImplementationRequestWrapper.(() -> HttpResponse<*, *>) -> HttpResponse<out Any?, StatusCodes>) = copy(decorator = decoration)
+    infix fun decorate(decoration: FF.() -> HttpResponse<out Any?, StatusCodes>) = copy(decorator = decoration)
 
     infix fun doBefore(action: ImplementationRequestWrapper.() -> Unit) = copy(before = {
         before(this)
@@ -76,4 +72,9 @@ data class Endpoint<B : Any>(
         after(this, it)
         action(this, it)
     })
+}
+
+class FF(
+    val next: () -> HttpResponse<*,*>,
+    val wrap: ImplementationRequestWrapper): ImplementationRequestWrapper by wrap {
 }

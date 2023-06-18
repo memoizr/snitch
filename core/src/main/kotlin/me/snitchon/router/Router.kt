@@ -10,6 +10,7 @@ import me.snitchon.config.SnitchConfig
 import me.snitchon.parameters.HeaderParameter
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.request.Body
+import me.snitchon.service.FF
 import me.snitchon.service.OpDescription
 import me.snitchon.service.SnitchService
 import me.snitchon.syntax.HttpMethodsSyntax
@@ -37,7 +38,7 @@ class Router(
             EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
             endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
         ) { request ->
-            decorator(request) {
+            decorator(FF({
                 before(request)
                 endpointResponse.handler(
                     parser,
@@ -45,7 +46,7 @@ class Router(
                 ).also {
                     after(request, it)
                 }
-            }
+            }, request))
         }
     }
 
@@ -65,7 +66,7 @@ class Router(
     inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) =
         Body(T::class, contentType)
 
-    fun decorateAll(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit = { it: Routes -> applyToAll(it, action)}
+    fun decorateAll(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit = { it: Routes -> applyToAll(it, action) }
 
     fun applyToAll(routerConfig: Router.() -> Unit, action: Endpoint<*>.() -> Endpoint<*>) {
         val router = Router(config, service, pathParams, parser, path)
@@ -78,7 +79,7 @@ class Router(
                 EndpointResponse(it.handlerResponse.statusCodes, it.handlerResponse.type),
                 it.handlerResponse,
             ) { request ->
-                endpoint.decorator(request) {
+                endpoint.decorator(FF({
                     endpoint.before(request)
                     it.handlerResponse.handler(
                         parser,
@@ -86,7 +87,7 @@ class Router(
                     ).also {
                         endpoint.after(request, it)
                     }
-                }
+                }, request))
             }
         }
     }
@@ -101,3 +102,6 @@ fun routes(routes: Router.() -> Unit) = routes
 typealias Routes = Router.() -> Unit
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this
+
+fun Router.using(ff: FF.() -> HttpResponse<out Any?, StatusCodes>) = decorateAll { decorate {ff()} }
+typealias foo = Router.(FF.() -> HttpResponse<out Any?, StatusCodes>) -> Unit

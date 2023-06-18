@@ -10,12 +10,12 @@ import me.snitchon.validation.UnregisteredParamException
 import org.junit.Test
 
 class DecorationTest : InlineSnitchTest() {
-    val Router.decoration
-        get() = decorateAll {
+    val Router.decoration get() = decorateAll {
             decorate {
-                it().map { "${body} world".ok }
+                next().map { "${body} world".ok }
             }
         }
+
     val nestedRoutes = routes {
         "deeper" / {
             GET("/end").isHandledBy { "end of the".ok }

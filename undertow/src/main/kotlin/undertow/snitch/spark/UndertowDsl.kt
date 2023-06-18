@@ -9,6 +9,7 @@ import me.snitchon.parameters.QueryParameter
 import me.snitchon.parsing.Parser
 import me.snitchon.request.ImplementationRequestWrapper
 import me.snitchon.request.filterValid
+import me.snitchon.service.FF
 import me.snitchon.types.HTTPMethods
 import java.net.URLDecoder
 
@@ -41,3 +42,4 @@ class UndertowRequestWrapper(
 }
 
 val ImplementationRequestWrapper.undertow get() = this as UndertowRequestWrapper
+val FF.undertow get() = this.wrap as UndertowRequestWrapper
