@@ -20,9 +20,9 @@ class UndertowRequestWrapper(
     val exchange: HttpServerExchange,
     inline val _body: () -> Any?,
 ) : RequestWrapper {
-
     override val body: () -> Any? get() = _body
-    override fun method(): HTTPMethods = HTTPMethods.fromString(exchange.requestMethod.toString())
+    override val method get() = HTTPMethods.fromString(exchange.requestMethod.toString())
+    override val path: String get() = exchange.requestPath
 
     override fun params(name: String): String? =
         URLDecoder.decode(exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).parameters.get(name))

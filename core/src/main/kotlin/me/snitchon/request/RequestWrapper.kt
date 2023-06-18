@@ -10,8 +10,9 @@ interface RequestWrapper : CommonResponses {
     val body: () -> Any?
     val params: Set<Parameter<*, *>>
     val parser: Parser
-
-    fun method(): HTTPMethods
+    val method: HTTPMethods
+    val path: String
+    val request get() = this
 
     fun params(name: String): String?
     fun headers(name: String): String?

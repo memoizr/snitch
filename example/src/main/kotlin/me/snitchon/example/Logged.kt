@@ -8,8 +8,7 @@ import undertow.snitch.spark.undertow
 
 val Router.logged
     get() = using {
-        val method = method().name
-        val path = undertow.exchange.requestPath
+        val method = method.name
         logger().info("Begin Request: $method $path")
         next().also {
             logger().info("End Request: $method $path ${it.statusCode.code} ${it.value(parser)}")

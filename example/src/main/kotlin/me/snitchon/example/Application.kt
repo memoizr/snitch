@@ -34,17 +34,10 @@ object Application {
         logstashEncoder.fieldNames.version = "version"
         logstashEncoder.start()
 
-        val fileAppender = FileAppender<ILoggingEvent>()
-        fileAppender.context = loggerContext
-        fileAppender.name = "FILE"
-        fileAppender.file = "myApp.log"
-        fileAppender.setEncoder(logstashEncoder)
-        fileAppender.start()
-
         val rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME)
         rootLogger.level = Level.INFO
-        rootLogger.addAppender(fileAppender)
     }
+
     fun setup(port: Int): RoutedService {
 
         setUpDatabase()
