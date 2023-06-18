@@ -10,7 +10,7 @@ import me.snitchon.config.SnitchConfig
 import me.snitchon.parameters.HeaderParameter
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.request.Body
-import me.snitchon.service.FF
+import me.snitchon.service.DecoratedWrapper
 import me.snitchon.service.OpDescription
 import me.snitchon.service.SnitchService
 import me.snitchon.syntax.HttpMethodsSyntax
@@ -38,7 +38,7 @@ class Router(
             EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
             endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
         ) { request ->
-            decorator(FF({
+            decorator(DecoratedWrapper({
                 before(request)
                 endpointResponse.handler(
                     parser,
@@ -66,7 +66,6 @@ class Router(
     inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) =
         Body(T::class, contentType)
 
-
     fun applyToAll(routerConfig: Routes, action: Endpoint<*>.() -> Endpoint<*>) {
         val router = Router(config, service, pathParams, parser, path)
         router.routerConfig()
@@ -78,7 +77,7 @@ class Router(
                 EndpointResponse(it.handlerResponse.statusCodes, it.handlerResponse.type),
                 it.handlerResponse,
             ) { request ->
-                endpoint.decorator(FF({
+                endpoint.decorator(DecoratedWrapper({
                     endpoint.before(request)
                     it.handlerResponse.handler(
                         parser,
@@ -92,15 +91,10 @@ class Router(
     }
 }
 
-fun (Routes).applyToAll(action: Endpoint<*>.() -> Endpoint<*>): Routes = {
-    this@applyToAll(this.also { applyToAll(this@applyToAll, action) })
-}
-
 fun routes(routes: Routes) = routes
 
-typealias Routes = Router.() -> Unit
+internal val String.leadingSlash get() = if (!startsWith("/")) "/$this" else this
 
-internal val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this
-
-fun Router.using(ff: FF.() -> HttpResponse<out Any?, StatusCodes>) = decorateAll { decorate {ff()} }
-internal fun Router.decorateAll(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit = { it: Routes -> applyToAll(it, action) }
+fun Router.using(decoration: Decoration) = decorateAll { decorate { decoration() } }
+internal fun Router.decorateAll(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit =
+    { it: Routes -> applyToAll(it, action) }

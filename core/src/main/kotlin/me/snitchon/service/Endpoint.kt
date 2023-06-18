@@ -6,10 +6,10 @@ import me.snitchon.parameters.Parameter
 import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.request.Body
-import me.snitchon.request.ImplementationRequestWrapper
-import me.snitchon.response.HttpResponse
+import me.snitchon.router.AfterAction
+import me.snitchon.router.BeforeAction
+import me.snitchon.router.Decoration
 import me.snitchon.types.HTTPMethods
-import me.snitchon.types.StatusCodes
 
 data class OpDescription(val description: String)
 
@@ -24,12 +24,13 @@ data class Endpoint<B : Any>(
     val body: Body<B>,
     val tags: List<String>? = emptyList(),
     val visibility: Visibility = Visibility.PUBLIC,
-    val before: ImplementationRequestWrapper.() -> Unit = {},
-    val after: ImplementationRequestWrapper.(HttpResponse<*, *>) -> Unit = {},
-    val decorator: FF.() -> HttpResponse<*, *> = { next() },
+    val before: BeforeAction = {},
+    val after: AfterAction = {},
+    val decorator: Decoration = { next() },
 ) {
 
     infix fun withQuery(queryParameter: QueryParameter<*, *>) = copy(queryParams = queryParams + queryParameter)
+
     infix fun withHeader(params: HeaderParameter<*, *>) = copy(headerParams = headerParams + params)
     infix fun <C : Any> with(body: Body<C>) = Endpoint(
         httpMethod,
@@ -47,8 +48,11 @@ data class Endpoint<B : Any>(
     )
 
     infix fun inSummary(summary: String) = copy(summary = summary)
+
     infix fun isDescribedAs(description: String) = copy(description = description)
+
     infix fun with(visibility: Visibility) = copy(visibility = visibility)
+
     infix fun with(queryParameter: List<Parameter<*, *>>) = let {
         queryParameter.foldRight(this) { param, endpoint ->
             when (param) {
@@ -59,22 +63,15 @@ data class Endpoint<B : Any>(
         }
     }
 
+    infix fun decorate(decoration: Decoration) = copy(decorator = decoration)
 
-
-    infix fun decorate(decoration: FF.() -> HttpResponse<out Any?, StatusCodes>) = copy(decorator = decoration)
-
-    infix fun doBefore(action: ImplementationRequestWrapper.() -> Unit) = copy(before = {
+    infix fun doBefore(action: BeforeAction) = copy(before = {
         before(this)
         action(this)
     })
 
-    infix fun doAfter(action: ImplementationRequestWrapper.(HttpResponse<*, *>) -> Unit) = copy(after = {
+    infix fun doAfter(action: AfterAction) = copy(after = {
         after(this, it)
         action(this, it)
     })
-}
-
-class FF(
-    val next: () -> HttpResponse<*,*>,
-    val wrap: ImplementationRequestWrapper): ImplementationRequestWrapper by wrap {
 }

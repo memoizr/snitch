@@ -6,7 +6,7 @@ import me.snitchon.response.CommonResponses
 import me.snitchon.types.HTTPMethods
 import me.snitchon.validation.UnregisteredParamException
 
-interface ImplementationRequestWrapper : CommonResponses {
+interface RequestWrapper : CommonResponses {
     val body: () -> Any?
     val params: Set<Parameter<*, *>>
     val parser: Parser
@@ -87,10 +87,10 @@ interface ImplementationRequestWrapper : CommonResponses {
 
 }
 
-private inline fun ImplementationRequestWrapper.checkParamIsRegistered(param: Parameter<*, *>) =
+private inline fun RequestWrapper.checkParamIsRegistered(param: Parameter<*, *>) =
     if (!params.contains(param)) throw UnregisteredParamException(param) else this
 
-private inline fun <R> ImplementationRequestWrapper.tryParam(block: () -> R) = try {
+private inline fun <R> RequestWrapper.tryParam(block: () -> R) = try {
     block()
 } catch (e: Exception) {
     throw InvalidParametersException(e, getInvalidParams())

@@ -7,9 +7,9 @@ import me.snitchon.parameters.Parameter
 import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.parsing.Parser
-import me.snitchon.request.ImplementationRequestWrapper
+import me.snitchon.request.RequestWrapper
 import me.snitchon.request.filterValid
-import me.snitchon.service.FF
+import me.snitchon.service.DecoratedWrapper
 import me.snitchon.types.HTTPMethods
 import java.net.URLDecoder
 
@@ -19,7 +19,7 @@ class UndertowRequestWrapper(
     override val params: Set<Parameter<*, *>>,
     val exchange: HttpServerExchange,
     inline val _body: () -> Any?,
-) : ImplementationRequestWrapper {
+) : RequestWrapper {
 
     override val body: () -> Any? get() = _body
     override fun method(): HTTPMethods = HTTPMethods.fromString(exchange.requestMethod.toString())
@@ -41,5 +41,5 @@ class UndertowRequestWrapper(
         headers(param.name).filterValid(param)
 }
 
-val ImplementationRequestWrapper.undertow get() = this as UndertowRequestWrapper
-val FF.undertow get() = this.wrap as UndertowRequestWrapper
+val RequestWrapper.undertow get() = this as UndertowRequestWrapper
+val DecoratedWrapper.undertow get() = this.wrap as UndertowRequestWrapper

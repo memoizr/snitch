@@ -1,6 +1,6 @@
 package me.snitchon.types
 
-import me.snitchon.request.ImplementationRequestWrapper
+import me.snitchon.request.RequestWrapper
 import me.snitchon.response.HttpResponse
 import me.snitchon.service.Endpoint
 
@@ -8,7 +8,7 @@ data class EndpointBundle<T : Any>(
     val endpoint: Endpoint<T>,
     val response: EndpointResponse,
     val handlerResponse: HandlerResponse<Any, Any, out StatusCodes>,
-    val handler: (ImplementationRequestWrapper) -> HttpResponse<*, *>
+    val handler: (RequestWrapper) -> HttpResponse<*, *>
 ) {
     val params = (endpoint.headerParams + endpoint.queryParams + endpoint.pathParams)
 }

@@ -7,9 +7,8 @@ import io.undertow.util.HttpString
 import io.undertow.util.Methods.*
 import me.snitchon.router.Router
 import me.snitchon.config.SnitchConfig
-import me.snitchon.extensions.print
 import me.snitchon.parsing.Parser
-import me.snitchon.request.ImplementationRequestWrapper
+import me.snitchon.request.RequestWrapper
 import me.snitchon.response.ErrorHttpResponse
 import me.snitchon.response.HttpResponse
 import me.snitchon.response.SuccessfulHttpResponse
@@ -37,7 +36,7 @@ class UndertowSnitchService(
     private lateinit var service: Undertow
     private val handlers = mutableListOf<RoutingHandler>()
     private val exceptionHandlers =
-        LinkedHashMap<KClass<*>, context(Parser) ImplementationRequestWrapper.(Throwable) -> HttpResponse<*, *>>()
+        LinkedHashMap<KClass<*>, context(Parser) RequestWrapper.(Throwable) -> HttpResponse<*, *>>()
 
     private val routingHandler = RoutingHandler()
     private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.service.port, "localhost") }
@@ -62,10 +61,10 @@ class UndertowSnitchService(
 
     override fun <T : Throwable, R : HttpResponse<*, *>> handleException(
         exceptionClass: KClass<T>,
-        exceptionHandler: context (Parser) ImplementationRequestWrapper.(T) -> R
+        exceptionHandler: context (Parser) RequestWrapper.(T) -> R
     ) {
         exceptionHandlers[exceptionClass] =
-            exceptionHandler as context(Parser) ImplementationRequestWrapper.(Throwable) -> R
+            exceptionHandler as context(Parser) RequestWrapper.(Throwable) -> R
     }
 
     override fun registerMethod(endpointBundle: EndpointBundle<*>, path: String) {
