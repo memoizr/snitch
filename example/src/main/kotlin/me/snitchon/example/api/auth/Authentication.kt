@@ -9,6 +9,7 @@ import me.snitchon.example.types.UserId
 import me.snitchon.parameters.InvalidParametersException
 import me.snitchon.parameters.PathParam
 import me.snitchon.request.Context
+import me.snitchon.router.Routes
 import me.snitchon.service.Endpoint
 
 fun <B : Any> Endpoint<B>.authenticated(): Endpoint<B> = copy(
@@ -18,11 +19,11 @@ fun <B : Any> Endpoint<B>.authenticated(): Endpoint<B> = copy(
         ?.let { verifyJWT(it) }
 }
 
-fun Router.authenticated(routes: Router.() -> Unit) = applyToAll({
+fun Router.authenticated(routes: Routes) = applyToAll({
     routes()
 }) { authenticated() }
 
-fun Router.withPrincipalMatchingParameter(pathParam: PathParam<out Any, *>, routes: Router.() -> Unit) = applyToAll({
+fun Router.withPrincipalMatchingParameter(pathParam: PathParam<out Any, *>, routes: Routes) = applyToAll({
     routes()
 }) { principalOf(pathParam) }
 

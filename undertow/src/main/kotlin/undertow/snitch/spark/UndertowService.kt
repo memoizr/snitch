@@ -13,6 +13,7 @@ import me.snitchon.request.ImplementationRequestWrapper
 import me.snitchon.response.ErrorHttpResponse
 import me.snitchon.response.HttpResponse
 import me.snitchon.response.SuccessfulHttpResponse
+import me.snitchon.router.Routes
 import me.snitchon.service.RoutedService
 import me.snitchon.service.SnitchService
 import me.snitchon.service.exceptionhandling.handleInvalidParameters
@@ -41,7 +42,7 @@ class UndertowSnitchService(
     private val routingHandler = RoutingHandler()
     private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.service.port, "localhost") }
 
-    override fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService {
+    override fun setRoutes(routerConfiguration: Routes): RoutedService {
         val router = Router(config, this@UndertowSnitchService, emptySet(), parser, "")
         routerConfiguration(router)
         return RoutedService(

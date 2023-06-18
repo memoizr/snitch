@@ -6,6 +6,7 @@ import me.snitchon.types.Routed
 import me.snitchon.router.leadingSlash
 import me.snitchon.parameters.ParametrizedPath
 import me.snitchon.parameters.PathParam
+import me.snitchon.router.Routes
 
 interface DivSyntax: Routed {
     operator fun String.div(path: String) = this.leadingSlash + "/" + path
@@ -13,7 +14,7 @@ interface DivSyntax: Routed {
 
     operator fun PathParam<out Any, out Any>.div(string: String) = ParametrizedPath("/{${name}}" + string.leadingSlash, pathParams + this)
 
-    operator fun String.div(block: Router.() -> Unit) {
+    operator fun String.div(block: Routes) {
         val router = Router(config, service, pathParams, parser, path + this.leadingSlash)
         router.block()
         endpoints += router.endpoints.map {
@@ -26,7 +27,7 @@ interface DivSyntax: Routed {
         }
     }
 
-    operator fun ParametrizedPath.div(block: Router.() -> Unit) {
+    operator fun ParametrizedPath.div(block: Routes) {
         val router = Router(config, service, pathParams + this.pathParameters, parser, this@DivSyntax.path + this.path.leadingSlash)
         router.block()
         router.endpoints += router.endpoints.map {
@@ -40,7 +41,7 @@ interface DivSyntax: Routed {
         endpoints += router.endpoints
     }
 
-    operator fun PathParam<out Any, out Any>.div(block: Router.() -> Unit) {
+    operator fun PathParam<out Any, out Any>.div(block: Routes) {
         val path = ParametrizedPath("/{$name}", setOf(this))
         val router = Router(config, service, pathParams + this, parser, this@DivSyntax.path + path.path.leadingSlash)
         router.block()

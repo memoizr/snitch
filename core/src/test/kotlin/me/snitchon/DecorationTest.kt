@@ -6,14 +6,14 @@ import me.snitchon.response.SuccessfulHttpResponse
 import me.snitchon.router.Router
 import me.snitchon.router.Routes
 import me.snitchon.router.routes
+import me.snitchon.router.using
 import me.snitchon.validation.UnregisteredParamException
 import org.junit.Test
 
 class DecorationTest : InlineSnitchTest() {
-    val Router.decoration get() = decorateAll {
-            decorate {
-                next().map { "${body} world".ok }
-            }
+    val Router.decoration
+        get() = using {
+            next().map { "${body} world".ok }
         }
 
     val nestedRoutes = routes {

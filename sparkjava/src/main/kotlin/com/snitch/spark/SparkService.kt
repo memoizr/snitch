@@ -35,7 +35,7 @@ class SparkSnitchService(
                 )
             }
 
-    fun setRoutes(routerConfiguration: Router.() -> Unit): RoutedService {
+    fun setRoutes(routerConfiguration: Routes): RoutedService {
         val tmpDir = File(System.getProperty("java.io.tmpdir") + "/swagger-ui/docs")
         if (!tmpDir.exists()) {
             tmpDir.mkdirs()

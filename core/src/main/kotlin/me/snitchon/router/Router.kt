@@ -66,9 +66,8 @@ class Router(
     inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) =
         Body(T::class, contentType)
 
-    fun decorateAll(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit = { it: Routes -> applyToAll(it, action) }
 
-    fun applyToAll(routerConfig: Router.() -> Unit, action: Endpoint<*>.() -> Endpoint<*>) {
+    fun applyToAll(routerConfig: Routes, action: Endpoint<*>.() -> Endpoint<*>) {
         val router = Router(config, service, pathParams, parser, path)
         router.routerConfig()
 
@@ -93,15 +92,15 @@ class Router(
     }
 }
 
-fun (Router.() -> Unit).applyToAll(action: Endpoint<*>.() -> Endpoint<*>): Router.() -> Unit = {
+fun (Routes).applyToAll(action: Endpoint<*>.() -> Endpoint<*>): Routes = {
     this@applyToAll(this.also { applyToAll(this@applyToAll, action) })
 }
 
-fun routes(routes: Router.() -> Unit) = routes
+fun routes(routes: Routes) = routes
 
 typealias Routes = Router.() -> Unit
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this
 
 fun Router.using(ff: FF.() -> HttpResponse<out Any?, StatusCodes>) = decorateAll { decorate {ff()} }
-typealias foo = Router.(FF.() -> HttpResponse<out Any?, StatusCodes>) -> Unit
+internal fun Router.decorateAll(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit = { it: Routes -> applyToAll(it, action) }

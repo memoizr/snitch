@@ -16,6 +16,7 @@ import me.snitchon.parameters.path
 import me.snitchon.parsing.Parser
 import me.snitchon.request.Handler
 import me.snitchon.router.Router
+import me.snitchon.router.Routes
 import me.snitchon.types.Format
 import me.snitchon.types.Sealed
 import java.util.*
@@ -79,7 +80,7 @@ object aFoo : Validator<Random, Random> {
     override val parse: Parser.(String) -> Random = { Random() }
 }
 
-val ServerRouter: Router.() -> Unit = {
+val ServerRouter: Routes = {
 //    val getGreeting: Handler<Nothing, AResponse> = {
 //        request[query]
 //        AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok

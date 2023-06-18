@@ -3,6 +3,7 @@ package me.snitchon.dsl
 import com.snitch.me.snitchon.NonEmptyString
 import me.snitchon.parameters.path
 import me.snitchon.router.Router
+import me.snitchon.router.Routes
 import me.snitchon.tests.Ported
 import me.snitchon.tests.TestMethods
 import java.util.*
@@ -23,7 +24,7 @@ abstract class InlineSnitchTest : Ported, TestMethods {
         }
     }
 
-    fun withRoutes(routes: Router.() -> Unit) = RoutedTest(testRoutes("", routes)(port).start())
+    fun withRoutes(routes: Routes) = RoutedTest(testRoutes("", routes)(port).start())
 }
 
 class StringPathTest : InlineSnitchTest() {
