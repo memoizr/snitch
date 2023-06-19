@@ -6,7 +6,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import ro.kreator.aRandom
 
-class CreatesNewUser : BaseTest() {
+class UsersRoutesTest : BaseTest() {
     val createRequest by aRandom<CreateUserRequest> { copy(email = "foo@gmail.com") }
     val otherRequestSameEmail by aRandom<CreateUserRequest> { copy(email = createRequest.email) }
 

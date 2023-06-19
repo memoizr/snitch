@@ -66,13 +66,19 @@ fun RoutedService.handleExceptions(): RoutedService =
         .handleParsingException()
         .handleUnregisteredParameters()
         .handleException(ValidationException::class) {
-            ErrorResponse(400, it.reason).badRequest()
+            ErrorResponse(400, it.reason)
+                .also { logger().error(it.toString()) }
+                .badRequest()
         }
         .handleException(JwtException::class) {
-            ErrorResponse(401, "unauthorized").unauthorized()
+            ErrorResponse(401, "unauthorized")
+                .also { logger().error(it.toString()) }
+                .unauthorized()
         }
         .handleException(ForbiddenException::class) {
-            ErrorResponse(403, "forbidden").forbidden()
+            ErrorResponse(403, "forbidden")
+                .also { logger().error(it.toString()) }
+                .forbidden()
         }
         .handleException(Throwable::class) {
             ErrorResponse(500, "something went wrong").serverError()

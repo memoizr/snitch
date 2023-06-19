@@ -6,6 +6,8 @@ import me.snitchon.parameters.Parameter
 import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.request.Body
+import me.snitchon.request.RequestWrapper
+import me.snitchon.response.HttpResponse
 import me.snitchon.router.AfterAction
 import me.snitchon.router.BeforeAction
 import me.snitchon.router.Decoration
@@ -26,8 +28,14 @@ data class Endpoint<B : Any>(
     val visibility: Visibility = Visibility.PUBLIC,
     val before: BeforeAction = {},
     val after: AfterAction = {},
-    val decorator: Decoration = { next() },
+    val decorator: DecoratedWrapper.() -> DecoratedWrapper = { this },
 ) {
+    infix fun decorate(decoration: DecoratedWrapper.() -> HttpResponse<*, *>): Endpoint<B> {
+        val previousDecorator = this.decorator
+        return copy(
+            decorator = { DecoratedWrapper({ decoration(previousDecorator(this)) }, wrap) }
+        )
+    }
 
     infix fun withQuery(queryParameter: QueryParameter<*, *>) = copy(queryParams = queryParams + queryParameter)
 
@@ -63,15 +71,12 @@ data class Endpoint<B : Any>(
         }
     }
 
-    infix fun decorate(decoration: Decoration) = copy(decorator = decoration)
+    infix fun doBefore(action: BeforeAction) = decorate {
+        action(wrap)
+        next()
+    }
 
-    infix fun doBefore(action: BeforeAction) = copy(before = {
-        before(this)
-        action(this)
-    })
-
-    infix fun doAfter(action: AfterAction) = copy(after = {
-        after(this, it)
-        action(this, it)
-    })
+    infix fun doAfter(action: AfterAction) = decorate {
+        next().also { action(wrap, it) }
+    }
 }

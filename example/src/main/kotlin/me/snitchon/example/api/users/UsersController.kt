@@ -10,12 +10,15 @@ import me.snitchon.example.api.auth.principalOf
 import me.snitchon.example.database.PostgresErrorCodes.UNIQUE_VIOLATION
 import me.snitchon.example.database.RepositoriesModule.postsRepository
 import me.snitchon.example.database.RepositoriesModule.usersRepository
+import me.snitchon.example.security.JWTClaims
+import me.snitchon.example.security.Role
 import me.snitchon.example.security.SecurityModule.hasher
-import me.snitchon.example.security.createJWT
+import me.snitchon.example.security.SecurityModule.jwt
 import me.snitchon.example.types.*
 import me.snitchon.extensions.print
 import me.snitchon.parameters.PathParam
 import me.snitchon.request.Context
+import me.snitchon.request.RequestWrapper
 import me.snitchon.request.handle
 import me.snitchon.request.parsing
 import me.snitchon.router.routes
@@ -67,7 +70,7 @@ private val deletePost by handle {
 
 private val getPosts by handle {
     transaction {
-        postsRepository().getPosts(request[accessToken])
+        postsRepository().getPosts(principal)
             .toResponse.ok
     }
 }
@@ -92,12 +95,13 @@ private val userLogin by parsing<LoginRequest>() handle {
     transaction { usersRepository().findHashBy(Email(body.email)) }
         ?.let {
             if (hasher().match(body.password, it.second))
-                createJWT(it.first).ok
+                jwt().newToken(JWTClaims(it.first, Role.USER)).ok
             else null
         } ?: InvalidCredentials().badRequest()
 }
 
 private val createUser by parsing<CreateUserRequest>() handle {
+    println("=====================")
     transaction {
         usersRepository().putUser(
             CreateUserAction(
@@ -116,14 +120,17 @@ private val createUser by parsing<CreateUserRequest>() handle {
     }
 }
 
-private fun <T, S : StatusCodes> Context<*>.`403`() =
+fun <T, S : StatusCodes> Context<*>.`403`() =
     ErrorResponse(403, "forbidden").forbidden<T, _, S>()
 
-private fun <T, S : StatusCodes> Context<*>.`404`() =
+fun <T, S : StatusCodes> RequestWrapper.`401`() =
+    ErrorResponse(401, "unauhtoreized").unauthorized<T, _, S>()
+
+fun <T, S : StatusCodes> Context<*>.`404`() =
     ErrorResponse(404, "forbidden").notFound<T, _, S>()
 
-private fun <T, S : StatusCodes> Context<*>.`500`() =
+fun <T, S : StatusCodes> Context<*>.`500`() =
     ServerError().serverError<T, _, S>()
 
-private fun Context<*>.principalIsNot(param: PathParam<out Any, *>) =
+fun Context<*>.principalIsNot(param: PathParam<out Any, *>) =
     request[param] != principal.value

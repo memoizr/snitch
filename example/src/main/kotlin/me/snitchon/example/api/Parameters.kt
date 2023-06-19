@@ -14,4 +14,7 @@ object Headers {
     val accessToken = header("X-Access-Token",
         condition = ValidAccessToken,
         description = "Access token for the principal user")
+    val accessTokens = header("X-Access-Tokens",
+        condition = ValidAccessToken,
+        description = "Access token for the principal user")
 }

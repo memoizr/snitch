@@ -38,15 +38,17 @@ class Router(
             EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
             endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
         ) { request ->
-            decorator(DecoratedWrapper({
-                before(request)
-                endpointResponse.handler(
-                    parser,
-                    Context(request)
-                ).also {
-                    after(request, it)
-                }
-            }, request))
+//            before(request)
+            decorator(
+                DecoratedWrapper({
+                    endpointResponse.handler(
+                        parser,
+                        Context(request)
+                    ).also {
+                        after(request, it)
+                    }
+                }, request)
+            ).next()
         }
     }
 
@@ -77,15 +79,15 @@ class Router(
                 EndpointResponse(it.handlerResponse.statusCodes, it.handlerResponse.type),
                 it.handlerResponse,
             ) { request ->
-                endpoint.decorator(DecoratedWrapper({
-                    endpoint.before(request)
-                    it.handlerResponse.handler(
-                        parser,
-                        Context(request)
-                    ).also {
-                        endpoint.after(request, it)
-                    }
-                }, request))
+//                endpoint.before(request)
+                endpoint.decorator(
+                    DecoratedWrapper({
+                        it.handlerResponse.handler(
+                            parser,
+                            Context(request)
+                        )
+                    }, request)
+                ).next()
             }
         }
     }
@@ -95,6 +97,6 @@ fun routes(routes: Routes) = routes
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/$this" else this
 
-fun Router.using(decoration: Decoration) = decorateAll { decorate { decoration() } }
-internal fun Router.decorateAll(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit =
+fun Router.using(decoration: DecoratedWrapper.() -> HttpResponse<*, *>) = decorateAll { decorate(decoration) }
+fun Router.decorateAll(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit =
     { it: Routes -> applyToAll(it, action) }

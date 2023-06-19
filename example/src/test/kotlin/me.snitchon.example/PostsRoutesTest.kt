@@ -5,7 +5,9 @@ import me.snitchon.example.ApplicationModule.now
 import me.snitchon.example.api.*
 import me.snitchon.example.database.RepositoriesModule.usersRepository
 import me.snitchon.example.database.RepositoriesModule.postsRepository
-import me.snitchon.example.security.createJWT
+import me.snitchon.example.security.JWTClaims
+import me.snitchon.example.security.Role
+import me.snitchon.example.security.SecurityModule.jwt
 import me.snitchon.example.types.*
 import me.snitchon.parsers.GsonJsonParser.serialized
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -17,21 +19,25 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset.UTC
 
-class PostsTest : BaseTest() {
+class PostsRoutesTest : BaseTest() {
     val createPostRequest by aRandom<CreatePostRequest>()
     val updatePostRequest by aRandom<UpdatePostRequest>()
 
     val otherUser by aRandom<User>()
     val user by aRandom<User>()
+    val admin by aRandom<User>()
     val post by aRandom<Post> { copy(creator = UserView(user.id, user.name), createdAt = now()) }
     val postByOtherUser by aRandom<Post> { copy(creator = UserView(otherUser.id, otherUser.name), createdAt = now()) }
 
     lateinit var userToken: String
+    lateinit var adminToken: String
 
     @BeforeEach
     fun setup() {
         clock.override { Clock.fixed(Instant.now(), UTC) }
-        userToken = user.create().let { createJWT(user.id) }
+        userToken = user.create().let { jwt().newToken(JWTClaims(user.id, Role.USER)) }
+        adminToken = admin.create().let { jwt().newToken(JWTClaims(admin.id, Role.ADMIN)) }
+
         otherUser.create()
     }
 
@@ -73,7 +79,7 @@ class PostsTest : BaseTest() {
 
         POST("/users/${user.id.value}/posts")
             .withBody(createPostRequest)
-            .expectCode(400)
+            .expectCode(401)
     }
 
     @Test
@@ -96,6 +102,14 @@ class PostsTest : BaseTest() {
     @Test
     fun `a logged in user cannot delete another user's post`() {
         postByOtherUser.create()
+
+        DELETE("/users/${otherUser.id.value}/posts/${postByOtherUser.id}")
+            .withHeaders(mapOf("X-Access-Token" to userToken))
+            .expectCode(403)
+    }
+
+    @Test
+    fun `a logged in admin can delete another user's post`() {
 
         DELETE("/users/${otherUser.id.value}/posts/${postByOtherUser.id}")
             .withHeaders(mapOf("X-Access-Token" to userToken))
@@ -173,9 +187,3 @@ fun Post.create() = transaction {
             )
         )
 }
-
-
-
-
-
-
