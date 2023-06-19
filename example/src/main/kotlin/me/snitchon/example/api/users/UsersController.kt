@@ -4,9 +4,7 @@ import me.snitchon.example.api.*
 import me.snitchon.example.api.Headers.accessToken
 import me.snitchon.example.api.Paths.postId
 import me.snitchon.example.api.Paths.userId
-import me.snitchon.example.api.auth.authenticated
-import me.snitchon.example.api.auth.principal
-import me.snitchon.example.api.auth.principalOf
+import me.snitchon.example.api.auth.*
 import me.snitchon.example.database.PostgresErrorCodes.UNIQUE_VIOLATION
 import me.snitchon.example.database.RepositoriesModule.postsRepository
 import me.snitchon.example.database.RepositoriesModule.usersRepository
@@ -33,11 +31,11 @@ val usersController = routes {
     userId / "posts" / {
         authenticated {
             GET() principalOf userId isHandledBy getPosts
-            POST() principalOf userId with body<CreatePostRequest>() isHandledBy createPost
+            POST() check PrincipalMatches(userId) with body<CreatePostRequest>() isHandledBy createPost
 
             GET(postId) isHandledBy getPost
-            PUT(postId).print() principalOf userId with body<UpdatePostRequest>() isHandledBy updatePost
-            DELETE(postId) principalOf userId isHandledBy deletePost
+            PUT(postId) principalOf userId with body<UpdatePostRequest>() isHandledBy updatePost
+            DELETE(postId) check (PrincipalMatches(userId) or HasAdminRole) isHandledBy deletePost
         }
     }
 }
@@ -101,7 +99,6 @@ private val userLogin by parsing<LoginRequest>() handle {
 }
 
 private val createUser by parsing<CreateUserRequest>() handle {
-    println("=====================")
     transaction {
         usersRepository().putUser(
             CreateUserAction(
@@ -121,6 +118,12 @@ private val createUser by parsing<CreateUserRequest>() handle {
 }
 
 fun <T, S : StatusCodes> Context<*>.`403`() =
+    ErrorResponse(403, "forbidden").forbidden<T, _, S>()
+
+fun <T, S : StatusCodes> RequestWrapper.`403`() =
+    ErrorResponse(403, "forbidden").forbidden<T, _, S>()
+
+fun <T, S : StatusCodes> RequestWrapper._403() =
     ErrorResponse(403, "forbidden").forbidden<T, _, S>()
 
 fun <T, S : StatusCodes> RequestWrapper.`401`() =

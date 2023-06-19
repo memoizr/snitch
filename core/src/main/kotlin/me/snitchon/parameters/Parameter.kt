@@ -40,8 +40,7 @@ data class PathParam<T,R>(
     override val type: Class<*>,
     override val name: String,
     override val pattern: Validator<T, R>,
-    override val description: String) : Parameter<T, R>(type, name, pattern, description, true, false) {
-}
+    override val description: String) : Parameter<T, R>(type, name, pattern, description, true, false)
 
 data class HeaderParam<T,R>(
     override val type: Class<*>,

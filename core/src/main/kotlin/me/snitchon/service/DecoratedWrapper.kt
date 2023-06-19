@@ -6,5 +6,4 @@ import me.snitchon.response.HttpResponse
 class DecoratedWrapper(
     val next: () -> HttpResponse<*, *>,
     val wrap: RequestWrapper
-): RequestWrapper by wrap {
-}
+): RequestWrapper by wrap

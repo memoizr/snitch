@@ -7,11 +7,12 @@ import me.snitchon.parameters.PathParam
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.request.Body
 import me.snitchon.request.RequestWrapper
+import me.snitchon.response.ErrorHttpResponse
 import me.snitchon.response.HttpResponse
 import me.snitchon.router.AfterAction
 import me.snitchon.router.BeforeAction
-import me.snitchon.router.Decoration
 import me.snitchon.types.HTTPMethods
+import me.snitchon.types.StatusCodes
 
 data class OpDescription(val description: String)
 
@@ -53,6 +54,7 @@ data class Endpoint<B : Any>(
         visibility,
         before,
         after,
+        decorator,
     )
 
     infix fun inSummary(summary: String) = copy(summary = summary)
@@ -79,4 +81,29 @@ data class Endpoint<B : Any>(
     infix fun doAfter(action: AfterAction) = decorate {
         next().also { action(wrap, it) }
     }
+
+    infix fun check(condition: Condition) = decorate {
+        when (val result = condition.check(wrap)) {
+            is ConditionResult.Successful -> next()
+            is ConditionResult.Failed -> result.response
+        }
+    }
+}
+
+interface Condition {
+    fun check(requestWrapper: RequestWrapper): ConditionResult
+    infix fun or(other: Condition): Condition = OrCondition(this, other)
+}
+
+class OrCondition(private val first: Condition, private val second: Condition) : Condition {
+    override fun check(requestWrapper: RequestWrapper) =
+        when (val result = first.check(requestWrapper)) {
+            is ConditionResult.Successful -> result
+            is ConditionResult.Failed -> second.check(requestWrapper)
+        }
+}
+
+sealed class ConditionResult {
+    class Successful : ConditionResult()
+    data class Failed(val response: ErrorHttpResponse<Any, out Any, StatusCodes.BAD_REQUEST>) : ConditionResult()
 }
