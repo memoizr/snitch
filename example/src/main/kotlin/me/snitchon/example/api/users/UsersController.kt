@@ -30,12 +30,12 @@ val usersController = routes {
 
     userId / "posts" / {
         authenticated {
-            GET() principalOf userId isHandledBy getPosts
-            POST() check PrincipalMatches(userId) with body<CreatePostRequest>() isHandledBy createPost
+            GET() check principalMatches(userId) isHandledBy getPosts
+            POST() check principalMatches(userId) with body<CreatePostRequest>() isHandledBy createPost
 
             GET(postId) isHandledBy getPost
-            PUT(postId) principalOf userId with body<UpdatePostRequest>() isHandledBy updatePost
-            DELETE(postId) check (PrincipalMatches(userId) or HasAdminRole) isHandledBy deletePost
+            PUT(postId) check principalMatches(userId) with body<UpdatePostRequest>() isHandledBy updatePost
+            DELETE(postId) check (principalMatches(userId) or hasAdminRole) isHandledBy deletePost
         }
     }
 }
