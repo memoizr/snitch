@@ -31,7 +31,7 @@ data class Endpoint<B : Any>(
     val after: AfterAction = {},
     val decorator: DecoratedWrapper.() -> DecoratedWrapper = { this },
 ) {
-    infix fun decorate(decoration: DecoratedWrapper.() -> HttpResponse<*, *>): Endpoint<B> {
+    infix fun decorate(decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>): Endpoint<B> {
         val previousDecorator = this.decorator
         return copy(
             decorator = { DecoratedWrapper({ decoration(previousDecorator(this)) }, wrap) }
@@ -82,7 +82,7 @@ data class Endpoint<B : Any>(
         next().also { action(wrap, it) }
     }
 
-    infix fun check(condition: Condition) = decorate {
+    infix fun onlyIf(condition: Condition) = decorate {
         when (val result = condition.check(wrap)) {
             is ConditionResult.Successful -> next()
             is ConditionResult.Failed -> result.response

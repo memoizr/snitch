@@ -8,5 +8,5 @@ import me.snitchon.service.Endpoint
 typealias Routes = Router.() -> Unit
 typealias Decoration = DecoratedWrapper.() -> HttpResponse<*, *>
 typealias BeforeAction =  RequestWrapper.() -> Unit
-typealias AfterAction = RequestWrapper.(HttpResponse<*, *>) -> Unit
+typealias AfterAction = RequestWrapper.(HttpResponse<out Any, *>) -> Unit
 typealias EndpointMap = Endpoint<*>.() -> Endpoint<*>

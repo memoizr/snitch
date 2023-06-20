@@ -19,12 +19,12 @@ class Handler<Request : Any, Response, S : StatusCodes>(val block: context(Parse
     }
 }
 class BodiedHandler<B: Any> {
-    infix fun <T, S: StatusCodes> handle(block: context(Parser) Context<B>.() -> HttpResponse<T, S>) = Handler<B, T,S>(block)
+    infix fun <T, S: StatusCodes> handling(block: context(Parser) Context<B>.() -> HttpResponse<T, S>) = Handler<B, T,S>(block)
     infix fun <T, S: StatusCodes> thenHandling(block: context(Parser) Context<B>.() -> HttpResponse<T, S>) = Handler<B, T,S>(block)
 }
-fun <B: Any, T, S: StatusCodes> handle(b: KClass<B>, block: context(Parser) Context<B>.() -> HttpResponse<T, S>) = Handler<B, T,S>(block)
-fun <B: Any, T, S: StatusCodes> handle(b: Function<B>, block: context(Parser) Context<B>.() -> HttpResponse<T, S>) = Handler<B, T,S>(block)
-fun <T, S: StatusCodes> handle(block: context(Parser) Context<Nothing>.() -> HttpResponse<T, S>) = Handler<Nothing, T,S>(block)
+fun <B: Any, T, S: StatusCodes> handling(b: KClass<B>, block: context(Parser) Context<B>.() -> HttpResponse<T, S>) = Handler<B, T,S>(block)
+fun <B: Any, T, S: StatusCodes> handling(b: Function<B>, block: context(Parser) Context<B>.() -> HttpResponse<T, S>) = Handler<B, T,S>(block)
+fun <T, S: StatusCodes> handling(block: context(Parser) Context<Nothing>.() -> HttpResponse<T, S>) = Handler<Nothing, T,S>(block)
 
 inline fun <reified B: Any> parsing() = BodiedHandler<B>()
 fun noBody() = BodiedHandler<Nothing>()

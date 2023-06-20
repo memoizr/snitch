@@ -1,7 +1,6 @@
 package me.snitchon.example.api.users
 
 import me.snitchon.example.api.*
-import me.snitchon.example.api.Headers.accessToken
 import me.snitchon.example.api.Paths.postId
 import me.snitchon.example.api.Paths.userId
 import me.snitchon.example.api.auth.*
@@ -13,11 +12,10 @@ import me.snitchon.example.security.Role
 import me.snitchon.example.security.SecurityModule.hasher
 import me.snitchon.example.security.SecurityModule.jwt
 import me.snitchon.example.types.*
-import me.snitchon.extensions.print
 import me.snitchon.parameters.PathParam
 import me.snitchon.request.Context
 import me.snitchon.request.RequestWrapper
-import me.snitchon.request.handle
+import me.snitchon.request.handling
 import me.snitchon.request.parsing
 import me.snitchon.router.routes
 import me.snitchon.types.ErrorResponse
@@ -30,17 +28,17 @@ val usersController = routes {
 
     userId / "posts" / {
         authenticated {
-            GET() check principalMatches(userId) isHandledBy getPosts
-            POST() check principalMatches(userId) with body<CreatePostRequest>() isHandledBy createPost
+            GET() onlyIf principalEquals(userId) isHandledBy getPosts
+            POST() onlyIf principalEquals(userId) with body<CreatePostRequest>() isHandledBy createPost
 
             GET(postId) isHandledBy getPost
-            PUT(postId) check principalMatches(userId) with body<UpdatePostRequest>() isHandledBy updatePost
-            DELETE(postId) check (principalMatches(userId) or hasAdminRole) isHandledBy deletePost
+            PUT(postId) with body<UpdatePostRequest>() onlyIf principalEquals(userId) isHandledBy updatePost
+            DELETE(postId) onlyIf (principalEquals(userId) or hasAdminRole) isHandledBy deletePost
         }
     }
 }
 
-private val updatePost by parsing<UpdatePostRequest>() handle {
+private val updatePost by parsing<UpdatePostRequest>() handling {
     transaction {
         postsRepository().updatePost(
             UpdatePostAction(
@@ -52,28 +50,28 @@ private val updatePost by parsing<UpdatePostRequest>() handle {
     }.noContent
 }
 
-private val getPost by handle {
+private val getPost by handling {
     transaction {
         postsRepository().getPost(PostId(request[postId]))
             ?.toResponse?.ok
-            ?: `404`()
+            ?: NOT_FOUND()
     }
 }
 
-private val deletePost by handle {
+private val deletePost by handling {
     transaction {
         postsRepository().deletePost(principal, PostId(request[postId]))
     }.noContent
 }
 
-private val getPosts by handle {
+private val getPosts by handling {
     transaction {
         postsRepository().getPosts(principal)
             .toResponse.ok
     }
 }
 
-private val createPost by parsing<CreatePostRequest>() handle {
+private val createPost by parsing<CreatePostRequest>() handling {
     transaction {
         postsRepository().putPost(
             CreatePostAction(
@@ -89,7 +87,7 @@ private val createPost by parsing<CreatePostRequest>() handle {
     }
 }
 
-private val userLogin by parsing<LoginRequest>() handle {
+private val userLogin by parsing<LoginRequest>() handling {
     transaction { usersRepository().findHashBy(Email(body.email)) }
         ?.let {
             if (hasher().match(body.password, it.second))
@@ -98,7 +96,7 @@ private val userLogin by parsing<LoginRequest>() handle {
         } ?: InvalidCredentials().badRequest()
 }
 
-private val createUser by parsing<CreateUserRequest>() handle {
+private val createUser by parsing<CreateUserRequest>() handling {
     transaction {
         usersRepository().putUser(
             CreateUserAction(
@@ -112,28 +110,26 @@ private val createUser by parsing<CreateUserRequest>() handle {
     }.mapFailure {
         when (code) {
             UNIQUE_VIOLATION -> EmailExists().badRequest()
-            else -> `500`()
+            else -> SERVER_ERROR()
         }
     }
 }
 
-fun <T, S : StatusCodes> Context<*>.`403`() =
+fun <T, S : StatusCodes> Context<*>.FORBIDDEN() =
     ErrorResponse(403, "forbidden").forbidden<T, _, S>()
 
-fun <T, S : StatusCodes> RequestWrapper.`403`() =
+fun <T, S : StatusCodes> RequestWrapper.FORBIDDEN() =
     ErrorResponse(403, "forbidden").forbidden<T, _, S>()
 
-fun <T, S : StatusCodes> RequestWrapper._403() =
-    ErrorResponse(403, "forbidden").forbidden<T, _, S>()
+fun <T, S : StatusCodes> RequestWrapper.UNAUTHORIZED() =
+    ErrorResponse(401, "unauthorized").unauthorized<T, _, S>()
 
-fun <T, S : StatusCodes> RequestWrapper.`401`() =
-    ErrorResponse(401, "unauhtoreized").unauthorized<T, _, S>()
-
-fun <T, S : StatusCodes> Context<*>.`404`() =
+fun <T, S : StatusCodes> Context<*>.NOT_FOUND() =
     ErrorResponse(404, "forbidden").notFound<T, _, S>()
 
-fun <T, S : StatusCodes> Context<*>.`500`() =
+fun <T, S : StatusCodes> Context<*>.SERVER_ERROR() =
     ServerError().serverError<T, _, S>()
 
 fun Context<*>.principalIsNot(param: PathParam<out Any, *>) =
     request[param] != principal.value
+
