@@ -27,8 +27,6 @@ data class Endpoint<B : Any>(
     val body: Body<B>,
     val tags: List<String>? = emptyList(),
     val visibility: Visibility = Visibility.PUBLIC,
-    val before: BeforeAction = {},
-    val after: AfterAction = {},
     val decorator: DecoratedWrapper.() -> DecoratedWrapper = { this },
 ) {
     infix fun decorate(decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>): Endpoint<B> {
@@ -52,8 +50,6 @@ data class Endpoint<B : Any>(
         body,
         tags,
         visibility,
-        before,
-        after,
         decorator,
     )
 

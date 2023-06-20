@@ -2,9 +2,7 @@ package me.snitchon.example.api.validation
 
 import com.snitch.me.snitchon.Validator
 import me.snitchon.example.security.Authentication
-import me.snitchon.example.security.JWTClaims
 import me.snitchon.example.security.SecurityModule.jwt
-import me.snitchon.example.types.UserId
 import me.snitchon.parsing.Parser
 
 object ValidAccessToken : Validator<String, Authentication> {

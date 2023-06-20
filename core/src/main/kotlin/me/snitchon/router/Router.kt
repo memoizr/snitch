@@ -3,7 +3,7 @@ package me.snitchon.router
 import me.snitchon.parameters.PathParam
 import me.snitchon.parsing.Parser
 import me.snitchon.types.HandlerResponse
-import me.snitchon.request.Context
+import me.snitchon.request.TypedRequestWrapper
 import me.snitchon.response.HttpResponse
 import me.snitchon.service.Endpoint
 import me.snitchon.config.SnitchConfig
@@ -38,15 +38,12 @@ class Router(
             EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
             endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
         ) { request ->
-//            before(request)
             decorator(
                 DecoratedWrapper({
                     endpointResponse.handler(
                         parser,
-                        Context(request)
-                    ).also {
-                        after(request, it)
-                    }
+                        TypedRequestWrapper(request)
+                    )
                 }, request)
             ).next()
         }
@@ -57,7 +54,7 @@ class Router(
     ): Endpoint<B> = addEndpoint(handlerResponse)
 
     inline infix fun <B : Any, reified T : Any, reified S : StatusCodes> Endpoint<B>.isHandledBy(
-        noinline handler: context(Parser) Context<B>.() -> HttpResponse<T, S>
+        noinline handler: context(Parser) TypedRequestWrapper<B>.() -> HttpResponse<T, S>
     ): Endpoint<B> = addEndpoint(
         HandlerResponse(S::class.starProjectedType, T::class.starProjectedType, handler)
     )
@@ -79,12 +76,11 @@ class Router(
                 EndpointResponse(it.handlerResponse.statusCodes, it.handlerResponse.type),
                 it.handlerResponse,
             ) { request ->
-//                endpoint.before(request)
                 endpoint.decorator(
                     DecoratedWrapper({
                         it.handlerResponse.handler(
                             parser,
-                            Context(request)
+                            TypedRequestWrapper(request)
                         )
                     }, request)
                 ).next()

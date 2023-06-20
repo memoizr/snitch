@@ -13,7 +13,7 @@ import me.snitchon.example.security.SecurityModule.hasher
 import me.snitchon.example.security.SecurityModule.jwt
 import me.snitchon.example.types.*
 import me.snitchon.parameters.PathParam
-import me.snitchon.request.Context
+import me.snitchon.request.TypedRequestWrapper
 import me.snitchon.request.RequestWrapper
 import me.snitchon.request.handling
 import me.snitchon.request.parsing
@@ -115,7 +115,7 @@ private val createUser by parsing<CreateUserRequest>() handling {
     }
 }
 
-fun <T, S : StatusCodes> Context<*>.FORBIDDEN() =
+fun <T, S : StatusCodes> TypedRequestWrapper<*>.FORBIDDEN() =
     ErrorResponse(403, "forbidden").forbidden<T, _, S>()
 
 fun <T, S : StatusCodes> RequestWrapper.FORBIDDEN() =
@@ -124,12 +124,12 @@ fun <T, S : StatusCodes> RequestWrapper.FORBIDDEN() =
 fun <T, S : StatusCodes> RequestWrapper.UNAUTHORIZED() =
     ErrorResponse(401, "unauthorized").unauthorized<T, _, S>()
 
-fun <T, S : StatusCodes> Context<*>.NOT_FOUND() =
+fun <T, S : StatusCodes> TypedRequestWrapper<*>.NOT_FOUND() =
     ErrorResponse(404, "forbidden").notFound<T, _, S>()
 
-fun <T, S : StatusCodes> Context<*>.SERVER_ERROR() =
+fun <T, S : StatusCodes> TypedRequestWrapper<*>.SERVER_ERROR() =
     ServerError().serverError<T, _, S>()
 
-fun Context<*>.principalIsNot(param: PathParam<out Any, *>) =
+fun TypedRequestWrapper<*>.principalIsNot(param: PathParam<out Any, *>) =
     request[param] != principal.value
 

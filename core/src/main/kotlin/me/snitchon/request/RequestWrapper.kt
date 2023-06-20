@@ -85,7 +85,6 @@ interface RequestWrapper : CommonResponses {
                     .filterValid(param)
                     ?.let { param.pattern.parse(parser, it) } ?: param.default
             }
-
 }
 
 private inline fun RequestWrapper.checkParamIsRegistered(param: Parameter<*, *>) =
