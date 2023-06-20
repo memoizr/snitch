@@ -147,12 +147,11 @@ Because code should be as readable as possible, and it should not require much c
 - For those who like to see their code compile and not have to wait for the runtime to tell them they made a typo 
 
 #### Who is it not for?
-***You*** most likely. Because you and your job suck, statistically speaking.
+- Those who prefer a strictly object-oriented approach instead of function-first
    
 #### System requirements
 - Java 17 or higher
 - Kotlin 1.8.20 or higher
-- Bag of chips
 
 #### How to contribute  
 Fork the repository and submit a pull request. We will review it as soon as possible.
