@@ -2,8 +2,9 @@ package me.snitchon.parameters
 
 import me.snitchon.documentation.Visibility
 import com.snitch.me.snitchon.Validator
+import kotlin.reflect.KProperty
 
-sealed class Parameter<T,R>(
+sealed class Parameter<T, R>(
     open val type: Class<*>,
     open val name: String,
     open val pattern: Validator<T, R>,
@@ -13,7 +14,7 @@ sealed class Parameter<T,R>(
     open val invalidAsMissing: Boolean = false
 )
 
-sealed class HeaderParameter<T,R>(
+sealed class HeaderParameter<T, R>(
     override val type: Class<*>,
     override val name: String,
     override val pattern: Validator<T, R>,
@@ -24,7 +25,7 @@ sealed class HeaderParameter<T,R>(
     open val visibility: Visibility = Visibility.PUBLIC
 ) : Parameter<T, R>(type, name, pattern, description, required, emptyAsMissing)
 
-sealed class QueryParameter<T,R>(
+sealed class QueryParameter<T, R>(
     override val type: Class<*>,
     override val name: String,
     override val pattern: Validator<T, R>,
@@ -35,12 +36,13 @@ sealed class QueryParameter<T,R>(
     open val visibility: Visibility = Visibility.PUBLIC
 ) : Parameter<T, R>(type, name, pattern, description, required, emptyAsMissing)
 
-data class PathParam<T,R>(
+data class PathParam<T, R>(
     val path: String? = null,
     override val type: Class<*>,
     override val name: String,
     override val pattern: Validator<T, R>,
-    override val description: String) : Parameter<T, R>(type, name, pattern, description, true, false) {
+    override val description: String
+) : Parameter<T, R>(type, name, pattern, description, true, false) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -63,7 +65,35 @@ data class PathParam<T,R>(
     }
 }
 
-data class HeaderParam<T,R>(
+class PathParamDelegate<T, R>(
+    val type: Class<*>,
+    val name: String,
+    val pattern: Validator<T, R>,
+    val description: String,
+) {
+    operator fun getValue(
+        nothing: Nothing?,
+        property: KProperty<*>
+    ) = PathParam(
+        "{${name.ifEmpty { property.name }}}",
+        type,
+        name.ifEmpty { property.name },
+        pattern,
+        description,
+    )
+    operator fun getValue(
+        nothing: Any?,
+        property: KProperty<*>
+    ) = PathParam(
+        "{${name.ifEmpty { property.name }}}",
+        type,
+        name.ifEmpty { property.name },
+        pattern,
+        description,
+    )
+}
+
+data class HeaderParam<T, R>(
     override val type: Class<*>,
     override val name: String,
     override val pattern: Validator<T, R>,
@@ -73,7 +103,30 @@ data class HeaderParam<T,R>(
     override val visibility: Visibility
 ) : HeaderParameter<T, R>(type, name, pattern, description, true, emptyAsMissing, invalidAsMissing)
 
-data class OptionalHeaderParam<T,R>(
+class HeaderParamDelegate<T, R>(
+    val type: Class<*>,
+    val name: String,
+    val pattern: Validator<T, R>,
+    val description: String,
+    val emptyAsMissing: Boolean,
+    val invalidAsMissing: Boolean,
+    val visibility: Visibility
+) {
+    operator fun getValue(
+        nothing: Nothing?,
+        property: KProperty<*>
+    ) = HeaderParam(
+        type,
+        name.ifEmpty { property.name },
+        pattern,
+        description,
+        emptyAsMissing,
+        invalidAsMissing,
+        visibility
+    )
+}
+
+data class OptionalHeaderParam<T, R>(
     override val type: Class<*>,
     override val name: String,
     override val pattern: Validator<T, R>,
@@ -84,7 +137,7 @@ data class OptionalHeaderParam<T,R>(
     override val visibility: Visibility
 ) : HeaderParameter<T, R>(type, name, pattern, description, false, emptyAsMissing, invalidAsMissing)
 
-data class OptionalQueryParam<T,R>(
+data class OptionalQueryParam<T, R>(
     override val type: Class<*>,
     override val name: String,
     override val pattern: Validator<T, R>,
@@ -95,7 +148,7 @@ data class OptionalQueryParam<T,R>(
     override val visibility: Visibility
 ) : QueryParameter<T, R>(type, name, pattern, description, false, emptyAsMissing, invalidAsMissing)
 
-data class QueryParam<T,R>(
+data class QueryParam<T, R>(
     override val type: Class<*>,
     override val name: String,
     override val pattern: Validator<T, R>,
@@ -105,56 +158,62 @@ data class QueryParam<T,R>(
     override val visibility: Visibility
 ) : QueryParameter<T, R>(type, name, pattern, description, true, emptyAsMissing, invalidAsMissing)
 
-inline fun <reified T, R> optionalQuery(name: String,
-                                        description: String = "",
-                                        condition: Validator<T, R>,
-                                        emptyAsMissing: Boolean = false,
-                                        invalidAsMissing: Boolean = false,
-                                        visibility: Visibility = Visibility.PUBLIC) =
-        OptionalQueryParam(
-                T::class.java,
-                name,
-                condition.optional(),
-                description,
-                default = null,
-                emptyAsMissing = emptyAsMissing,
-                invalidAsMissing = invalidAsMissing,
-                visibility = visibility
-        )
+inline fun <reified T, R> optionalQuery(
+    name: String,
+    description: String = "",
+    condition: Validator<T, R>,
+    emptyAsMissing: Boolean = false,
+    invalidAsMissing: Boolean = false,
+    visibility: Visibility = Visibility.PUBLIC
+) =
+    OptionalQueryParam(
+        T::class.java,
+        name,
+        condition.optional(),
+        description,
+        default = null,
+        emptyAsMissing = emptyAsMissing,
+        invalidAsMissing = invalidAsMissing,
+        visibility = visibility
+    )
 
-inline fun <reified T, R> optionalQuery(name: String,
-                                        description: String ="",
-                                        condition: Validator<T, R>,
-                                        default: R,
-                                        emptyAsMissing: Boolean = false,
-                                        invalidAsMissing: Boolean = false,
-                                        visibility: Visibility = Visibility.PUBLIC) =
-        OptionalQueryParam(
-                T::class.java,
-                name,
-                condition,
-                description,
-                default = default,
-                emptyAsMissing = emptyAsMissing,
-                invalidAsMissing = invalidAsMissing,
-                visibility = visibility
-        )
+inline fun <reified T, R> optionalQuery(
+    name: String,
+    description: String = "",
+    condition: Validator<T, R>,
+    default: R,
+    emptyAsMissing: Boolean = false,
+    invalidAsMissing: Boolean = false,
+    visibility: Visibility = Visibility.PUBLIC
+) =
+    OptionalQueryParam(
+        T::class.java,
+        name,
+        condition,
+        description,
+        default = default,
+        emptyAsMissing = emptyAsMissing,
+        invalidAsMissing = invalidAsMissing,
+        visibility = visibility
+    )
 
-inline fun <reified T, R> query(name: String,
-                                description: String = "",
-                                condition: Validator<T, R>,
-                                emptyAsMissing: Boolean = false,
-                                invalidAsMissing: Boolean = false,
-                                visibility: Visibility = Visibility.PUBLIC) =
-        QueryParam(
-                T::class.java,
-                name,
-                condition,
-                description,
-                emptyAsMissing = emptyAsMissing,
-                invalidAsMissing = invalidAsMissing,
-                visibility = visibility
-        )
+inline fun <reified T, R> query(
+    name: String,
+    description: String = "",
+    condition: Validator<T, R>,
+    emptyAsMissing: Boolean = false,
+    invalidAsMissing: Boolean = false,
+    visibility: Visibility = Visibility.PUBLIC
+) =
+    QueryParam(
+        T::class.java,
+        name,
+        condition,
+        description,
+        emptyAsMissing = emptyAsMissing,
+        invalidAsMissing = invalidAsMissing,
+        visibility = visibility
+    )
 
 inline fun <reified T, R> optionalHeader(
     name: String,
@@ -162,17 +221,18 @@ inline fun <reified T, R> optionalHeader(
     condition: Validator<T, R>,
     emptyAsMissing: Boolean = false,
     invalidAsMissing: Boolean = false,
-    visibility: Visibility = Visibility.PUBLIC) =
-        OptionalHeaderParam(
-                T::class.java,
-                name,
-                condition.optional(),
-                description,
-                default = null,
-                emptyAsMissing = emptyAsMissing,
-                invalidAsMissing = invalidAsMissing,
-                visibility = visibility
-        )
+    visibility: Visibility = Visibility.PUBLIC
+) =
+    OptionalHeaderParam(
+        T::class.java,
+        name,
+        condition.optional(),
+        description,
+        default = null,
+        emptyAsMissing = emptyAsMissing,
+        invalidAsMissing = invalidAsMissing,
+        visibility = visibility
+    )
 
 inline fun <reified T, R> optionalHeader(
     name: String,
@@ -181,38 +241,63 @@ inline fun <reified T, R> optionalHeader(
     emptyAsMissing: Boolean = false,
     default: R,
     invalidAsMissing: Boolean = false,
-    visibility: Visibility = Visibility.PUBLIC) =
-        OptionalHeaderParam(
-                T::class.java,
-                name,
-                condition,
-                description,
-                default = default,
-                emptyAsMissing = emptyAsMissing,
-                invalidAsMissing = invalidAsMissing,
-                visibility = visibility
-        )
-
-inline fun <reified T, R> header(
-    name: String,
-    description: String = "",
-    condition: Validator<T, R>,
-    emptyAsMissing: Boolean = false,
-    invalidAsMissing: Boolean = false,
     visibility: Visibility = Visibility.PUBLIC
-) = HeaderParam(
+) =
+    OptionalHeaderParam(
         T::class.java,
         name,
         condition,
         description,
+        default = default,
         emptyAsMissing = emptyAsMissing,
         invalidAsMissing = invalidAsMissing,
         visibility = visibility
+    )
+
+inline fun <reified T, R> header(
+    name: String,
+    condition: Validator<T, R>,
+    description: String = "",
+    emptyAsMissing: Boolean = false,
+    invalidAsMissing: Boolean = false,
+    visibility: Visibility = Visibility.PUBLIC
+) = HeaderParam(
+    T::class.java,
+    name,
+    condition,
+    description,
+    emptyAsMissing = emptyAsMissing,
+    invalidAsMissing = invalidAsMissing,
+    visibility = visibility
+)
+
+inline fun <reified T, R> headerParam(
+    name: String = "",
+    condition: Validator<T, R>,
+    description: String = "",
+    emptyAsMissing: Boolean = false,
+    invalidAsMissing: Boolean = false,
+    visibility: Visibility = Visibility.PUBLIC
+) = HeaderParamDelegate(
+    T::class.java,
+    name,
+    condition,
+    description,
+    emptyAsMissing = emptyAsMissing,
+    invalidAsMissing = invalidAsMissing,
+    visibility = visibility
 )
 
 inline fun <reified T, R> path(name: String, description: String = "", condition: Validator<T, R>) = PathParam(
-        "{${name}}",
-        T::class.java,
-        name,
-        condition,
-        description)
+    "{${name}}",
+    T::class.java,
+    name,
+    condition,
+    description
+)
+inline fun <reified T, R> pathParam(condition: Validator<T, R>, name: String = "", description: String = "", ) = PathParamDelegate(
+    T::class.java,
+    name,
+    condition,
+    description
+)

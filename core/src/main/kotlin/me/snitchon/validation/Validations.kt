@@ -61,3 +61,21 @@ class Enum<E : kotlin.Enum<*>>(e: KClass<E>) : Validator<E, E> {
 }
 
 inline fun <reified E : kotlin.Enum<*>> enum() = Enum(E::class)
+
+fun <From, To> validator(
+    description: String,
+    regex: Regex = """^.+$""".toRegex(DOT_MATCHES_ALL), mapper: Parser.(String) -> To
+) = object : Validator<From, To> {
+    override val description = description
+    override val regex = regex
+    override val parse: Parser.(String) -> To = mapper
+}
+
+fun <To> stringValidator(
+    description: String,
+    regex: Regex = """^.+$""".toRegex(DOT_MATCHES_ALL), mapper: Parser.(String) -> To
+) = object : Validator<String, To> {
+    override val description = description
+    override val regex = regex
+    override val parse: Parser.(String) -> To = mapper
+}

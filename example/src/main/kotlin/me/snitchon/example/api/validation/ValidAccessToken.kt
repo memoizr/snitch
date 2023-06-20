@@ -1,12 +1,6 @@
 package me.snitchon.example.api.validation
 
-import com.snitch.me.snitchon.Validator
-import me.snitchon.example.security.Authentication
+import com.snitch.me.snitchon.stringValidator
 import me.snitchon.example.security.SecurityModule.jwt
-import me.snitchon.parsing.Parser
 
-object ValidAccessToken : Validator<String, Authentication> {
-    override val description = "valid jwt"
-    override val regex = """^.+$""".toRegex(RegexOption.DOT_MATCHES_ALL)
-    override val parse: Parser.(String) -> Authentication = { jwt().validate(it) }
-}
+val validAccessToken = stringValidator("valid jwt") { jwt().validate(it) }

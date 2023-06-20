@@ -10,7 +10,6 @@ import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsing.Parser
 import me.snitchon.request.Handler
-import me.snitchon.router.routes
 import me.snitchon.types.Sealed
 import me.snitchon.types.ErrorResponse
 import org.junit.Test
@@ -35,8 +34,8 @@ private val offset =
     optionalQuery(name = "offset", description = "description", condition = NonNegativeInt, default = 30)
 val limit = optionalQuery(name = "limit", description = "description", condition = NonNegativeInt)
 
-val qHead = header(name = "q", description = "description", condition = NonEmptySingleLineString)
-val intHead = header(name = "int", description = "description", condition = NonNegativeInt)
+val qHead = header(name = "q", condition = NonEmptySingleLineString, description = "description")
+val intHead = header(name = "int", condition = NonNegativeInt, description = "description")
 val offsetHead = optionalHeader(
     name = "offsetHead",
     description = "description",

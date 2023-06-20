@@ -82,34 +82,15 @@ val createPost by parsing<CreatePostRequest>() handling {
 
 #### Expressive and exendable parameter definition, parsing and validation
 ```Kotlin
-object Paths {
-    val userId = path("userId", condition = NonEmptyString)
-    val postId = path("postId", condition = NonEmptyString)
-}
-
-object Headers {
-    val accessToken = header("X-Access-Token",
-        condition = ValidAccessToken,
-        description = "Access token for the principal user")
-}
+val userId by path()
+val postId by path()
+val accessToken by header(validAccessToken)
 
 // Your custom parameter validation and parsing logic
-object ValidAccessToken : Validator<String, Authentication> {
-    override val description = "valid jwt"
-    override val regex = """^.+$""".toRegex(RegexOption.DOT_MATCHES_ALL)
-    override val parse: Parser.(String) -> Authentication = { jwt().validate(it) }
-}
-
-sealed interface Authentication {
-    data class Authenticated(val claims: JWTClaims) : Authentication
-    interface Unauthenticated : Authentication
-    object InvalidToken : Unauthenticated
-    object ExpiredToken : Unauthenticated
-    object MissingToken : Unauthenticated
-    object InvalidClaims : Unauthenticated
-}
+val validAccessToken = stringValidator("valid jwt") { jwt().validate(it) }
 ```
 #### Middleware
+Here's how you would define a simple logger middleware
 ```Kotlin
 val Router.log get() = using {
         logger().info("Begin Request: ${request.method.name} ${request.path}")

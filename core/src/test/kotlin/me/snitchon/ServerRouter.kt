@@ -15,7 +15,6 @@ import me.snitchon.parameters.optionalQuery
 import me.snitchon.parameters.path
 import me.snitchon.parsing.Parser
 import me.snitchon.request.Handler
-import me.snitchon.router.Router
 import me.snitchon.router.Routes
 import me.snitchon.types.Format
 import me.snitchon.types.Sealed
