@@ -8,7 +8,7 @@ data class EndpointBundle<T : Any>(
     val endpoint: Endpoint<T>,
     val response: EndpointResponse,
     val handlerResponse: HandlerResponse<Any, Any, out StatusCodes>,
-    val handler: (RequestWrapper) -> HttpResponse<*, *>
+    inline val handler: (RequestWrapper) -> HttpResponse<*, *>
 ) {
     val params = (endpoint.headerParams + endpoint.queryParams + endpoint.pathParams)
 }

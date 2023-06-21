@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "1.8.20"
     `maven-publish`
     `java-library`
+    jacoco
 }
 
 group = "com.snitch.core"
@@ -47,5 +48,23 @@ publishing {
 
             from(components["java"])
         }
+    }
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+}
+jacoco {
+    toolVersion = "0.8.8"
+    reportsDirectory.set(layout.buildDirectory.dir("customJacocoReportDir"))
+}
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
     }
 }

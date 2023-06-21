@@ -71,6 +71,7 @@ class PathParamDelegate<T, R>(
     val pattern: Validator<T, R>,
     val description: String,
 ) {
+
     operator fun getValue(
         nothing: Nothing?,
         property: KProperty<*>
@@ -96,7 +97,7 @@ class PathParamDelegate<T, R>(
 data class HeaderParam<T, R>(
     override val type: Class<*>,
     override val name: String,
-    override val pattern: Validator<T, R>,
+    override inline val pattern: Validator<T, R>,
     override val description: String,
     override val emptyAsMissing: Boolean,
     override val invalidAsMissing: Boolean,
@@ -128,7 +129,7 @@ class HeaderParamDelegate<T, R>(
 
 data class OptionalHeaderParam<T, R>(
     override val type: Class<*>,
-    override val name: String,
+    override inline val name: String,
     override val pattern: Validator<T, R>,
     override val description: String,
     val default: R,

@@ -1,6 +1,8 @@
 ## Snitch 
 Snitch helps you create a production-grade HTTP layer for your applications and (micro)services with minimal effort. To create ***complete*** documentation for them with ***no*** effort.
 
+Snitch is a thin layer built upon long established and well-supported embedded web servers such as Undertow. Thanks to Kotlin's inlining capabilities the performance of Snitch is essentially the same as that of the underlying web server.
+
 Our primary goals are:
 - To create the most readable and maintainable API for creating web services
 - By readable we mean readable production code where routes are complex, parameters need validation, parsing and mapping to domain types, errors need to be handled, deal with authentication and permissions, etc.

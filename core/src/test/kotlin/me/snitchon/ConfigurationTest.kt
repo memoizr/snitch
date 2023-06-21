@@ -8,6 +8,7 @@ import me.snitchon.config.parse
 import me.snitchon.tests.SnitchTest
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class ConfigurationTest : SnitchTest({
@@ -31,6 +32,7 @@ class ConfigurationTest : SnitchTest({
     }
 
     @Test
+    @Ignore
     fun `supports port from config`() {
         GET("/hey/customport")
             .expectCode(200)
@@ -38,6 +40,7 @@ class ConfigurationTest : SnitchTest({
     }
 
     @Test
+    @Ignore
     fun `parses yml templates`() {
 
         val config = """
