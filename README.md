@@ -1,5 +1,4 @@
-## Snitch
-
+## Snitch 
 Snitch helps you create a production-grade HTTP layer for your applications and (micro)services with minimal effort. To create ***complete*** documentation for them with ***no*** effort.
 
 Our primary goals are:
@@ -174,11 +173,17 @@ Snitch uses Undertow as the default embedded web server. Undertow was chosen bec
 
 Snitch is designed to be only a very thin overlay on top of the embedded webserver, so it does not add any overhead to the request handling process. It's designed to be as fast as possible, and it's therefore almost as fast as the underlying web server is. Object instantiation is kept to a minium to not cause GC pressure. Call stack is also kept as shallow as possible.
 Reflection is not used at all, and the only reflection that happens is when the documentation is generated, which is an optional step for production code that would occour at most once during startup. This is done only once, and the results are cached, so it does not happen on every request. 
-The application has a small classpath, and the only dependencies are the web server and the JSON library. This means that the application can be deployed as a single jar file, and it's easy to deploy and run it in a containerized environment. A small application complete with documentation can run in as little as 12MB of ram on top of the JVM.
+The application has a small classpath, and the only dependencies are the web server and the JSON library. This means that the application can be deployed as a single jar file, and it's easy to deploy and run it in a containerized environment. A small application complete with documentation can run in as little as 12MB of ram on top of the JVM. This library has been successfuly used in a variety of settings, from resource constrained environments such as Android to high performance environments such as high throughput microservices. 
 
 
 #### Small learning curve
 The library is actually very small and a complete detailed overview can be had in a matter of hours. Powerful features such as guards, middleware and others are built on top of a small number of core concepts, and really there isn't any magic involved. The codebase only has a few thousand lines of code. Given a fluency of the Kotlin language it should be one of the easiest frameworks to truly understand how it works. Really it's just a thin wrapper around the embedded web server.
+
+#### Learning resources
+Please refer to the 'example` folder for a reference implementation of a simple reddit-like service. The example tries to have production-like qualities such as handling authorization and authentication, database interaction, it shows how it works well and integrates with dependency injection libraries such as Shank. Also please refer to the wiki for a more detailed overview of the library as well as tutorials.
+
+#### Community support
+Join us on our slack channel at https://join.slack.com/t/snitch-f to ask questions, get help, or just to chat. We're a small but growing community but we're friendly and we're always happy to help.
 
 #### Why does it exist
 Because code should be as readable as possible, and it should not require much ceremony to do simple stuff. If you want to do complex stuff it should be simple to extend the framework to do so. Resources are precious, you should not waste them on reflection or huge classpaths for doing basic stuff. Documentation is crucial, it should be generated automatically and be always up to date, and nobody should ever touch OpenAPI YAML or JSON files: we stand for these basic human rights.
@@ -196,6 +201,6 @@ Because code should be as readable as possible, and it should not require much c
 - Kotlin 1.8.20 or higher
 
 #### How to contribute  
-Fork the repository and submit a pull request. We will review it as soon as possible.
+This library evolved over the years, initially as an internat tool deployed in a variety of scenarios, but now released as an open-source project. To contribute, please fork the repository and submit a pull request. We will review it as soon as possible. Alternatively, open an issue and we'll try to address it as soon as possible.
    
  
