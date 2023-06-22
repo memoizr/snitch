@@ -74,6 +74,113 @@ fun main() {
 } 
 ```
 
+Of course in a real application you'd like to separate the route declarations from the endpoint implementations.
+
+```kotlin
+val root = routes {
+    GET("foo") isHandledBy getFoo
+    POST("foo") with body<FooRequest>() isHandledBy postFoo
+}
+
+val getFoo by handling {
+    "bar".ok
+}
+
+val postFoo by parsing<FooRequest>() handling {
+    "fooValue: ${body.fooValue}".created
+}
+```
+
+#### Route Nesting
+Services often have hundreds of routes, organized hierarchically. This can be modeled in Snitch:
+```kotlin
+val root = routes {
+    "health" / healthController
+    "users" / usersController
+    "posts" / postsController
+    ...
+}
+
+val usersController = routes {
+    POST() with body<CreateUserRequest> isHandledBy createUser
+    
+    userId / {
+        GET() isHandledBy getUser
+        DELETE() isHandledBy deleteUser
+        
+        "posts" / {
+            GET() isHandledBy getPosts
+            POST() with body<CreatePostRequest> isHandledBy createPost
+            postId / {
+                GET() isHandledBy getPost
+            }
+        }
+    }
+}
+```
+
+This will define the following routes:
+```
+POST users
+GET users/{userId}
+DELETE users/{userId}
+GET users/{userId}/posts
+POST users/{userId}/posts
+GET users/{userId}/posts/{postId}
+```
+
+Different teams however will have different styles that they endorse, so for those who would rather have a less DRY but more explicit route declaration, they can define the routes as:
+
+```kotlin
+val root = routes {
+    healthController
+    usersController
+    postsController
+    ...
+}
+val usersController = routes {
+    POST("users") with body<CreateUserRequest> isHandledBy createUser
+    
+    GET("users" / userId) isHandledBy getUser
+    DELETE("users" / userId) isHandledBy deleteUser
+
+    GET("users" / userId / "posts") isHandledBy getPosts
+    POST("users" / userId / "posts") with body<CreatePostRequest> isHandledBy createPost
+    GET("users" / userId / "posts" / postId) isHandledBy getPost
+}
+```
+
+The DSL is flexible so for teams that would like a measured and hybrid approach they can define the routes howerver they wish. For example grouping by path for all the actions supported on it:
+
+```kotlin
+val root = routes {
+    healthController
+    usersController
+    postsController
+    ...
+}
+val usersController = routes {
+    "users" / {
+        POST() with body<CreateUserRequest> isHandledBy createUser
+
+        "users" / userId / {
+            GET() isHandledBy getUser
+            DELETE() isHandledBy deleteUser
+        }
+
+        "users" / userId / "posts" {
+            GET() isHandledBy getPosts
+            POST() with body<CreatePostRequest> isHandledBy createPost
+        }
+
+        userId / "posts" / postId / {
+            GET() isHandledBy getPost
+        }
+    }
+}
+```
+
+
 #### HTTP input parameters
 
 ```kotlin
