@@ -162,20 +162,19 @@ val root = routes {
 val usersController = routes {
     "users" / {
         POST() with body<CreateUserRequest> isHandledBy createUser
+    }
+    "users" / userId / {
+        GET() isHandledBy getUser
+        DELETE() isHandledBy deleteUser
+    }
 
-        "users" / userId / {
-            GET() isHandledBy getUser
-            DELETE() isHandledBy deleteUser
-        }
+    "users" / userId / "posts" {
+        GET() isHandledBy getPosts
+        POST() with body<CreatePostRequest> isHandledBy createPost
+    }
 
-        "users" / userId / "posts" {
-            GET() isHandledBy getPosts
-            POST() with body<CreatePostRequest> isHandledBy createPost
-        }
-
-        userId / "posts" / postId / {
-            GET() isHandledBy getPost
-        }
+    "users" / userId / "posts" / postId / {
+        GET() isHandledBy getPost
     }
 }
 ```
