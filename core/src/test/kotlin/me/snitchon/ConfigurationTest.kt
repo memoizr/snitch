@@ -15,7 +15,7 @@ class ConfigurationTest : SnitchTest({
     UndertowSnitchService(
         GsonJsonParser,
         loadConfigFromFile("configuration.yml")
-    ).setRoutes {
+    ).onRoutes {
         GET("customport").isHandledBy { "3333".ok }
     }
 }) {

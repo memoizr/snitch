@@ -8,7 +8,7 @@ import me.snitchon.parsers.GsonJsonParser
 
 fun main(args: Array<String>) {
     UndertowSnitchService(GsonJsonParser)
-        .setRoutes(ServerRouter)
+        .onRoutes(ServerRouter)
         .start()
         .generateDocumentation(GsonDocumentationSerializer)
         .servePublicDocumenation()
@@ -16,7 +16,7 @@ fun main(args: Array<String>) {
 
 fun readmeExamples() {
     UndertowSnitchService(GsonJsonParser)
-        .setRoutes {
+        .onRoutes {
             GET("/hello").isHandledBy { "world".ok }
         }
         .start()

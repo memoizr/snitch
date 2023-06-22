@@ -3,10 +3,7 @@ package me.snitchon.example
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.LoggerContext
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.FileAppender
 import io.jsonwebtoken.JwtException
-import undertow.snitch.spark.UndertowSnitchService
 import me.snitchon.config.SnitchConfig
 import me.snitchon.config.SnitchConfig.Service
 import me.snitchon.documentation.generateDocumentation
@@ -23,6 +20,7 @@ import me.snitchon.service.exceptionhandling.handleUnregisteredParameters
 import me.snitchon.types.ErrorResponse
 import net.logstash.logback.encoder.LogstashEncoder
 import org.slf4j.LoggerFactory
+import undertow.snitch.spark.snitch
 
 object Application {
     init {
@@ -42,8 +40,8 @@ object Application {
 
         setUpDatabase()
 
-        return UndertowSnitchService(GsonJsonParser, SnitchConfig(Service(port = port)))
-            .setRoutes(rootRouter)
+        return snitch(GsonJsonParser, SnitchConfig(Service(port = port)))
+            .onRoutes(rootRouter)
             .handleExceptions()
     }
 

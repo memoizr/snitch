@@ -1,12 +1,9 @@
 package me.snitchon
 
 import undertow.snitch.spark.UndertowSnitchService
-import me.snitchon.documentation.generateDocumentation
-import me.snitchon.parsers.GsonDocumentationSerializer
 import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.service.RoutedService
 import me.snitchon.config.SnitchConfig
-import me.snitchon.router.Router
 import me.snitchon.router.Routes
 
 fun testRoutes(basePath: String = "", router: Routes): (Int) -> RoutedService = { port ->
@@ -18,5 +15,5 @@ fun testRoutes(basePath: String = "", router: Routes): (Int) -> RoutedService = 
                 port = port
             )
         )
-    ).setRoutes(router)
+    ).onRoutes(router)
 }

@@ -26,6 +26,11 @@ import java.nio.ByteBuffer
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
+fun snitch(
+    parser: Parser,
+    config: SnitchConfig = SnitchConfig()
+) = UndertowSnitchService(parser, config)
+
 @Suppress("UNCHECKED_CAST")
 class UndertowSnitchService(
     private val parser: Parser,
@@ -41,7 +46,7 @@ class UndertowSnitchService(
     private val routingHandler = RoutingHandler()
     private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.service.port, "localhost") }
 
-    override fun setRoutes(routerConfiguration: Routes): RoutedService {
+    override fun onRoutes(routerConfiguration: Routes): RoutedService {
         val router = Router(config, this@UndertowSnitchService, emptySet(), parser, "")
         routerConfiguration(router)
         return RoutedService(

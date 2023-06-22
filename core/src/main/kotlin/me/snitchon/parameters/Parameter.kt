@@ -1,7 +1,5 @@
 package me.snitchon.parameters
 
-import com.snitch.me.snitchon.NonEmptyString
-import me.snitchon.documentation.Visibility
 import com.snitch.me.snitchon.Validator
 
 sealed class Parameter<T, R>(

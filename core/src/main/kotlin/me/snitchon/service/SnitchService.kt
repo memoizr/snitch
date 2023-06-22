@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 interface SnitchService {
     val config: SnitchConfig
     fun registerMethod(endpointBundle: EndpointBundle<*>, path: String)
-    fun setRoutes(routerConfiguration: Routes): RoutedService
+    fun onRoutes(routerConfiguration: Routes): RoutedService
     fun onStop(action: () -> Unit): SnitchService
 
     fun <T : Throwable, R : HttpResponse<*, *>> handleException(
