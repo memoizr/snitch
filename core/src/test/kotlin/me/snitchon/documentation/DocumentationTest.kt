@@ -36,11 +36,11 @@ class DocumentationTest : InlineSnitchTest() {
 
     @Test
     fun `deals with parameter types`() {
-        val path = path("path", "", NonEmptyString)
-        val header = header("header", NonEmptyString)
-        val optionalHeader = optionalHeader("optionalPath", "", NonEmptyString)
-        val query = query("query", "", NonEmptyString)
-        val optionalQuery = optionalQuery("optionalQuery", "", NonEmptyString)
+        val path by path(NonEmptyString)
+        val header by header(NonEmptyString, "header")
+        val optionalHeader by optionalHeader(NonEmptyString, "optionalPath", "")
+        val query by query(NonEmptyString, "query", "")
+        val optionalQuery by optionalQuery(NonEmptyString, "optionalQuery", "")
         expect that withRoutes {
             GET(path)
                 .with(headers(header, optionalHeader))

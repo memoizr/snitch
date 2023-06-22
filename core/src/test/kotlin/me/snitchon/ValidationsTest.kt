@@ -3,32 +3,29 @@ package me.snitchon
 import com.snitch.me.snitchon.NonNegativeInt
 import com.snitch.me.snitchon.StringSet
 import com.snitch.me.snitchon.Validator
-import me.snitchon.parameters.optionalHeader
-import me.snitchon.parameters.optionalQuery
-import me.snitchon.parameters.path
+import me.snitchon.parameters.*
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsing.Parser
-import me.snitchon.router.routes
 import org.junit.Test
 
-private val id = path("id", condition = NonNegativeInt)
-private val offset = optionalQuery("offset", condition = NonNegativeInt, default = 20, emptyAsMissing = true)
-private val allowInvalidQuery = optionalQuery(
+private val offset by optionalQuery(condition = NonNegativeInt, "offset", default = 20, emptyAsMissing = true)
+private val id by path(condition = NonNegativeInt, description = "")
+private val allowInvalidQuery by optionalQuery(
+    condition = NonNegativeInt,
     "allowInvalidQuery",
-    condition = NonNegativeInt,
     default = 20,
     emptyAsMissing = true,
     invalidAsMissing = true
 )
-private val allowInvalidHeader = optionalHeader(
+private val allowInvalidHeader by optionalHeader(
+    condition = NonNegativeInt,
     "allowInvalidHeader",
-    condition = NonNegativeInt,
-    default = 20,
     emptyAsMissing = true,
+    default = 20,
     invalidAsMissing = true
 )
-private val stringSet = optionalQuery("stringset", condition = StringSet)
-private val userId = optionalQuery("userId", condition = UserIdValidator)
+private val stringSet by optionalQuery(condition = StringSet, "stringset")
+private val userId by optionalQuery(condition = UserIdValidator, "userId")
 
 private data class UserId(val id: String)
 

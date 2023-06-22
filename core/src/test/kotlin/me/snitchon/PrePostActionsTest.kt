@@ -7,7 +7,7 @@ import org.junit.Test
 
 private val list = mutableListOf<String>()
 
-private val param = query("p", condition = NonEmptyString)
+private val param by query(condition = NonEmptyString, "p")
 
 class PrePostActionsTest : BaseTest(testRoutes {
     GET("foo")

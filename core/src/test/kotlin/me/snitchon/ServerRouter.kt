@@ -24,52 +24,50 @@ val root = "home"
 val v1 = "/v1"
 val clips = "clips"
 
-val clipId: PathParam<Int, Int> = path(
-    name = "clipId",
+val clipId: PathParam<Int, Int> by path(
     condition = NonNegativeInt,
     description = "The clip id"
 )
 
-val otherPathParam: PathParam<Int, Int> = path(
-    name = "otherPathParam",
+val otherPathParam: PathParam<Int, Int> by path(
     condition = NonNegativeInt,
     description = "The clip id"
 )
 
-val name = header(
-    name = "clips",
+val name by header(
     condition = NonEmptyString,
+    name = "clips",
     description = "The clip id"
 )
 
-private val query = optionalQuery(
+private val query by optionalQuery(
+    condition = NonEmptyString,
     name = "query",
-    default = "978",
     description = "The query",
-    condition = NonEmptyString
+    default = "978"
 )
 
-private val length = optionalQuery(
+private val length by optionalQuery(
+    condition = NonNegativeInt,
     name = "length",
     description = "The number of items returned in the page",
     default = 20,
-    condition = NonNegativeInt,
     visibility = INTERNAL
 )
 
-private val offset = optionalQuery(
+private val offset by optionalQuery(
+    condition = NonNegativeInt,
     name = "offset",
     description = "The offset from the first item",
-    default = 0,
-    condition = NonNegativeInt
+    default = 0
 )
 
-private val random = optionalQuery(
+private val random by optionalQuery(
+    condition = aFoo,
     name = "random",
-    invalidAsMissing = true,
-    emptyAsMissing = true,
     description = "randomfoo",
-    condition = aFoo
+    emptyAsMissing = true,
+    invalidAsMissing = true
 )
 
 

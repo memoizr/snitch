@@ -5,8 +5,8 @@ import me.snitchon.parameters.path
 import org.junit.Test
 
 class SinglePathParamTest : InlineSnitchTest() {
-    val param = path("param", condition = NonEmptyString)
-    val otherPathParam = path("otherPathParam", condition = NonEmptyString)
+    val param by path(condition = NonEmptyString)
+    val otherPathParam by path(condition = NonEmptyString)
 
     @Test
     fun `supports single path param GET route`() {

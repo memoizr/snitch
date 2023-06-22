@@ -16,47 +16,44 @@ import org.junit.Test
 import java.text.SimpleDateFormat
 import java.util.*
 
-val stringParam = path(
-    name = "stringParam",
+val stringParam by path(
     description = "Description",
     condition = NonEmptySingleLineString
 )
 
-val intparam = path(
-    name = "intParam",
+val intParam by path(
     description = "Description",
     condition = NonNegativeInt
 )
 
-val q = query(name = "q", description = "description", condition = NonEmptyString)
-val int = query(name = "int", description = "description", condition = NonNegativeInt, emptyAsMissing = true)
-private val offset =
-    optionalQuery(name = "offset", description = "description", condition = NonNegativeInt, default = 30)
-val limit = optionalQuery(name = "limit", description = "description", condition = NonNegativeInt)
+val q by query()
+val int by query(condition = NonNegativeInt, emptyAsMissing = true)
+private val offset by
+    optionalQuery(condition = NonNegativeInt, description = "description", default = 30)
+val limit by optionalQuery(condition = NonNegativeInt, description = "description")
 
-val qHead = header(name = "q", condition = NonEmptySingleLineString, description = "description")
-val intHead = header(name = "int", condition = NonNegativeInt, description = "description")
-val offsetHead = optionalHeader(
-    name = "offsetHead",
-    description = "description",
+val qHead by header(condition = NonEmptySingleLineString, name = "q", description = "description")
+val intHead by header(condition = NonNegativeInt, name = "int", description = "description")
+val offsetHead by optionalHeader(
     condition = NonNegativeInt,
-    default = 666,
-    emptyAsMissing = true
+    description = "description",
+    emptyAsMissing = true,
+    default = 666
 )
-val limitHead =
-    optionalHeader(name = "limitHead", description = "description", condition = NonNegativeInt, emptyAsMissing = true)
-val queryParam =
-    optionalQuery(name = "param", description = "parameter", condition = NonEmptySingleLineString, default = "hey")
-val headerParam = optionalHeader(
+val limitHead by
+    optionalHeader(condition = NonNegativeInt, description = "description", emptyAsMissing = true)
+val queryParam by
+    optionalQuery(condition = NonEmptySingleLineString, name = "param", description = "parameter", default = "hey")
+val headerParam by optionalHeader(
+    condition = NonEmptySingleLineString,
     name = "param",
     description = "parameter",
-    condition = NonEmptySingleLineString,
     default = "hey",
     visibility = Visibility.INTERNAL
 )
-val pathParam = path(name = "param", description = "parameter", condition = NonEmptySingleLineString)
+val pathParam by path(name = "param", description = "parameter", condition = NonEmptySingleLineString)
 
-val time = query("time", description = "the time", condition = DateValidator)
+val time by query(condition = DateValidator, "time", description = "the time")
 
 object DateValidator : Validator<Date, Date> {
     override val description: String = "An iso 8601 format date"
@@ -67,10 +64,10 @@ object DateValidator : Validator<Date, Date> {
 
 class ParametersTest : BaseTest(testRoutes {
     GET("stringpath" / stringParam) isHandledBy { TestResult(request[stringParam]).ok }
-    GET("intpath" / intparam) isHandledBy { IntTestResult(request[intparam]).ok }
+    GET("intpath" / intParam) isHandledBy { IntTestResult(request[intParam]).ok }
 
-    GET("intpath2" / intparam / "end") isHandledBy {
-        IntTestResult(request[intparam]).ok
+    GET("intpath2" / intParam / "end") isHandledBy {
+        IntTestResult(request[intParam]).ok
     }
 
     GET("queriespath") inSummary "does a foo" withQuery q isHandledBy { TestResult(request[q]).ok }
