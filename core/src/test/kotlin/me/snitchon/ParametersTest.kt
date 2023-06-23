@@ -28,7 +28,7 @@ val intParam by path(
 val q by query()
 val int by query(condition = ofNonNegativeInt, emptyAsMissing = true)
 private val offset by
-    optionalQuery(condition = ofNonNegativeInt, description = "description", default = 30)
+optionalQuery(condition = ofNonNegativeInt, description = "description", default = 30)
 val limit by optionalQuery(condition = ofNonNegativeInt, description = "description")
 
 val qHead by header(condition = ofNonEmptySingleLineString, name = "q", description = "description")
@@ -40,9 +40,9 @@ val offsetHead by optionalHeader(
     default = 666
 )
 val limitHead by
-    optionalHeader(condition = ofNonNegativeInt, description = "description", emptyAsMissing = true)
+optionalHeader(condition = ofNonNegativeInt, description = "description", emptyAsMissing = true)
 val queryParam by
-    optionalQuery(condition = ofNonEmptySingleLineString, name = "param", description = "parameter", default = "hey")
+optionalQuery(condition = ofNonEmptySingleLineString, name = "param", description = "parameter", default = "hey")
 val headerParam by optionalHeader(
     condition = ofNonEmptySingleLineString,
     name = "param",
@@ -58,7 +58,11 @@ object DateValidator : Validator<Date, Date> {
     override val description: String = "An iso 8601 format date"
     override val regex: Regex =
         """^(?:[1-9]\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:Z|[+-][01]\d:[0-5]\d)$""".toRegex()
-    override val parse: Parser.(String) -> Date = { SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(it) }
+    override val parse: Parser.(Collection<String>) -> Date = {
+        it.first().let {
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(it)
+        }
+    }
 }
 
 class ParametersTest : BaseTest(testRoutes {
@@ -143,7 +147,7 @@ class ParametersTest : BaseTest(testRoutes {
 
     @Test
     fun `supports default values for query parameters`() {
-        with (GsonJsonParser) {
+        with(GsonJsonParser) {
             whenPerform GET "/queriespath3?offset=42" expectBody IntTestResult(42).serialized
             whenPerform GET "/queriespath3" expectBody IntTestResult(30).serialized
 
@@ -181,7 +185,7 @@ class ParametersTest : BaseTest(testRoutes {
 
     @Test
     fun `supports default values for header parameters`() {
-        with (GsonJsonParser) {
+        with(GsonJsonParser) {
             whenPerform GET "/headerspath3" withHeaders mapOf(offsetHead.name to 42) expectBody IntTestResult(42).serialized
             whenPerform GET "/headerspath3" expectBody IntTestResult(666).serialized
             whenPerform GET "/headerspath3" expectBody IntTestResult(666).serialized
@@ -205,14 +209,14 @@ class ParametersTest : BaseTest(testRoutes {
     fun `supports custom parsing`() {
         val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         val date = "2018-06-30T02:59:51-00:00"
-        with (GsonJsonParser) {
+        with(GsonJsonParser) {
             whenPerform GET "/customParsing?time=$date" expectBody DateResult(df.parse(date)).serialized
         }
     }
 
     @Test
     fun `forbids using parameters which aren't registered`() {
-        with (GsonJsonParser) {
+        with(GsonJsonParser) {
             whenPerform GET "/sneakyqueryparams" expectBody ErrorResponse(
                 500,
                 "Attempting to use unregistered query parameter `param`"

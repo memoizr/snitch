@@ -73,7 +73,7 @@ private val random by optionalQuery(
 object aFoo : Validator<Random, Random> {
     override val regex: Regex = "/^hello".toRegex()
     override val description: String = "a ranom parameter"
-    override val parse: Parser.(String) -> Random = { Random() }
+    override val parse: Parser.(Collection<String>) -> Random = { Random() }
 }
 
 val ServerRouter: Routes = {

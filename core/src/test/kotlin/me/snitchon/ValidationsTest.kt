@@ -31,7 +31,11 @@ private data class UserId(val id: String)
 private object UserIdValidator : Validator<String, UserId> {
     override val description = "User id"
     override val regex = """^.+$""".toRegex(RegexOption.DOT_MATCHES_ALL)
-    override val parse: Parser.(String) -> UserId = { UserId(it) }
+    override val parse: Parser.(Collection<String>) -> UserId = {
+        it.first().let {
+            UserId(it)
+        }
+    }
 }
 
 class ValidationsTest : BaseTest(testRoutes {

@@ -16,39 +16,38 @@ interface RequestWrapper : CommonResponses {
     val request get() = this
 
     fun params(name: String): String?
-    fun headers(name: String): String?
-    fun queryParams(name: String): String?
+    fun headers(name: String): Collection<String>
+    fun queryParams(name: String): Collection<String>
     fun getPathParam(param: PathParam<*, *>): String?
-    fun getQueryParam(param: QueryParameter<*, *>): String?
-    fun getHeaderParam(param: HeaderParameter<*, *>): String?
+    fun getQueryParam(param: QueryParameter<*, *>): Collection<String>?
+    fun getHeaderParam(param: HeaderParameter<*, *>): Collection<String>?
 
     private fun missingParameterMessage(path: String, it: Parameter<*, *>) =
         """Required $path parameter `${it.name}` is missing"""
 
-    private fun invalidParameterMessage(query: String, it: Parameter<*, *>, value: String?) =
-        """$query parameter `${it.name}` is invalid, expecting ${it.pattern.description}, got `$value`"""
+    private fun invalidParameterMessage(query: String, it: Parameter<*, *>, value: Collection<String>?) =
+        """$query parameter `${it.name}` is invalid, expecting ${it.pattern.description}, got `${value?.joinToString(",")}`"""
 
     fun getInvalidParams(): List<String> {
         return params
             .map {
                 when (it) {
-                    is PathParam<*, *> -> validateParam(it, getPathParam(it), "Path")
+                    is PathParam<*, *> -> validateParam(it, listOf(getPathParam(it).orEmpty()), "Path")
                     is QueryParameter<*, *> -> validateParam(it, getQueryParam(it), "Query")
                     is HeaderParameter<*, *> -> validateParam(it, getHeaderParam(it), "Header")
                 }
             }.filterNotNull().print()
     }
 
-    private fun validateParam(it: Parameter<*, *>, value: String?, path: String): String? {
+    private fun validateParam(it: Parameter<*, *>, value: Collection<String>?, path: String): String? {
         return try {
             when {
-                it.required && value == null -> missingParameterMessage(path, it)
+                it.required && (value == null || value.isEmpty()) -> missingParameterMessage(path, it)
                 !it.required && value == null -> null
                 value != null && it.pattern.parse(parser, value).let { true } -> null
                 it.pattern.regex.matches(value.toString()) -> null
-                else -> {
-                    invalidParameterMessage(path, it, value)
-                }
+                else -> invalidParameterMessage(path, it, value)
+
             }
         } catch (e: Exception) {
             invalidParameterMessage(path, it, value)
@@ -59,13 +58,14 @@ interface RequestWrapper : CommonResponses {
         checkParamIsRegistered(param)
             .tryParam {
                 params(param.name)
-                    .let { param.pattern.parse(parser, it.orEmpty()) }
+                    .let { param.pattern.parse(parser, listOf(it.orEmpty())) }
             }
 
     operator fun <T : Any?, R> get(param: QueryParam<T, R>): R =
         checkParamIsRegistered(param)
             .tryParam {
                 queryParams(param.name)
+                    .filterValid(param)
                     .let { param.pattern.parse(parser, it.orEmpty()) }
             }
 
@@ -101,6 +101,13 @@ private inline fun <R> RequestWrapper.tryParam(block: () -> R) = try {
     block()
 } catch (e: Exception) {
     throw InvalidParametersException(e, getInvalidParams())
+}
+
+fun Collection<String>.filterValid(param: Parameter<*, *>): Collection<String>? = when {
+    this.isEmpty() -> null
+    param.emptyAsMissing && this.all { it.isEmpty()} -> null
+    param.invalidAsMissing -> null
+    else -> this
 }
 
 fun String?.filterValid(param: Parameter<*, *>): String? = when {

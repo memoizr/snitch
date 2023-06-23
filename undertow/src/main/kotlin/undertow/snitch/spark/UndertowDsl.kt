@@ -27,9 +27,9 @@ class UndertowRequestWrapper(
     override fun params(name: String): String? =
         URLDecoder.decode(exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).parameters.get(name))
 
-    override fun headers(name: String): String? = exchange.requestHeaders.get(name)?.firstOrNull()
+    override fun headers(name: String): Collection<String> = exchange.requestHeaders.get(name).orEmpty()
 
-    override fun queryParams(name: String): String? = exchange.queryParameters.get(name)?.firstOrNull()
+    override fun queryParams(name: String): Collection<String> = exchange.queryParameters.get(name).orEmpty()
 
     override fun getPathParam(param: PathParam<*, *>): String? =
         params(param.name).filterValid(param)
