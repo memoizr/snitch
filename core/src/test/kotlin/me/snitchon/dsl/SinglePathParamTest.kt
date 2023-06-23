@@ -1,12 +1,11 @@
 package me.snitchon.dsl
 
-import com.snitch.me.snitchon.NonEmptyString
 import me.snitchon.parameters.path
 import org.junit.Test
 
 class SinglePathParamTest : InlineSnitchTest() {
-    val param by path(condition = NonEmptyString)
-    val otherPathParam by path(condition = NonEmptyString)
+    val param by path()
+    val otherPathParam by path()
 
     @Test
     fun `supports single path param GET route`() {

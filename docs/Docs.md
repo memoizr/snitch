@@ -168,7 +168,7 @@ val usersController = routes {
         DELETE() isHandledBy deleteUser
     }
 
-    "users" / userId / "posts" {
+    "users" / userId / "posts" / {
         GET() isHandledBy getPosts
         POST() with body<CreatePostRequest> isHandledBy createPost
     }

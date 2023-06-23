@@ -1,6 +1,6 @@
 package me.snitchon.parameters
 
-import com.snitch.me.snitchon.Validator
+import me.snitchon.validation.Validator
 
 sealed class Parameter<T, R>(
     open val type: Class<*>,

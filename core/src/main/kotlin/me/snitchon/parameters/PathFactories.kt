@@ -1,7 +1,8 @@
 package me.snitchon.parameters
 
-import com.snitch.me.snitchon.NonEmptyString
-import com.snitch.me.snitchon.Validator
+import com.snitch.me.snitchon.ofNonEmptyString
+import me.snitchon.validation.Validator
+
 
 inline fun <reified T, R> path(condition: Validator<T, R>, name: String = "", description: String = "") =
     PathParamDelegate(
@@ -11,4 +12,4 @@ inline fun <reified T, R> path(condition: Validator<T, R>, name: String = "", de
         description = description
     )
 
-fun path(name: String = "", description: String = "") = path(NonEmptyString, name, description)
+fun path(name: String = "", description: String = "") = path(ofNonEmptyString, name, description)

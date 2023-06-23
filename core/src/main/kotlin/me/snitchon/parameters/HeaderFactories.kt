@@ -1,8 +1,8 @@
 package me.snitchon.parameters
 
-import com.snitch.me.snitchon.NonEmptyString
-import com.snitch.me.snitchon.Validator
+import com.snitch.me.snitchon.ofNonEmptyString
 import me.snitchon.documentation.Visibility
+import me.snitchon.validation.Validator
 
 inline fun <reified T, R> optionalHeader(
     condition: Validator<T, R>,
@@ -30,7 +30,7 @@ fun optionalHeader(
     invalidAsMissing: Boolean = false,
     visibility: Visibility = Visibility.PUBLIC
 ) = optionalHeader(
-    condition = NonEmptyString,
+    condition = ofNonEmptyString,
     name = name,
     description = description,
     emptyAsMissing = emptyAsMissing,
@@ -46,7 +46,7 @@ fun optionalHeader(
     invalidAsMissing: Boolean = false,
     visibility: Visibility = Visibility.PUBLIC
 ) = optionalHeader(
-    condition = NonEmptyString,
+    condition = ofNonEmptyString,
     name = name,
     description = description,
     emptyAsMissing = emptyAsMissing,
@@ -81,7 +81,7 @@ fun header(
     invalidAsMissing: Boolean = false,
     visibility: Visibility = Visibility.PUBLIC
 ) = header(
-    condition = NonEmptyString,
+    condition = ofNonEmptyString,
     name = name,
     description = description,
     emptyAsMissing = emptyAsMissing,

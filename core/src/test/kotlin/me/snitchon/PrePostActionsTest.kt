@@ -1,13 +1,12 @@
 package me.snitchon
 
 import com.memoizr.assertk.expect
-import com.snitch.me.snitchon.NonEmptyString
 import me.snitchon.parameters.query
 import org.junit.Test
 
 private val list = mutableListOf<String>()
 
-private val param by query(condition = NonEmptyString, "p")
+private val param by query("p")
 
 class PrePostActionsTest : BaseTest(testRoutes {
     GET("foo")

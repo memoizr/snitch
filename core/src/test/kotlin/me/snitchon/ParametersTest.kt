@@ -1,10 +1,8 @@
 package me.snitchon
 
+import com.snitch.me.snitchon.ofNonEmptySingleLineString
+import com.snitch.me.snitchon.ofNonNegativeInt
 import me.snitchon.documentation.Visibility
-import com.snitch.me.snitchon.NonEmptySingleLineString
-import com.snitch.me.snitchon.NonEmptyString
-import com.snitch.me.snitchon.NonNegativeInt
-import com.snitch.me.snitchon.Validator
 import me.snitchon.parameters.*
 import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.parsers.GsonJsonParser.serialized
@@ -12,46 +10,47 @@ import me.snitchon.parsing.Parser
 import me.snitchon.request.Handler
 import me.snitchon.types.Sealed
 import me.snitchon.types.ErrorResponse
+import me.snitchon.validation.Validator
 import org.junit.Test
 import java.text.SimpleDateFormat
 import java.util.*
 
 val stringParam by path(
     description = "Description",
-    condition = NonEmptySingleLineString
+    condition = ofNonEmptySingleLineString
 )
 
 val intParam by path(
     description = "Description",
-    condition = NonNegativeInt
+    condition = ofNonNegativeInt
 )
 
 val q by query()
-val int by query(condition = NonNegativeInt, emptyAsMissing = true)
+val int by query(condition = ofNonNegativeInt, emptyAsMissing = true)
 private val offset by
-    optionalQuery(condition = NonNegativeInt, description = "description", default = 30)
-val limit by optionalQuery(condition = NonNegativeInt, description = "description")
+    optionalQuery(condition = ofNonNegativeInt, description = "description", default = 30)
+val limit by optionalQuery(condition = ofNonNegativeInt, description = "description")
 
-val qHead by header(condition = NonEmptySingleLineString, name = "q", description = "description")
-val intHead by header(condition = NonNegativeInt, name = "int", description = "description")
+val qHead by header(condition = ofNonEmptySingleLineString, name = "q", description = "description")
+val intHead by header(condition = ofNonNegativeInt, name = "int", description = "description")
 val offsetHead by optionalHeader(
-    condition = NonNegativeInt,
+    condition = ofNonNegativeInt,
     description = "description",
     emptyAsMissing = true,
     default = 666
 )
 val limitHead by
-    optionalHeader(condition = NonNegativeInt, description = "description", emptyAsMissing = true)
+    optionalHeader(condition = ofNonNegativeInt, description = "description", emptyAsMissing = true)
 val queryParam by
-    optionalQuery(condition = NonEmptySingleLineString, name = "param", description = "parameter", default = "hey")
+    optionalQuery(condition = ofNonEmptySingleLineString, name = "param", description = "parameter", default = "hey")
 val headerParam by optionalHeader(
-    condition = NonEmptySingleLineString,
+    condition = ofNonEmptySingleLineString,
     name = "param",
     description = "parameter",
     default = "hey",
     visibility = Visibility.INTERNAL
 )
-val pathParam by path(name = "param", description = "parameter", condition = NonEmptySingleLineString)
+val pathParam by path(name = "param", description = "parameter", condition = ofNonEmptySingleLineString)
 
 val time by query(condition = DateValidator, "time", description = "the time")
 

@@ -1,7 +1,6 @@
 package me.snitchon.documentation
 
 import com.memoizr.assertk.expect
-import com.snitch.me.snitchon.NonEmptyString
 import me.snitchon.dsl.InlineSnitchTest
 import me.snitchon.parameters.*
 import me.snitchon.types.Sealed
@@ -36,11 +35,11 @@ class DocumentationTest : InlineSnitchTest() {
 
     @Test
     fun `deals with parameter types`() {
-        val path by path(NonEmptyString)
-        val header by header(NonEmptyString, "header")
-        val optionalHeader by optionalHeader(NonEmptyString, "optionalPath", "")
-        val query by query(NonEmptyString, "query", "")
-        val optionalQuery by optionalQuery(NonEmptyString, "optionalQuery", "")
+        val path by path()
+        val header by header()
+        val optionalHeader by optionalHeader()
+        val query by query()
+        val optionalQuery by optionalQuery()
         expect that withRoutes {
             GET(path)
                 .with(headers(header, optionalHeader))

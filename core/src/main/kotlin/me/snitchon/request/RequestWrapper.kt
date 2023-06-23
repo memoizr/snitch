@@ -1,5 +1,6 @@
 package me.snitchon.request
 
+import me.snitchon.extensions.print
 import me.snitchon.parameters.*
 import me.snitchon.parsing.Parser
 import me.snitchon.response.CommonResponses
@@ -28,23 +29,29 @@ interface RequestWrapper : CommonResponses {
         """$query parameter `${it.name}` is invalid, expecting ${it.pattern.description}, got `$value`"""
 
     fun getInvalidParams(): List<String> {
-        return params.map {
-            when (it) {
-                is PathParam<*, *> -> validateParam(it, getPathParam(it), "Path")
-                is QueryParameter<*, *> -> validateParam(it, getQueryParam(it), "Query")
-                is HeaderParameter<*, *> -> validateParam(it, getHeaderParam(it), "Header")
-            }
-        }.filterNotNull()
+        return params
+            .map {
+                when (it) {
+                    is PathParam<*, *> -> validateParam(it, getPathParam(it), "Path")
+                    is QueryParameter<*, *> -> validateParam(it, getQueryParam(it), "Query")
+                    is HeaderParameter<*, *> -> validateParam(it, getHeaderParam(it), "Header")
+                }
+            }.filterNotNull().print()
     }
 
     private fun validateParam(it: Parameter<*, *>, value: String?, path: String): String? {
-        return when {
-            it.required && value == null -> missingParameterMessage(path, it)
-            !it.required && value == null -> null
-            it.pattern.regex.matches(value.toString()) -> null
-            else -> {
-                invalidParameterMessage(path, it, value)
+        return try {
+            when {
+                it.required && value == null -> missingParameterMessage(path, it)
+                !it.required && value == null -> null
+                value != null && it.pattern.parse(parser, value).let { true } -> null
+                it.pattern.regex.matches(value.toString()) -> null
+                else -> {
+                    invalidParameterMessage(path, it, value)
+                }
             }
+        } catch (e: Exception) {
+            invalidParameterMessage(path, it, value)
         }
     }
 

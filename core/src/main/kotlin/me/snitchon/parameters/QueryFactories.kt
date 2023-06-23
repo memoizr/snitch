@@ -1,8 +1,8 @@
 package me.snitchon.parameters
 
-import com.snitch.me.snitchon.NonEmptyString
-import com.snitch.me.snitchon.Validator
+import com.snitch.me.snitchon.ofNonEmptyString
 import me.snitchon.documentation.Visibility
+import me.snitchon.validation.Validator
 
 inline fun <reified T, R> optionalQuery(
     condition: Validator<T, R>,
@@ -48,7 +48,7 @@ fun optionalQuery(
     invalidAsMissing: Boolean = false,
     visibility: Visibility = Visibility.PUBLIC
 ) = optionalQuery(
-    condition = NonEmptyString,
+    condition = ofNonEmptyString,
     name = name,
     description = description,
     emptyAsMissing = emptyAsMissing,
@@ -64,7 +64,7 @@ fun optionalQuery(
     invalidAsMissing: Boolean = false,
     visibility: Visibility = Visibility.PUBLIC
 ) = optionalQuery(
-    condition = NonEmptyString,
+    condition = ofNonEmptyString,
     name = name,
     description = description,
     default = default,
@@ -80,7 +80,7 @@ fun query(
     invalidAsMissing: Boolean = false,
     visibility: Visibility = Visibility.PUBLIC
 ) = query(
-    condition = NonEmptyString,
+    condition = ofNonEmptyString,
     name = name,
     description = description,
     emptyAsMissing = emptyAsMissing,

@@ -1,30 +1,29 @@
 package me.snitchon
 
-import com.snitch.me.snitchon.NonNegativeInt
-import com.snitch.me.snitchon.StringSet
-import com.snitch.me.snitchon.Validator
+import com.snitch.me.snitchon.*
 import me.snitchon.parameters.*
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsing.Parser
+import me.snitchon.validation.Validator
 import org.junit.Test
 
-private val offset by optionalQuery(condition = NonNegativeInt, "offset", default = 20, emptyAsMissing = true)
-private val id by path(condition = NonNegativeInt, description = "")
+private val offset by optionalQuery(condition = ofNonNegativeInt, "offset", default = 20, emptyAsMissing = true)
+private val id by path(condition = ofNonNegativeInt)
 private val allowInvalidQuery by optionalQuery(
-    condition = NonNegativeInt,
+    condition = ofNonNegativeInt,
     "allowInvalidQuery",
     default = 20,
     emptyAsMissing = true,
     invalidAsMissing = true
 )
 private val allowInvalidHeader by optionalHeader(
-    condition = NonNegativeInt,
+    condition = ofNonNegativeInt,
     "allowInvalidHeader",
     emptyAsMissing = true,
     default = 20,
     invalidAsMissing = true
 )
-private val stringSet by optionalQuery(condition = StringSet, "stringset")
+private val stringSet by optionalQuery(condition = ofStringSet, "stringset")
 private val userId by optionalQuery(condition = UserIdValidator, "userId")
 
 private data class UserId(val id: String)

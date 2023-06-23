@@ -1,6 +1,5 @@
 package me.snitchon.dsl
 
-import com.snitch.me.snitchon.NonEmptyString
 import me.snitchon.parameters.path
 import me.snitchon.router.Routes
 import me.snitchon.tests.Ported
@@ -27,7 +26,7 @@ abstract class InlineSnitchTest : Ported, TestMethods {
 }
 
 class StringPathTest : InlineSnitchTest() {
-    val param by path(condition = NonEmptyString)
+    val param by path()
 
     @Test
     fun `supports simple GET route`() {

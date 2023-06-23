@@ -1,7 +1,6 @@
 package me.snitchon.parameters
 
-import com.snitch.me.snitchon.Validator
-import me.snitchon.documentation.Visibility
+import me.snitchon.validation.Validator
 import kotlin.reflect.KProperty
 
 data class PathParam<T, R>(
@@ -44,7 +43,7 @@ class PathParamDelegate<T, R>(
     operator fun getValue(nothing: Any?, property: KProperty<*>): PathParam<T, R> = param(property)
 
     private fun param(property: KProperty<*>) =
-        param ?: PathParam<T, R>(
+        param ?: PathParam(
             "{${name.ifEmpty { property.name }}}",
             type,
             name.ifEmpty { property.name },

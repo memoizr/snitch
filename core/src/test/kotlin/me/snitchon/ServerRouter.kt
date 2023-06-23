@@ -1,9 +1,7 @@
 package me.snitchon
 
 import com.google.gson.annotations.SerializedName
-import com.snitch.me.snitchon.NonEmptyString
-import com.snitch.me.snitchon.NonNegativeInt
-import com.snitch.me.snitchon.Validator
+import com.snitch.me.snitchon.*
 import me.snitchon.*
 import me.snitchon.types.ContentType
 import me.snitchon.documentation.Description
@@ -18,6 +16,7 @@ import me.snitchon.request.Handler
 import me.snitchon.router.Routes
 import me.snitchon.types.Format
 import me.snitchon.types.Sealed
+import me.snitchon.validation.Validator
 import java.util.*
 
 val root = "home"
@@ -25,30 +24,30 @@ val v1 = "/v1"
 val clips = "clips"
 
 val clipId: PathParam<Int, Int> by path(
-    condition = NonNegativeInt,
+    condition = ofNonNegativeInt,
     description = "The clip id"
 )
 
 val otherPathParam: PathParam<Int, Int> by path(
-    condition = NonNegativeInt,
+    condition = ofNonNegativeInt,
     description = "The clip id"
 )
 
 val name by header(
-    condition = NonEmptyString,
+    condition = ofNonEmptyString,
     name = "clips",
     description = "The clip id"
 )
 
 private val query by optionalQuery(
-    condition = NonEmptyString,
+    condition = ofNonEmptyString,
     name = "query",
     description = "The query",
     default = "978"
 )
 
 private val length by optionalQuery(
-    condition = NonNegativeInt,
+    condition = ofNonNegativeInt,
     name = "length",
     description = "The number of items returned in the page",
     default = 20,
@@ -56,7 +55,7 @@ private val length by optionalQuery(
 )
 
 private val offset by optionalQuery(
-    condition = NonNegativeInt,
+    condition = ofNonNegativeInt,
     name = "offset",
     description = "The offset from the first item",
     default = 0

@@ -1,7 +1,7 @@
 package me.snitchon.parameters
 
-import com.snitch.me.snitchon.Validator
 import me.snitchon.documentation.Visibility
+import me.snitchon.validation.Validator
 import kotlin.reflect.KProperty
 
 sealed class HeaderParameter<T, R>(
