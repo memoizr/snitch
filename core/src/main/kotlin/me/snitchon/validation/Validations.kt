@@ -55,7 +55,7 @@ inline fun <reified E : kotlin.Enum<*>> ofEnum(): Validator<String, E> {
     }
 }
 
-inline fun <reified E : kotlin.Enum<*>> ofEnumMulti(): Validator<String, Collection<E>> {
+inline fun <reified E : kotlin.Enum<*>> ofRepeatableEnum(): Validator<String, Collection<E>> {
     val e = E::class
     val values = e.java.enumConstants.asList().joinToString("|")
     val regex: Regex = "^($values)$".toRegex()

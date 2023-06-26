@@ -202,3 +202,27 @@ val root = routes {
 
 Note: `userId` and `showDetails` are typed and validated. `request[showDetails]` will return a `Boolean` and `request[userId]` will return a `String`. If you don't pass a `Validator` such as `ofBoolean`, it defaults to `ofNonEmptyString`.  
 Note: you have to declare the usage of a certain parameter in order to use it.
+
+#### Input parameter validation and transformation
+All parameters are validated and transformed to another type by default. Here's some more examples, let's add the type parameters explicitly so it's clear what's happening:
+
+```Kotlin
+val userId: String by path(nonEmptyString)  
+val filters: Set<String> by path(ofNonEmptySet)
+val showDetails: Boolean by path(ofBoolean)
+```
+
+#### Custom validations
+Although there are a few built in validator-transformers, they offer a relatively weak typing. Best practice involves transforming and validating raw platform types into domain types. For example a `userId` is rarely actually just a string, for example it's unlikely the content of `Shakespeare.txt` parsed as string could possibly be a valid ID for a user. You most likely have a `value class UserId` defined somewhere. Likewise a search filter is usually something like an `Enum` where you have a set of pre-determined filter values. 
+
+Defining custom validator-transformers in snitch is simple:
+```kotlin
+value class UserId(val id: UUID)
+enum class Filter { EXPIRED, ACTIVE, CANCELLED, PENDING }
+
+val ofUserId = stringValidator("non empty string") { UserId(UUID.fromString(it)) }
+
+val userId: UserId by path(ofUserId)
+val filters: Collection<Filter> by path(ofRepeatableEnum<Filter>())
+val filter: Filter by path(ofEnum<Filter>())
+```
