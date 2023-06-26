@@ -249,5 +249,24 @@ val limit: Int by optionalQuery(ofNonNegativeInt, default = 20, emptyAsMissing =
 val offset: Int by optionalQuery(ofNonNegativeInt, default = 0, emptyAsMissing = true, invalidAsMissing = true)
 ```
 
+#### Parameter naming
+Snitch aims at being as concise and as less verbose as possible while delivering a full feature set for production use-cases. In this spirit when you define an input parameter such as `val q by query()` it will create a named query parameter that should be supplied as such for example:`?q=urlencodedquery`. Note that the name of the parameter `val` in the codebase is by default the same name as in the API. If you want it to be different, it's simple:
+```kotlin
+val searchQuery by query(name = "searchQuery")
+```
+
 `limit` and `offset` here are defined so that if these parameters were not provided, or provided incorrectly, a default value would be provided instead. This is in case a "fail quietly" behaviour is desired. By default a `fail explicitly` behaviour is supported, so empty or invalid inputs will return a 400 to inform the API user they're probably doing something wrong.
 
+#### Unsafe, undocumented parameter parsing
+While Snitch *enforces* best practices, leading to a less verbose and more consistent codebase that implements them, it also support an *unsafe* traditional approach. If you want to access a parameter sneakily and you don't care for the parameter to be included in the documentation, you can do it very simply with the cowboy-friendly syntax:
+
+```kotlin
+val getCows by handling {
+    ...
+    request.queryParams("numberOfCows")
+    request.headerParams("ranch")
+    request.pathParams("ranchId")
+    ...
+}
+```
+Although this approach is supported for niche use cases, it is strongly discouraged that this be used for most production applications unless there is a good reason for it.
