@@ -1,6 +1,6 @@
 package me.snitchon.example.api.validation
 
-import com.snitch.me.snitchon.stringValidator
 import me.snitchon.example.security.SecurityModule.jwt
+import me.snitchon.validation.stringValidator
 
-val validAccessToken = stringValidator("valid jwt") { jwt().validate(it) }
+val validAccessToken = stringValidator { jwt().validate(it) }

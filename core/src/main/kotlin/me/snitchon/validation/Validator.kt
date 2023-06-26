@@ -20,7 +20,7 @@ inline fun <From, To> validator(
 }
 
 inline fun <To> stringValidator(
-    description: String,
+    description: String = "",
     regex: Regex = """^.+$""".toRegex(RegexOption.DOT_MATCHES_ALL),
     crossinline mapper: Parser.(String) -> To,
 ) = validator<String, To>(description, regex, mapper)

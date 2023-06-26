@@ -5,14 +5,11 @@ import me.snitchon.parsing.Parser
 import me.snitchon.types.HandlerResponse
 import me.snitchon.request.TypedRequestWrapper
 import me.snitchon.response.HttpResponse
-import me.snitchon.service.Endpoint
 import me.snitchon.config.SnitchConfig
 import me.snitchon.parameters.HeaderParameter
 import me.snitchon.parameters.QueryParameter
 import me.snitchon.request.Body
-import me.snitchon.service.DecoratedWrapper
-import me.snitchon.service.OpDescription
-import me.snitchon.service.SnitchService
+import me.snitchon.service.*
 import me.snitchon.syntax.HttpMethodsSyntax
 import me.snitchon.types.ContentType
 import me.snitchon.types.EndpointBundle
@@ -65,7 +62,7 @@ class Router(
     inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) =
         Body(T::class, contentType)
 
-    fun applyToAll(routerConfig: Routes, action: Endpoint<*>.() -> Endpoint<*>) {
+    internal fun applyToAll_(routerConfig: Routes, action: Endpoint<*>.() -> Endpoint<*>) {
         val router = Router(config, service, pathParams, parser, path)
         router.routerConfig()
 
@@ -93,6 +90,7 @@ fun routes(routes: Routes) = routes
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/$this" else this
 
-fun Router.using(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = decorateAll { decorate(decoration) }
-fun Router.decorateAll(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit =
-    { it: Routes -> applyToAll(it, action) }
+fun Router.using(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = transformEndpoints { decorate(decoration) }
+fun Router.transformEndpoints(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit =
+    { it: Routes -> applyToAll_(it, action) }
+fun Router.onlyIf(condition: Condition) = transformEndpoints { onlyIf(condition) }

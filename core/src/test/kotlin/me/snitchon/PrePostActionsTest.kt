@@ -19,7 +19,7 @@ class PrePostActionsTest : BaseTest(testRoutes {
             "ok".ok
         }
 
-    applyToAll({
+    applyToAll_({
         GET("global")
             .with(queries(param))
             .doBefore { list.add(this[param] + "One") }

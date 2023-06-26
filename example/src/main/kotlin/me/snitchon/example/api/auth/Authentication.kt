@@ -11,19 +11,19 @@ import me.snitchon.parameters.Parameter
 import me.snitchon.request.TypedRequestWrapper
 import me.snitchon.request.RequestWrapper
 import me.snitchon.router.Router
-import me.snitchon.router.decorateAll
+import me.snitchon.router.transformEndpoints
 import me.snitchon.service.Condition
 import me.snitchon.service.ConditionResult
 import me.snitchon.service.ConditionResult.Failed
 import me.snitchon.service.ConditionResult.Successful
 
 
-val <T : Any> TypedRequestWrapper<T>.principal: UserId get() = (request[accessToken] as Authentication.Authenticated).claims.userId
+//val <T : Any> TypedRequestWrapper<T>.principal: UserId get() = (request[accessToken] as Authentication.Authenticated).claims.userId
 val RequestWrapper.principal: UserId get() = (request[accessToken] as Authentication.Authenticated).claims.userId
 val RequestWrapper.role: Role get() = (request[accessToken] as Authentication.Authenticated).claims.role
 
 val Router.authenticated
-    get() = decorateAll {
+    get() = transformEndpoints {
         with(listOf(accessToken)).decorate {
             when (request[accessToken]) {
                 is Authentication.Authenticated -> next()
