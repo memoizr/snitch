@@ -222,11 +222,32 @@ enum class Filter { EXPIRED, ACTIVE, CANCELLED, PENDING }
 
 val ofUserId = stringValidator("the ID of the user") { UserId(UUID.fromString(it)) }
 
+// explicit types can be omitted for conciseness, here included for illustrative purposes
 val userId: UserId by path(ofUserId)
-val filters: Collection<Filter> by path(ofRepeatableEnum<Filter>())
-val filter: Filter by path(ofEnum<Filter>())
+val filters: Collection<Filter> by query(ofRepeatableEnum<Filter>())
+val filter: Filter by query(ofEnum<Filter>())
 ```
 
-> *But it's verbose, it's boilerplate!!*
+> *Note:* Snitch is optimized for production code use cases, and in the spirit of Kotlin, it *enforces* best practices. In production, you almost always need to validate and transfrom inputs consistently. Snitch lets you do this in only one line of code in most cases, leading to a more concise, explicit and consistent codebase, making it easier to maintain larger codebases and for new developers to quickly become productive. 
 
-> In production code you most often than not need to validate each and every input. You most often than not also need to convert inputs to domain types. You also need to do this consistently between different endpoints. The approach taken by Snitch, actually simplifies and provides a structure on how to do all of this, and all at the cost of adding between one and three lines of code in most cases. Of all the approaches that were evaluated during the design of this library this was the one that in production code would result in the *least* amount of boilerplate for the functionality given. If you can think of a better and more concise approach, please get in touch as we're always looking for improvements for the next version.
+#### Optional input parameters
+Declaring a parameter with `query` or `header` will make it required. If the parameter is not supplied a `400` message will be returned specifying that that particular parameter was expected but not provided, as well as any other parameter that also does not pass validation. Optional parameters can be declared as such:
+
+
+```kotlin
+// request[sort] is nullable
+val sort: Sorting? by optionalQuery(ofEnum<Sorting>())
+```
+
+The optionality functionality is quite powerful, offering a clear and consistent way of specifying default values as well as defining a behaviour for when these values are provided as empty as or as invalid inputs:
+
+```kotlin
+// request[sort] is not nullable, NEW is the default value
+val sort: Sorting by optionalQuery(ofEnum<Sorting>(), default = NEW)
+
+val limit: Int by optionalQuery(ofNonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
+val offset: Int by optionalQuery(ofNonNegativeInt, default = 0, emptyAsMissing = true, invalidAsMissing = true)
+```
+
+`limit` and `offset` here are defined so that if these parameters were not provided, or provided incorrectly, a default value would be provided instead. This is in case a "fail quietly" behaviour is desired. By default a `fail explicitly` behaviour is supported, so empty or invalid inputs will return a 400 to inform the API user they're probably doing something wrong.
+
