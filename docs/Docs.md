@@ -220,9 +220,13 @@ Defining custom validator-transformers in snitch is simple:
 value class UserId(val id: UUID)
 enum class Filter { EXPIRED, ACTIVE, CANCELLED, PENDING }
 
-val ofUserId = stringValidator("non empty string") { UserId(UUID.fromString(it)) }
+val ofUserId = stringValidator("the ID of the user") { UserId(UUID.fromString(it)) }
 
 val userId: UserId by path(ofUserId)
 val filters: Collection<Filter> by path(ofRepeatableEnum<Filter>())
 val filter: Filter by path(ofEnum<Filter>())
 ```
+
+> *But it's verbose, it's boilerplate!!*
+
+> In production code you most often than not need to validate each and every input. You most often than not also need to convert inputs to domain types. You also need to do this consistently between different endpoints. The approach taken by Snitch, actually simplifies and provides a structure on how to do all of this, and all at the cost of adding between one and three lines of code in most cases. Of all the approaches that were evaluated during the design of this library this was the one that in production code would result in the *least* amount of boilerplate for the functionality given. If you can think of a better and more concise approach, please get in touch as we're always looking for improvements for the next version.
