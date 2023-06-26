@@ -270,3 +270,10 @@ val getCows by handling {
 }
 ```
 Although this approach is supported for niche use cases, it is strongly discouraged that this be used for most production applications unless there is a good reason for it.
+
+#### Repeated parameters
+In HTTP one of the hidden challenges to creating a robust and production grade API is that of handling the edge case of query or header parameters provided repeatedly when exactly one or at most one is expected. By default `val searchQuery by query()` expects exactly one value being provided and `val searchQuery by optionalQuery()` provides at most one semantics, unexpected repetition will result in 400. Support for repeated parameters can be made explicity by using `... by query(ofStringSet)` for example, which uses a repeatable validator. Custom validator for repeatable can be created in a very similar way to non-repeatable validators:
+
+```kotlin
+val ofUserId = repeatableStringValidator("the ID of the user") { UserId(UUID.fromString(it)) }
+```
