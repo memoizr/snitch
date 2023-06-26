@@ -45,20 +45,6 @@ class Enum<E : kotlin.Enum<*>>(e: KClass<E>) : Validator<E, E> {
     override val regex: Regex = "^($values)$".toRegex()
 }
 
-//inline fun <reified E : kotlin.Enum<*>> ofEnum() = Enum(E::class)
-//inline fun <reified E : kotlin.Enum<*>> ofEnum(): Validator<String, E> {
-//    return object : Validator<String, E> {
-//        private val values = E::class.java.enumConstants.asList().joinToString("|")
-//        override val regex: Regex = "^($values)$".toRegex()
-//        override val description: String = "A string of value: $values"
-//        override val parse: Parser.(Collection<String>) -> E = {
-//            it.firstOrNull()!!.let {
-//                it.parse(e.java)
-//            }
-//        }
-//    }
-//}
-
 inline fun <reified E : kotlin.Enum<*>> ofEnum(): Validator<String, E> {
     val e = E::class
     val values = e.java.enumConstants.asList().joinToString("|")
