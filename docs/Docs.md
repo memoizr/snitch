@@ -277,3 +277,23 @@ In HTTP one of the hidden challenges to creating a robust and production grade A
 ```kotlin
 val ofUserId = repeatableStringValidator("the ID of the user") { UserId(UUID.fromString(it)) }
 ```
+
+
+### Error handling
+Although Snitch encourages a more functional approach to errors, it also supports global exception handling for both unexpected behaviour as well as for flow control.
+
+```kotlin
+snitch(GsonJsonParser)
+    .onRoutes(root)
+    .handleException(MyException::class) { exception ->
+        MyCustomErroResponse(exception.reason)
+            .also { logger().error(it.toString()) }
+            .badRequest()
+    }
+    .start()
+```
+
+Note that the body of the exception handler works like the normal handlers', with the only difference that it has a referfence to the exception being handled, thie `it` of the lambda, which can be optionally named as in the example above. Note that it's not necessary to return an error response, it's possible to return an alternative successful response instead.
+
+#### Polymorphic error handling
+Note that error handling is polymorphic, so if `MyException` extends `MyBaseException` `.handleException(MyBaseException::class)...` would handle `MyException` as well as any other subclass of `MyBaseException`. For this reason, ordering of the declaration of exception handlers matters. You should always put the most specific handlers first, otherwise a more generic polymorphic handler would handle the exception instead.
