@@ -16,5 +16,5 @@ class JsonParsingTest {
         }
     }
 }
-data class Foo(val test: String)
+private data class Foo(val test: String)
 
