@@ -90,7 +90,8 @@ fun routes(routes: Routes) = routes
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/$this" else this
 
-fun Router.using(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = transformEndpoints { decorate(decoration) }
+fun Router.decorateWith(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = transformEndpoints { decorated(decoration) }
+fun decoration(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = decoration
 fun Router.transformEndpoints(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit =
     { it: Routes -> applyToAll_(it, action) }
 fun Router.onlyIf(condition: Condition) = transformEndpoints { onlyIf(condition) }

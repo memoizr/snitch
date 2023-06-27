@@ -29,7 +29,7 @@ data class Endpoint<B : Any>(
     val visibility: Visibility = Visibility.PUBLIC,
     val decorator: DecoratedWrapper.() -> DecoratedWrapper = { this },
 ) {
-    infix fun decorate(decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>): Endpoint<B> {
+    infix fun decorated(decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>): Endpoint<B> {
         val previousDecorator = this.decorator
         return copy(
             decorator = { DecoratedWrapper({ decoration(previousDecorator(this)) }, wrap) }
@@ -69,16 +69,16 @@ data class Endpoint<B : Any>(
         }
     }
 
-    infix fun doBefore(action: BeforeAction) = decorate {
+    infix fun doBefore(action: BeforeAction) = decorated {
         action(wrap)
         next()
     }
 
-    infix fun doAfter(action: AfterAction) = decorate {
+    infix fun doAfter(action: AfterAction) = decorated {
         next().also { action(wrap, it) }
     }
 
-    infix fun onlyIf(condition: Condition) = decorate {
+    infix fun onlyIf(condition: Condition) = decorated {
         when (val result = condition.check(wrap)) {
             is ConditionResult.Successful -> next()
             is ConditionResult.Failed -> result.response

@@ -3,12 +3,12 @@ package me.snitchon
 import me.snitchon.dsl.InlineSnitchTest
 import me.snitchon.router.Router
 import me.snitchon.router.routes
-import me.snitchon.router.using
+import me.snitchon.router.decorateWith
 import org.junit.Test
 
 class DecorationTest : InlineSnitchTest() {
     val Router.decoration
-        get() = using {
+        get() = decorateWith {
             next().map { "${body} world".ok }
         }
 
