@@ -17,70 +17,73 @@ import me.snitchon.request.TypedRequestWrapper
 import me.snitchon.request.RequestWrapper
 import me.snitchon.request.handling
 import me.snitchon.request.parsing
+import me.snitchon.response.HttpResponse
+import me.snitchon.router.Router
 import me.snitchon.router.routes
+import me.snitchon.router.decorateWith
+import me.snitchon.router.decoration
+import me.snitchon.service.DecoratedWrapper
 import me.snitchon.types.ErrorResponse
 import me.snitchon.types.StatusCodes
 import org.jetbrains.exposed.sql.transactions.transaction
 
 val usersController = routes {
-    POST() with body<CreateUserRequest>() isHandledBy createUser
-    POST("login") with body<LoginRequest>() isHandledBy userLogin
+    withTransaction {
+        POST() with body<CreateUserRequest>() isHandledBy createUser
+        POST("login") with body<LoginRequest>() isHandledBy userLogin
 
-    userId / "posts" / {
-        authenticated {
-            GET() onlyIf principalEquals(userId) isHandledBy getPosts
-            POST() onlyIf principalEquals(userId) with body<CreatePostRequest>() isHandledBy createPost
+        userId / "posts" / {
+            authenticated {
+                GET() onlyIf principalEquals(userId) isHandledBy getPosts
+                POST() onlyIf principalEquals(userId) with body<CreatePostRequest>() isHandledBy createPost
 
-            GET(postId) isHandledBy getPost
-            PUT(postId) with body<UpdatePostRequest>() onlyIf principalEquals(userId) isHandledBy updatePost
-            DELETE(postId) onlyIf (principalEquals(userId) or hasAdminRole) isHandledBy deletePost
+                GET(postId) isHandledBy getPost
+                PUT(postId) with body<UpdatePostRequest>() onlyIf principalEquals(userId) isHandledBy updatePost
+                DELETE(postId) onlyIf (principalEquals(userId) or hasAdminRole) isHandledBy deletePost
+            }
         }
     }
 }
 
+val Router.withTransaction get() = decorateWith { transaction { next() } }
+
+private val withExposedTransaction = decoration { transaction { next() } }
+
 private val updatePost by parsing<UpdatePostRequest>() handling {
-    transaction {
-        postsRepository().updatePost(
-            UpdatePostAction(
-                PostId(request[postId]),
-                PostTitle(body.title),
-                PostContent(body.content),
-            )
+    postsRepository().updatePost(
+        UpdatePostAction(
+            PostId(request[postId]),
+            PostTitle(body.title),
+            PostContent(body.content),
         )
-    }.noContent
+    )
+        .noContent
 }
 
 private val getPost by handling {
-    transaction {
-        postsRepository().getPost(PostId(request[postId]))
-            ?.toResponse?.ok
-            ?: NOT_FOUND()
-    }
+    postsRepository().getPost(PostId(request[postId]))
+        ?.toResponse?.ok
+        ?: NOT_FOUND()
 }
 
 private val deletePost by handling {
-    transaction {
-        postsRepository().deletePost(principal, PostId(request[postId]))
-    }.noContent
+    postsRepository().deletePost(request.principal, PostId(request[postId]))
+        .noContent
 }
 
 private val getPosts by handling {
-    transaction {
-        postsRepository().getPosts(principal)
-            .toResponse.ok
-    }
+    postsRepository().getPosts(request.principal)
+        .toResponse.ok
 }
 
 private val createPost by parsing<CreatePostRequest>() handling {
-    transaction {
-        postsRepository().putPost(
-            CreatePostAction(
-                principal,
-                PostTitle(body.title),
-                PostContent(body.content),
-            )
+    postsRepository().putPost(
+        CreatePostAction(
+            request.principal,
+            PostTitle(body.title),
+            PostContent(body.content),
         )
-    }.mapSuccess {
+    ).mapSuccess {
         SuccessfulCreation(value).created
     }.mapFailure {
         FailedCreation().badRequest()
@@ -88,7 +91,7 @@ private val createPost by parsing<CreatePostRequest>() handling {
 }
 
 private val userLogin by parsing<LoginRequest>() handling {
-    transaction { usersRepository().findHashBy(Email(body.email)) }
+    usersRepository().findHashBy(Email(body.email))
         ?.let {
             if (hasher().match(body.password, it.second))
                 jwt().newToken(JWTClaims(it.first, Role.USER)).ok
@@ -97,15 +100,13 @@ private val userLogin by parsing<LoginRequest>() handling {
 }
 
 private val createUser by parsing<CreateUserRequest>() handling {
-    transaction {
-        usersRepository().putUser(
-            CreateUserAction(
-                UserName(body.name),
-                Email(body.email),
-                Password(body.password).hash
-            )
+    usersRepository().putUser(
+        CreateUserAction(
+            UserName(body.name),
+            Email(body.email),
+            Password(body.password).hash
         )
-    }.mapSuccess {
+    ).mapSuccess {
         SuccessfulCreation(value).created
     }.mapFailure {
         when (code) {
@@ -131,5 +132,5 @@ fun <T, S : StatusCodes> TypedRequestWrapper<*>.SERVER_ERROR() =
     ServerError().serverError<T, _, S>()
 
 fun TypedRequestWrapper<*>.principalIsNot(param: PathParam<out Any, *>) =
-    request[param] != principal.value
+    request[param] != request.principal.value
 

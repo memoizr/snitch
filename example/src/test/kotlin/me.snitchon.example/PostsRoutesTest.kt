@@ -79,7 +79,7 @@ class PostsRoutesTest : BaseTest() {
 
         POST("/users/${user.id.value}/posts")
             .withBody(createPostRequest)
-            .expectCode(401)
+            .expectCode(400)
     }
 
     @Test

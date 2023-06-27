@@ -1,13 +1,11 @@
 package me.snitchon.example
 
 import me.snitchon.example.ApplicationModule.logger
-import me.snitchon.parsers.GsonJsonParser
 import me.snitchon.router.Router
-import me.snitchon.router.using
-import undertow.snitch.spark.undertow
+import me.snitchon.router.decorateWith
 
 val Router.logged
-    get() = using {
+    get() = decorateWith {
         val method = method.name
         logger().info("Begin Request: $method $path")
         next().also {

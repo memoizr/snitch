@@ -5,9 +5,9 @@ import me.snitchon.example.api.health.healthController
 import me.snitchon.example.api.users.usersController
 import me.snitchon.router.Router
 import me.snitchon.router.routes
-import me.snitchon.router.using
+import me.snitchon.router.decorateWith
 
-val Router.log get() = using {
+val Router.log get() = decorateWith {
         logger().info("Begin Request: ${request.method.name} ${request.path}")
         next().also {
             logger().info("End Request: ${request.method.name} ${request.path} ${it.statusCode.code} ${it.value(parser)}")

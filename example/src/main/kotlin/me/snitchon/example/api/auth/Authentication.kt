@@ -8,7 +8,6 @@ import me.snitchon.example.security.Role
 import me.snitchon.example.security.Role.ADMIN
 import me.snitchon.example.types.UserId
 import me.snitchon.parameters.Parameter
-import me.snitchon.request.TypedRequestWrapper
 import me.snitchon.request.RequestWrapper
 import me.snitchon.router.Router
 import me.snitchon.router.transformEndpoints
@@ -24,7 +23,7 @@ val RequestWrapper.role: Role get() = (request[accessToken] as Authentication.Au
 
 val Router.authenticated
     get() = transformEndpoints {
-        with(listOf(accessToken)).decorate {
+        with(listOf(accessToken)).decorated {
             when (request[accessToken]) {
                 is Authentication.Authenticated -> next()
                 is Authentication.Unauthenticated -> UNAUTHORIZED()
