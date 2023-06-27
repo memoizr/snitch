@@ -1,4 +1,4 @@
-package me.snitchon
+package me.snitchon.parsing
 
 import com.memoizr.assertk.isEqualTo
 import me.snitchon.types.Sealed

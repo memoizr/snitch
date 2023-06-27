@@ -1,4 +1,4 @@
-package me.snitchon
+package me.snitchon.parsing
 
 import com.memoizr.assertk.expect
 import me.snitchon.parsers.GsonJsonParser
