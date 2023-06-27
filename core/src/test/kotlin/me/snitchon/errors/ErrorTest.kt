@@ -11,9 +11,9 @@ class ErrorsTest : InlineSnitchTest() {
 
     @Test
     fun `supports typed path parameters`() {
-        withRoutes {
+        given {
             GET("errors") inSummary "does a foo" isHandledBy { ErrorBody("hellothere", 3f).badRequest() }
-        }.assert {
+        }.then {
             GET("/errors")
                 .expectCode(400)
                 .expectBody(ErrorBody("hellothere", 3f).serialized)
@@ -22,14 +22,14 @@ class ErrorsTest : InlineSnitchTest() {
 
     @Test
     fun `supports custom exceptions`() {
-        withRoutes {
+        given {
             GET("exception") inSummary "does a foo" isHandledBy {
                 throw CustomException()
                 "".ok
             }
         }.handleException(CustomException::class) {
             "Something bad happened".badRequest()
-        }.assert {
+        }.then {
             GET("/exception")
                 .expectCode(400)
                 .expect {

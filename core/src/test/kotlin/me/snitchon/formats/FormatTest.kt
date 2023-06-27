@@ -1,4 +1,4 @@
-package me.snitchon
+package me.snitchon.formats
 
 import com.memoizr.assertk.expect
 import me.snitchon.dsl.InlineSnitchTest
@@ -11,9 +11,9 @@ class FormatTest : InlineSnitchTest() {
 
     @Test
     fun `returns json format by default`() {
-        withRoutes {
+        given {
             GET("json") isHandledBy { "ok".ok }
-        } assert {
+        } then {
             GET("/json")
                 .expect {
                     expect that it.headers().map()["content-type"] isEqualTo listOf("application/json")
@@ -23,11 +23,11 @@ class FormatTest : InlineSnitchTest() {
 
     @Test
     fun `returns video mp4 format`() {
-        withRoutes {
+        given {
             GET("bytearray") isHandledBy {
                 "ok".ok.format(VideoMP4)
             }
-        } assert {
+        } then {
             GET("/bytearray").expect {
                 expect that it.headers().map()["content-type"] isEqualTo listOf("video/mp4")
             }
@@ -37,12 +37,12 @@ class FormatTest : InlineSnitchTest() {
 
     @Test
     fun `preserves binary formats`() {
-        withRoutes {
+        given {
             GET("image") isHandledBy {
                 val readBytes = File(ClassLoader.getSystemClassLoader().getResource("squat.jpg")?.file).readBytes()
                 readBytes.ok.format(ImageJpeg)
             }
-        } assert {
+        } then {
             GET("/image").expect {
                 expect that it.headers().map()["Content-Type"] isEqualTo listOf("image/jpeg")
             }

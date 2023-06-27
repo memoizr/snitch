@@ -1,6 +1,5 @@
 package me.snitchon.dsl
 
-import me.snitchon.dsl.InlineSnitchTest
 import me.snitchon.router.Router
 import me.snitchon.router.routes
 import me.snitchon.router.decorateWith
@@ -20,14 +19,14 @@ class DecorationTest : InlineSnitchTest() {
 
     @Test
     fun `allows to decorate requests`() {
-        withRoutes {
+        given {
             decoration {
                 GET("/hello").isHandledBy { "hello".ok }
                 "nest" / nestedRoutes
             }
+        } then {
+            GET("/hello").expectBody(""""hello world"""")
+            GET("/nest/deeper/end").expectBody(""""end of the world"""")
         }
-
-        GET("/hello").expectBody(""""hello world"""")
-        GET("/nest/deeper/end").expectBody(""""end of the world"""")
     }
 }

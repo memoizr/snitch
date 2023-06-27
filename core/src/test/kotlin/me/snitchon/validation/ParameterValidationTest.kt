@@ -9,13 +9,13 @@ class ParameterValidationTest : InlineSnitchTest() {
     @Test
     fun `supports repeated parameters`() {
         val repeatable by query(ofStringSet)
-        withRoutes {
+        given {
             GET("/foo")
                 .with(queries(repeatable))
                 .isHandledBy {
                     request.get(repeatable).toList().ok
             }
-        }.assert {
+        }.then {
             GET("/foo?repeatable=one&repeatable=two&repeatable=three")
                 .expectBody("""["one","two","three"]""")
         }

@@ -10,7 +10,7 @@ import java.util.Date
 class DocumentationTest : InlineSnitchTest() {
     @Test
     fun `creates documentation to basic endpoint`() {
-        val doc = withRoutes {
+        val doc = given {
             GET("/foo").isHandledBy { "bar".ok }
             PUT("/foo").isHandledBy { "bar".ok }
             POST("/foo").isHandledBy { "bar".ok }
@@ -24,7 +24,7 @@ class DocumentationTest : InlineSnitchTest() {
 
     @Test
     fun `deals with complex classes`() {
-        expect that withRoutes {
+        expect that given {
             GET() isHandledBy { (null as ComplexClass).ok }
         }.generateDocumentation()
             .documentation
@@ -38,7 +38,7 @@ class DocumentationTest : InlineSnitchTest() {
         val optionalHeader by optionalHeader()
         val query by query()
         val optionalQuery by optionalQuery()
-        expect that withRoutes {
+        expect that given {
             GET(path)
                 .with(headers(header, optionalHeader))
                 .with(queries(query, optionalQuery))
@@ -51,7 +51,7 @@ class DocumentationTest : InlineSnitchTest() {
 
     @Test
     fun `serves the public documentation`() {
-        withRoutes {
+        given {
             GET("/foo").isHandledBy { "bar".ok }
         }
             .generateDocumentation()

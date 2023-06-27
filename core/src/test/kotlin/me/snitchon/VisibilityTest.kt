@@ -2,8 +2,8 @@ package me.snitchon
 
 import me.snitchon.documentation.Visibility
 import com.google.gson.internal.LinkedTreeMap
+import me.snitchon.parameters.TestResult
 import me.snitchon.parsers.GsonJsonParser.parseJson
-import me.snitchon.router.routes
 import org.junit.Test
 import kotlin.reflect.KClass
 

@@ -9,9 +9,9 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports single path param GET route`() {
-        withRoutes {
+        given {
             GET(param).isHandledBy { request[param].ok }
-        }.assert {
+        }.then {
             GET("/hey")
                 .expectCode(200)
                 .expectBody(""""hey"""")
@@ -20,9 +20,9 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports single path param POST route`() {
-        withRoutes {
+        given {
             POST(param).with(body<String>()).isHandledBy { body.ok }
-        }.assert {
+        }.then {
             POST("/hey")
                 .withBody("no")
                 .expectCode(200)
@@ -32,9 +32,9 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports single path param DELETE route`() {
-        withRoutes {
+        given {
             DELETE(param).isHandledBy { "ok".ok }
-        }.assert {
+        }.then {
             DELETE("/hey")
                 .expectCode(200)
                 .expectBody(""""ok"""")
@@ -43,9 +43,9 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports single path param PATCH route`() {
-        withRoutes {
+        given {
             PATCH(param).isHandledBy { "patch".ok }
-        }.assert {
+        }.then {
             PATCH("/hey")
                 .withBody("patch")
                 .expectCode(200)
@@ -55,9 +55,9 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports single path param PUT route`() {
-        withRoutes {
+        given {
             PUT(param).isHandledBy { "put".ok }
-        }.assert {
+        }.then {
             PUT("/hey")
                 .withBody("put")
                 .expectCode(200)
@@ -67,11 +67,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested GET route`() {
-        withRoutes {
+        given {
             "foo" / {
                 GET(param).isHandledBy { request[param].ok }
             }
-        }.assert {
+        }.then {
             GET("/foo/hey")
                 .expectCode(200)
                 .expectBody(""""hey"""")
@@ -80,11 +80,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested POST route`() {
-        withRoutes {
+        given {
             "foo" / {
                 POST(param).with(body<String>()).isHandledBy { body.ok }
             }
-        }.assert {
+        }.then {
             POST("/foo/hey")
                 .withBody("no")
                 .expectCode(200)
@@ -94,11 +94,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested DELETE route`() {
-        withRoutes {
+        given {
             "foo" / {
                 DELETE(param).isHandledBy { "ok".ok }
             }
-        }.assert {
+        }.then {
             DELETE("/foo/hey")
                 .expectCode(200)
                 .expectBody(""""ok"""")
@@ -107,11 +107,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested PATCH route`() {
-        withRoutes {
+        given {
             "foo" / {
                 PATCH(param).isHandledBy { "patch".ok }
             }
-        }.assert {
+        }.then {
             PATCH("/foo/hey")
                 .withBody("patch")
                 .expectCode(200)
@@ -121,11 +121,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested PUT route`() {
-        withRoutes {
+        given {
             "foo" / {
                 PUT(param).isHandledBy { "put".ok }
             }
-        }.assert {
+        }.then {
             PUT("/foo/hey")
                 .withBody("put")
                 .expectCode(200)
@@ -135,11 +135,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested GET route with multiple segments`() {
-        withRoutes {
+        given {
             "foo" / "bar" / {
                 GET(param).isHandledBy { request[param].ok }
             }
-        }.assert {
+        }.then {
             GET("/foo/bar/hey")
                 .expectCode(200)
                 .expectBody(""""hey"""")
@@ -148,11 +148,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested POST route with multiple segments`() {
-        withRoutes {
+        given {
             "foo" / "bar" / {
                 POST(param).with(body<String>()).isHandledBy { body.ok }
             }
-        }.assert {
+        }.then {
             POST("/foo/bar/hey")
                 .withBody("no")
                 .expectCode(200)
@@ -162,11 +162,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested DELETE route with multiple segments`() {
-        withRoutes {
+        given {
             "foo" / "bar" / {
                 DELETE(param).isHandledBy { "ok".ok }
             }
-        }.assert {
+        }.then {
             DELETE("/foo/bar/hey")
                 .expectCode(200)
                 .expectBody(""""ok"""")
@@ -175,11 +175,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested PATCH route with multiple segments`() {
-        withRoutes {
+        given {
             "foo" / "bar" / {
                 PATCH(param).isHandledBy { "patch".ok }
             }
-        }.assert {
+        }.then {
             PATCH("/foo/bar/hey")
                 .withBody("patch")
                 .expectCode(200)
@@ -189,11 +189,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested PUT route with multiple segments`() {
-        withRoutes {
+        given {
             "foo" / "bar" / {
                 PUT(param).isHandledBy { "put".ok }
             }
-        }.assert {
+        }.then {
             PUT("/foo/bar/hey")
                 .withBody("put")
                 .expectCode(200)
@@ -203,11 +203,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested GET route with multiple segments and path param`() {
-        withRoutes {
+        given {
             "foo" / "bar" / otherPathParam / "baz" / {
                 GET(param).isHandledBy { "${request[otherPathParam]} ${request[param]}".ok }
             }
-        }.assert {
+        }.then {
             GET("/foo/bar/hey/baz/there")
                 .expectCode(200)
                 .expectBody(""""hey there"""")
@@ -216,12 +216,12 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested POST route with multiple segments and path param`() {
-        withRoutes {
+        given {
             "foo" / "bar" / otherPathParam / "baz" / {
                 POST(param).with(body<String>())
                     .isHandledBy { "${request[otherPathParam]} ${request[param]} ${body}".ok }
             }
-        }.assert {
+        }.then {
             POST("/foo/bar/hey/baz/there")
                 .withBody("no")
                 .expectCode(200)
@@ -231,11 +231,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested DELETE route with multiple segments and path param`() {
-        withRoutes {
+        given {
             "foo" / "bar" / otherPathParam / "baz" / {
                 DELETE(param).isHandledBy { "${request[otherPathParam]} ${request[param]}".ok }
             }
-        }.assert {
+        }.then {
             DELETE("/foo/bar/hey/baz/there")
                 .expectCode(200)
                 .expectBody(""""hey there"""")
@@ -244,11 +244,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested PATCH route with multiple segments and path param`() {
-        withRoutes {
+        given {
             "foo" / "bar" / otherPathParam / "baz" / {
                 PATCH(param).isHandledBy { "${request[otherPathParam]} ${request[param]}".ok }
             }
-        }.assert {
+        }.then {
             PATCH("/foo/bar/hey/baz/there")
                 .withBody("patch")
                 .expectCode(200)
@@ -258,11 +258,11 @@ class SinglePathParamTest : InlineSnitchTest() {
 
     @Test
     fun `supports nested PUT route with multiple segments and path param`() {
-        withRoutes {
+        given {
             "foo" / "bar" / otherPathParam / "baz" / {
                 PUT(param).isHandledBy { "${request[otherPathParam]} ${request[param]}".ok }
             }
-        }.assert {
+        }.then {
             PUT("/foo/bar/hey/baz/there")
                 .withBody("put")
                 .expectCode(200)
