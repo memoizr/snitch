@@ -1,4 +1,4 @@
-package me.snitchon
+package me.snitchon.dsl
 
 import me.snitchon.dsl.InlineSnitchTest
 import me.snitchon.router.Router

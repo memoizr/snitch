@@ -16,8 +16,7 @@ class DocumentationTest : InlineSnitchTest() {
             POST("/foo").isHandledBy { "bar".ok }
             PATCH("/foo").isHandledBy { "bar".ok }
             DELETE("/foo").isHandledBy { "bar".ok }
-        }.routedService
-            .generateDocumentation()
+        }.generateDocumentation()
             .documentation
 
         expect that doc.spec contains "get" contains "/foo"
@@ -27,8 +26,7 @@ class DocumentationTest : InlineSnitchTest() {
     fun `deals with complex classes`() {
         expect that withRoutes {
             GET() isHandledBy { (null as ComplexClass).ok }
-        }.routedService
-            .generateDocumentation()
+        }.generateDocumentation()
             .documentation
             .spec contains ""
     }
@@ -45,7 +43,7 @@ class DocumentationTest : InlineSnitchTest() {
                 .with(headers(header, optionalHeader))
                 .with(queries(query, optionalQuery))
                 .isHandledBy { (null as ComplexClass).ok }
-        }.routedService
+        }
             .generateDocumentation()
             .documentation
             .spec contains ""
@@ -55,7 +53,7 @@ class DocumentationTest : InlineSnitchTest() {
     fun `serves the public documentation`() {
         withRoutes {
             GET("/foo").isHandledBy { "bar".ok }
-        }.routedService
+        }
             .generateDocumentation()
             .servePublicDocumenation()
     }
@@ -70,7 +68,7 @@ private data class ComplexClass(
     val float: Float,
     @Description("description", exDouble = 2.0)
     val double: Double,
-    @Description("description", exString ="")
+    @Description("description", exString = "")
     val string: String,
     val boolean: Boolean,
     val short: Short,
@@ -91,7 +89,7 @@ private data class ComplexClass(
     val maybefloat: Float?,
     @Description("description", exDouble = 2.0)
     val maybedouble: Double?,
-    @Description("description", exString ="")
+    @Description("description", exString = "")
     val maybestring: String?,
     val maybeboolean: Boolean?,
     val maybeshort: Short?,
@@ -110,7 +108,7 @@ private enum class MyEnum {
     A, B
 }
 
-private sealed class SealedClass: Sealed() {
-    object A: SealedClass()
-    object B: SealedClass()
+private sealed class SealedClass : Sealed() {
+    object A : SealedClass()
+    object B : SealedClass()
 }
