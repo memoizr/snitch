@@ -23,7 +23,7 @@ abstract class InlineSnitchTest : Ported, TestMethods {
         }
     }
 
-    fun RoutedService.assert(assertionBlock: () -> Unit) {
+    infix fun RoutedService.assert(assertionBlock: () -> Unit) {
         this.start()
         try {
             assertionBlock()
