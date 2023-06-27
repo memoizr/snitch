@@ -15,6 +15,6 @@ class JsonParsingTest {
             } hasMessage """Value of non-nullable member [test] cannot be null"""
         }
     }
+    data class Foo(val test: String)
 }
-private data class Foo(val test: String)
 

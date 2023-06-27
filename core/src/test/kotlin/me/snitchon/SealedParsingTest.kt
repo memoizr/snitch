@@ -5,7 +5,7 @@ import me.snitchon.types.Sealed
 import me.snitchon.parsers.GsonJsonParser
 import org.junit.Test
 
-class ExtensionsTest {
+class SealedParsingTest {
     @Test
     fun `parses sealed classes`() {
         with (GsonJsonParser) {
