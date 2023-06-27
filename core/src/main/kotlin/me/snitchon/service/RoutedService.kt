@@ -1,9 +1,11 @@
 package me.snitchon.service
 
-import me.snitchon.Router
+import me.snitchon.router.Router
 import me.snitchon.parsing.Parser
 import me.snitchon.request.RequestWrapper
 import me.snitchon.response.HttpResponse
+import me.snitchon.types.StatusCodes
+import kotlin.reflect.KClass
 
 data class RoutedService(
     val service: SnitchService,
@@ -25,8 +27,13 @@ data class RoutedService(
         onStop()
     }
 
-    inline fun <reified T : Exception, R : HttpResponse<*, *>> handleException(noinline block: context(Parser) RequestWrapper.(T) -> R): RoutedService {
+    inline fun <reified T : Throwable, R : HttpResponse<Any, StatusCodes>> handleException(noinline block: context(Parser) RequestWrapper.(T) -> R): RoutedService {
         service.handleException(T::class, block)
+        return this
+    }
+
+    fun <T : Throwable, R : HttpResponse<Any, StatusCodes>> handleException(ex: KClass<T>, block: context(Parser) RequestWrapper.(T) -> R): RoutedService {
+        service.handleException(ex, block)
         return this
     }
 }

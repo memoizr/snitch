@@ -1,8 +1,8 @@
 package me.snitchon.documentation
 
-import me.snitchon.*
 import me.snitchon.types.Format.*
 import me.snitchon.parameters.Parameter
+import me.snitchon.router.Router
 import me.snitchon.service.RoutedService
 import me.snitchon.types.ContentType
 import me.snitchon.types.EndpointBundle
@@ -109,7 +109,7 @@ class Spec internal constructor(
 )
 
 fun DocumentedService.servePublicDocumenation(): DocumentedService {
-    with(Router(service.router.config, service.service, emptySet(), service.router.parser)) {
+    with(Router(service.router.config, service.service, emptySet(), service.router.parser, service.router.path)) {
         val path = "/"// config.publicDocumentationPath.ensureLeadingSlash()
         val docPath = "/spec.json"//.ensureLeadingSlash()
         GET(path).isHandledBy {

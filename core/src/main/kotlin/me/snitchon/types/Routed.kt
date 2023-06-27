@@ -11,4 +11,5 @@ interface Routed {
     val pathParams: Set<PathParam<out Any, out Any>>
     val endpoints: MutableList<EndpointBundle<*>>
     val parser: Parser
+    val path: String
 }
