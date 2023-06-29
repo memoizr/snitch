@@ -7,6 +7,9 @@ interface CommonResponses {
     fun <T, S : StatusCodes> HttpResponse<T, S>.format(newFormat: Format) =
         if (this is SuccessfulHttpResponse<T, S>) copy(_format = newFormat) else this
 
+    val <T, S : StatusCodes> HttpResponse<T, S>.text get() =
+        if (this is SuccessfulHttpResponse<T, S>) copy(_format = Format.TextPlain) else this
+
     fun <T, S : StatusCodes> HttpResponse<T, S>.serializer(serializer: (T) -> Any) =
         if (this is SuccessfulHttpResponse<T, S>) copy(value = { serializer(this.body) }) else this
 

@@ -3,6 +3,7 @@ package undertow.snitch.spark
 import io.undertow.Undertow
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.RoutingHandler
+import io.undertow.util.HeaderMap
 import io.undertow.util.HttpString
 import io.undertow.util.Methods.*
 import me.snitchon.router.Router
@@ -154,13 +155,13 @@ class UndertowSnitchService(
     private fun SuccessfulHttpResponse<*, *>.dispatchSuccessfulResponse(exchange: HttpServerExchange) {
         exchange.setStatusCode(this.statusCode.code)
         exchange.responseHeaders.put(HttpString("content-type"), this._format.type)
+        headers.forEach {
+            exchange.responseHeaders.put(HttpString(it.key), it.value)
+        }
         if (this._format == Format.Json) {
             val value1 = value(parser)!!
 
             exchange.responseSender.send(value1.toString())
-            headers.forEach {
-                exchange.responseHeaders.put(HttpString(it.key), it.value)
-            }
         } else {
             if (body!!::class == ByteArray::class) {
                 exchange.responseSender.send(ByteBuffer.wrap(body as ByteArray))

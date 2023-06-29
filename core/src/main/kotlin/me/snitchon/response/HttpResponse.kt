@@ -1,8 +1,6 @@
 package me.snitchon.response
 
 import me.snitchon.parsing.Parser
-import me.snitchon.types.Format
-import me.snitchon.types.Format.*
 import me.snitchon.types.StatusCodes
 
 sealed class HttpResponse<T, out S : StatusCodes> {
@@ -17,28 +15,6 @@ sealed class HttpResponse<T, out S : StatusCodes> {
         is SuccessfulHttpResponse -> this.success()
         is ErrorHttpResponse<T, *, S> -> this.failure()
     }
+
+    abstract fun header(header: Pair<String, String>): HttpResponse<T, S>
 }
-
-data class SuccessfulHttpResponse<T, out S : StatusCodes>(
-    override val statusCode: S,
-    val body: T,
-    val _format: Format = Json,
-    override inline val value: context(Parser) () -> Any? = {
-        when (_format) {
-            Json -> body?.serialized
-            TextHTML -> body
-            OctetStream -> body
-            TextPlain -> body
-            ImageJpeg -> body
-            VideoMP4 -> body
-        }
-    },
-    override val headers: Map<String, String> = emptyMap(),
-) : HttpResponse<T, S>()
-
-data class ErrorHttpResponse<T, E, out S : StatusCodes>(
-    override val statusCode: StatusCodes,
-    val details: E,
-    override val value: context(Parser) () -> Any? = { details?.serialized },
-    override val headers: Map<String, String> = emptyMap(),
-) : HttpResponse<T, S>()
