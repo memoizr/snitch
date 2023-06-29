@@ -9,7 +9,15 @@ data class PathParam<T, R>(
     override val name: String,
     override val pattern: Validator<T, R>,
     override val description: String
-) : Parameter<T, R>(type, name, pattern, description, true, false) {
+) : Parameter<T, R>(
+    type = type,
+    name = name,
+    pattern = pattern,
+    description = description,
+    required = true,
+    emptyAsMissing = true,
+    invalidAsMissing = false
+) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

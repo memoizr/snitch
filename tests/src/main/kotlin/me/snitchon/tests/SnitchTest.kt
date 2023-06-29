@@ -131,6 +131,9 @@ data class Expectation(
     infix fun withHeaders(headers: Map<String, Any?>) =
         copy(headers = headers.map { it.key to it.value.toString() }.toMap())
 
+    infix fun withHeader(header: Pair<String, String>) =
+        copy(headers = headers + header)
+
     infix fun expectBody(body: String) = apply {
         com.memoizr.assertk.expect that response.body() isEqualTo body
     }

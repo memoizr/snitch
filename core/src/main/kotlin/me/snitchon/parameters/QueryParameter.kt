@@ -9,22 +9,39 @@ sealed class QueryParameter<T, R>(
     override val name: String,
     override val pattern: Validator<T, R>,
     override val description: String,
-    override val required: Boolean = false,
-    override val emptyAsMissing: Boolean = false,
-    override val invalidAsMissing: Boolean = false,
+    override val required: Boolean,
+    override val emptyAsMissing: Boolean,
+    override val invalidAsMissing: Boolean,
     open val visibility: Visibility = Visibility.PUBLIC
-) : Parameter<T, R>(type, name, pattern, description, required, emptyAsMissing)
+) : Parameter<T, R>(
+    type = type,
+    name = name,
+    pattern = pattern,
+    description = description,
+    required = required,
+    emptyAsMissing = emptyAsMissing,
+    invalidAsMissing = invalidAsMissing,
+)
 
 data class OptionalQueryParam<T, R>(
     override val type: Class<*>,
     override val name: String,
     override val pattern: Validator<T, R>,
     override val description: String,
-    val default: R,
+    override val default: R,
     override val emptyAsMissing: Boolean,
     override val invalidAsMissing: Boolean,
     override val visibility: Visibility
-) : QueryParameter<T, R>(type, name, pattern, description, false, emptyAsMissing, invalidAsMissing)
+) : QueryParameter<T, R>(
+    type = type,
+    name = name,
+    pattern = pattern,
+    description = description,
+    required = false,
+    emptyAsMissing = emptyAsMissing,
+    invalidAsMissing = invalidAsMissing
+)
+, OptionalParam<R>
 
 data class QueryParam<T, R>(
     override val type: Class<*>,
@@ -45,7 +62,7 @@ class QueryParamDelegate<T, R>(
     val invalidAsMissing: Boolean,
     val visibility: Visibility
 ) {
-    var param: QueryParam<T, R>? = null
+    private var param: QueryParam<T, R>? = null
     operator fun getValue(nothing: Nothing?, property: KProperty<*>) = param(property)
     operator fun getValue(nothing: Any?, property: KProperty<*>) = param(property)
 
@@ -77,13 +94,13 @@ class OptionalQueryParamDelegate<T, R>(
 
     private fun param(property: KProperty<*>) =
         param ?: OptionalQueryParam(
-            type,
-            name.ifEmpty { property.name },
-            pattern,
-            description,
-            default,
-            emptyAsMissing,
-            invalidAsMissing,
-            visibility
+            type = type,
+            name = name.ifEmpty { property.name },
+            pattern = pattern,
+            description = description,
+            default = default,
+            emptyAsMissing = emptyAsMissing,
+            invalidAsMissing = invalidAsMissing,
+            visibility = visibility
         ).also { param = it }
 }

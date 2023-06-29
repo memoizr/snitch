@@ -29,7 +29,7 @@ fun optionalHeader(
     emptyAsMissing: Boolean = false,
     invalidAsMissing: Boolean = false,
     visibility: Visibility = Visibility.PUBLIC
-) = optionalHeader(
+): OptionalHeaderParamDelegate<String?, String?> = optionalHeader(
     condition = ofNonEmptyString,
     name = name,
     description = description,
@@ -45,7 +45,7 @@ fun optionalHeader(
     emptyAsMissing: Boolean = false,
     invalidAsMissing: Boolean = false,
     visibility: Visibility = Visibility.PUBLIC
-) = optionalHeader(
+): OptionalHeaderParamDelegate<String, String> = optionalHeader(
     condition = ofNonEmptyString,
     name = name,
     description = description,

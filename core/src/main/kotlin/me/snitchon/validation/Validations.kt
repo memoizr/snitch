@@ -1,9 +1,6 @@
 package com.snitch.me.snitchon
 
-import me.snitchon.parsing.Parser
 import me.snitchon.validation.*
-import me.snitchon.validation.validator
-import kotlin.reflect.KClass
 
 val ofNonNegativeInt = validator<Int, Int>(
     "non negative integer",
@@ -25,42 +22,34 @@ val ofNonEmptySingleLineString = stringValidator("non empty single-line string")
     else it
 }
 
-val ofNonEmptyStringSet = stringValidator("non empty string set") {
-    it.split(",").toSet()
+val ofNonEmptyStringSet = stringValidatorMulti("non empty string set") {
+    it.flatMap { it.split(",") }
+        .filter { it.isNotEmpty() }
+        .ifEmpty { throw ValidationException(it) }
+        .toSet()
 }
 
 val ofStringSet = stringValidatorMulti("string set") {
     it.flatMap { it.split(",") }.toSet()
 }
 
-
-class Enum<E : kotlin.Enum<*>>(e: KClass<E>) : Validator<E, E> {
-    private val values = e.java.enumConstants.asList().joinToString("|")
-    override val description: String = "A string of value: $values"
-    override val parse: Parser.(Collection<String>) -> E = {
-        it.firstOrNull()!!.let {
-            it.parse(e.java)
-        }
-    }
-    override val regex: Regex = "^($values)$".toRegex()
-}
-
-inline fun <reified E : kotlin.Enum<*>> ofEnum(): Validator<String, E> {
+inline fun <reified E : Enum<*>> ofEnum(): Validator<String, E> {
     val e = E::class
     val values = e.java.enumConstants.asList().joinToString("|")
     val regex: Regex = "^($values)$".toRegex()
-    val description: String = "A string of value: $values"
+    val description = "A string of value: $values"
     return validator(description, regex) {
         it.parse(e.java)
     }
 }
 
-inline fun <reified E : kotlin.Enum<*>> ofRepeatableEnum(): Validator<String, Collection<E>> {
+inline fun <reified E : Enum<*>> ofRepeatableEnum(): Validator<String, Collection<E>> {
     val e = E::class
     val values = e.java.enumConstants.asList().joinToString("|")
     val regex: Regex = "^($values)$".toRegex()
-    val description: String = "A string of value: $values"
+    val description = "A string of value: $values"
     return validatorMulti(description, regex) {
-        it.map { it.parse(e.java) }
+        it.flatMap { it.split(",") }
+            .map { it.parse(e.java) }
     }
 }

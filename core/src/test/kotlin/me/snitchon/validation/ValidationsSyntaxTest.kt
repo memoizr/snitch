@@ -2,6 +2,7 @@ package me.snitchon.validation
 
 import com.snitch.me.snitchon.*
 import me.snitchon.dsl.InlineSnitchTest
+import me.snitchon.extensions.print
 import me.snitchon.parameters.*
 import me.snitchon.parsers.GsonJsonParser.serialized
 import me.snitchon.parsing.Parser
@@ -38,7 +39,7 @@ private object UserIdValidator : Validator<String, UserId> {
     }
 }
 
-class ValidationsTest : InlineSnitchTest() {
+class ValidationsSyntaxTest : InlineSnitchTest() {
 
     @Test
     fun `validates routes`() {
@@ -49,7 +50,7 @@ class ValidationsTest : InlineSnitchTest() {
                 stringSet,
                 userId
             ) with headers(allowInvalidHeader) isHandledBy {
-                request[offset]
+                request[offset].print()
                 request[allowInvalidHeader]
                 request[allowInvalidQuery]
                 request[stringSet]
@@ -65,17 +66,17 @@ class ValidationsTest : InlineSnitchTest() {
                     listOf("""Path parameter `id` is invalid, expecting non negative integer, got `hey`""")
                 ).serialized
             ).expectCode(400)
-            GET("/foo/134?offset=-34").expectBodyJson(
+            GET("/foo/134?offset=-34").expectBody(
                 TestErrorHttpResponse<Any, List<String>>(
                     400,
                     listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `-34`""")
-                )
+                ).serialized
             ).expectCode(400)
-            GET("/foo/134?offset=a").expectBodyJson(
+            GET("/foo/134?offset=a").expectBody(
                 TestErrorHttpResponse<Any, List<String>>(
                     400,
                     listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `a`""")
-                )
+                ).serialized
             ).expectCode(400)
             GET("/foo/134?allowInvalidQuery=a").expectCode(200)
             GET("/foo/134").withHeaders(mapOf(allowInvalidHeader.name to "boo")).expectCode(200)

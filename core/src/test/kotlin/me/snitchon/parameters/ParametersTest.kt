@@ -1,6 +1,7 @@
 package me.snitchon.parameters
 
 import com.snitch.me.snitchon.ofNonEmptySingleLineString
+import com.snitch.me.snitchon.ofNonEmptyString
 import com.snitch.me.snitchon.ofNonNegativeInt
 import me.snitchon.documentation.Visibility
 import me.snitchon.dsl.InlineSnitchTest
@@ -56,6 +57,7 @@ sealed class SealedClass : Sealed() {
     data class One(val oneInt: Int) : SealedClass()
     object Two : SealedClass()
 }
+
 data class TestResult(val string: String)
 
 
@@ -280,6 +282,185 @@ class ParametersTest : InlineSnitchTest() {
         } then {
             POST("/bodyparam").withBody("lolol").expectCode(400)
                 .expectBody("""{"statusCode":400,"details":"Invalid body parameter"}""")
+        }
+    }
+
+    @Test
+    fun `supports a optional header parameters`() {
+        val param by optionalHeader(ofNonNegativeInt)
+        given {
+            GET() withHeader param isHandledBy { (request[param] ?: 0).ok }
+        } then {
+            GET("/").withHeader("param" to "4").expectBody("4")
+            GET("/").expectBody("0")
+        }
+    }
+
+    @Test
+    fun `supports a optional header parameter with default`() {
+        val param by optionalHeader(
+            ofNonNegativeInt,
+            default = 5,
+            emptyAsMissing = true,
+            invalidAsMissing = true
+        )
+
+        given {
+            GET() withHeader param isHandledBy { (request[param]).ok }
+        } then {
+            GET("/")
+                .withHeader("param" to "4")
+                .expectBody("4")
+            GET("/")
+                .withHeader("param" to "foo")
+                .expectBody("5")
+            GET("/")
+                .withHeader("param" to "")
+                .expectBody("5")
+            GET("/").expectBody("5")
+        }
+    }
+
+    @Test
+    fun `supports a optional header parameter without default`() {
+        val param by optionalHeader(
+            ofNonNegativeInt,
+            emptyAsMissing = true,
+            invalidAsMissing = true
+        )
+
+        given {
+            GET() withHeader param isHandledBy { ((request[param]) ?: 5).ok }
+        } then {
+            GET("/")
+                .withHeader("param" to "4")
+                .expectBody("4")
+            GET("/")
+                .withHeader("param" to "foo")
+                .expectBody("5")
+            GET("/")
+                .withHeader("param" to "")
+                .expectBody("5")
+            GET("/").expectBody("5")
+        }
+    }
+
+    @Test
+    fun `supports a optional query parameter with default`() {
+        val param by optionalQuery(
+            ofNonNegativeInt,
+            default = 5,
+            emptyAsMissing = true,
+            invalidAsMissing = true
+        )
+
+        given {
+            GET() withQuery param isHandledBy { (request[param]).ok }
+        } then {
+            GET("/?param=4")
+                .expectBody("4")
+            GET("/?param=foo")
+                .expectBody("5")
+            GET("/?param=")
+                .expectBody("5")
+            GET("/").expectBody("5")
+        }
+    }
+
+    @Test
+    fun `supports a optional query parameter without default`() {
+        val param by optionalQuery(
+            ofNonNegativeInt,
+            emptyAsMissing = true,
+            invalidAsMissing = true
+        )
+
+        given {
+            GET() withQuery param isHandledBy { (request[param] ?: 42).ok }
+        } then {
+            GET("/?param=4")
+                .expectBody("4")
+            GET("/?param=foo")
+                .expectBody("42")
+            GET("/?param=")
+                .expectBody("42")
+            GET("/").expectBody("42")
+        }
+    }
+
+
+    @Test
+    fun `supports a optional string header parameter with default`() {
+        val param by optionalHeader(
+            default = "5",
+            emptyAsMissing = true,
+        )
+
+        given {
+            GET() withHeader param isHandledBy { (request[param]).ok }
+        } then {
+            GET("/")
+                .withHeader("param" to "4")
+                .expectBody(""""4"""")
+            GET("/")
+                .withHeader("param" to "")
+                .expectBody(""""5"""")
+            GET("/").expectBody(""""5"""")
+        }
+    }
+
+    @Test
+    fun `supports a optional string header parameter without default`() {
+        val param by optionalHeader(
+            emptyAsMissing = true,
+        )
+
+        given {
+            GET() withHeader param isHandledBy { ((request[param]) ?: "5").ok }
+        } then {
+            GET("/")
+                .withHeader("param" to "4")
+                .expectBody(""""4"""")
+            GET("/")
+                .withHeader("param" to "")
+                .expectBody(""""5"""")
+            GET("/").expectBody(""""5"""")
+        }
+    }
+
+    @Test
+    fun `supports a optional string query parameter with default`() {
+        val param by optionalQuery(
+            default = "5",
+            emptyAsMissing = true,
+            invalidAsMissing = true,
+        )
+
+        given {
+            GET() withQuery param isHandledBy { (request[param]).ok }
+        } then {
+            GET("/?param=4")
+                .expectBody(""""4"""")
+            GET("/?param=")
+                .expectBody(""""5"""")
+            GET("/").expectBody(""""5"""")
+        }
+    }
+
+    @Test
+    fun `supports a optional string query parameter without default`() {
+        val param by optionalQuery(
+            emptyAsMissing = true,
+        )
+
+        given {
+            GET() withQuery param isHandledBy { (request[param] ?: "42").ok }
+        } then {
+            GET("/?param=4")
+                .expectBody(""""4"""")
+            GET("/?param=")
+                .expectBody(""""42"""")
+            GET("/").expectBody(""""42"""")
         }
     }
 }

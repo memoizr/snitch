@@ -1,6 +1,7 @@
 package me.snitchon.validation
 
 import me.snitchon.parsing.Parser
+import java.lang.Exception
 
 interface Validator<T, R> {
     val regex: Regex
@@ -39,3 +40,5 @@ fun <To> stringValidatorMulti(
     regex: Regex = """^.+$""".toRegex(RegexOption.DOT_MATCHES_ALL),
     mapper: Parser.(Collection<String>) -> To,
 ) = validatorMulti<String, To>(description, regex, mapper)
+
+class ValidationException(val value: Any, val exception: Exception? = null): Exception()

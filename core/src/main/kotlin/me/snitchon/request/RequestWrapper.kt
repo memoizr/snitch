@@ -56,63 +56,63 @@ interface RequestWrapper : CommonResponses {
 
     operator fun <T : Any, R> get(param: PathParam<T, R>): R =
         checkParamIsRegistered(param)
-            .tryParam {
+            .tryParam(param) {
                 params(param.name)
                     .let { param.pattern.parse(parser, listOf(it.orEmpty())) }
-            }
+            }!!
 
     operator fun <T : Any?, R> get(param: QueryParam<T, R>): R =
         checkParamIsRegistered(param)
-            .tryParam {
+            .tryParam(param) {
                 queryParams(param.name)
                     .filterValid(param)
                     .let { param.pattern.parse(parser, it.orEmpty()) }
-            }
+            }!!
 
     operator fun <T : Any?, R> get(param: OptionalQueryParam<T, R>): R =
         checkParamIsRegistered(param)
-            .tryParam {
+            .tryParam(param) {
                 queryParams(param.name)
-                    .filterValid(param)
-                    ?.let { param.pattern.parse(parser, it) } ?: param.default
-            }
+                    .filterValid(param).print()
+                    ?.let { param.pattern.parse(parser, it).print() }.print()
+            } ?: param.default
 
     operator fun <T : Any?, R> get(param: HeaderParam<T, R>): R =
         checkParamIsRegistered(param)
-            .tryParam {
+            .tryParam(param) {
                 headers(param.name)
-                    .let { param.pattern.parse(parser, it.orEmpty()) }
-            }
+                    .let { param.pattern.parse(parser, it) }
+            }!!
 
 
     operator fun <T : Any?, R> get(param: OptionalHeaderParam<T, R>): R =
         checkParamIsRegistered(param)
-            .tryParam {
+            .tryParam(param) {
                 headers(param.name)
                     .filterValid(param)
-                    ?.let { param.pattern.parse(parser, it) } ?: param.default
-            }
+                    ?.let { param.pattern.parse(parser, it) }
+            } ?: param.default
 }
 
 private inline fun RequestWrapper.checkParamIsRegistered(param: Parameter<*, *>) =
     if (!params.contains(param)) throw UnregisteredParamException(param) else this
 
-private inline fun <R> RequestWrapper.tryParam(block: () -> R) = try {
+private inline fun <R> RequestWrapper.tryParam(param: Parameter<*, R>, block: () -> R?): R? = try {
     block()
 } catch (e: Exception) {
-    throw InvalidParametersException(e, getInvalidParams())
+    if (param is OptionalParam<*>&& param.invalidAsMissing) {
+        null
+    } else throw InvalidParametersException(e, getInvalidParams())
 }
 
 fun Collection<String>.filterValid(param: Parameter<*, *>): Collection<String>? = when {
     this.isEmpty() -> null
-    param.emptyAsMissing && this.all { it.isEmpty()} -> null
-    param.invalidAsMissing -> null
+    param.emptyAsMissing && this.all { it.isEmpty() } -> null
     else -> this
 }
 
 fun String?.filterValid(param: Parameter<*, *>): String? = when {
     this == null -> null
     param.emptyAsMissing && this.isEmpty() -> null
-    param.invalidAsMissing -> null
     else -> this
 }
