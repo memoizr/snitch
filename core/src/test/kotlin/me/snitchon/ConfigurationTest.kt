@@ -32,7 +32,6 @@ class ConfigurationTest : SnitchTest({
     }
 
     @Test
-    @Ignore
     fun `supports port from config`() {
         GET("/hey/customport")
             .expectCode(200)
@@ -40,7 +39,6 @@ class ConfigurationTest : SnitchTest({
     }
 
     @Test
-    @Ignore
     fun `parses yml templates`() {
 
         val config = """
