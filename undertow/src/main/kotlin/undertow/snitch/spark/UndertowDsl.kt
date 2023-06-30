@@ -2,15 +2,15 @@ package undertow.snitch.spark
 
 import io.undertow.server.HttpServerExchange
 import io.undertow.util.PathTemplateMatch
-import me.snitchon.parameters.HeaderParameter
-import me.snitchon.parameters.Parameter
-import me.snitchon.parameters.PathParam
-import me.snitchon.parameters.QueryParameter
-import me.snitchon.parsing.Parser
-import me.snitchon.request.RequestWrapper
-import me.snitchon.request.filterValid
-import me.snitchon.service.DecoratedWrapper
-import me.snitchon.types.HTTPMethods
+import me.snitch.parameters.HeaderParameter
+import me.snitch.parameters.Parameter
+import me.snitch.parameters.PathParam
+import me.snitch.parameters.QueryParameter
+import me.snitch.parsing.Parser
+import me.snitch.request.RequestWrapper
+import me.snitch.request.filterValid
+import me.snitch.service.DecoratedWrapper
+import me.snitch.types.HTTPMethods
 import java.net.URLDecoder
 
 

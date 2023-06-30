@@ -1,0 +1,40 @@
+package snitch.example.api
+
+import snitch.example.types.Post
+import snitch.example.types.UserView
+
+data class PostsResponse(val posts: List<PostResponse>)
+val List<Post>.toResponse get() = PostsResponse(map { it.toResponse })
+
+data class PostResponse(
+    val title: String,
+    val content: String,
+    val creator: UserViewResponse,
+    val createdAt: String,
+)
+
+val Post.toResponse
+    get() = PostResponse(
+        title.value,
+        content.value,
+        creator.toResponse,
+        createdAt.toString(),
+    )
+
+data class UserViewResponse(
+    val id: String,
+    val name: String,
+)
+
+val UserView.toResponse
+    get() = UserViewResponse(
+        id = id.value,
+        name = name.value
+    )
+
+data class SuccessfulCreation(val id: String)
+class FailedCreation(val reason: String = "unsuccessful creation")
+
+class InvalidCredentials(val reason: String = "invalid credentials")
+class EmailExists(val reason: String = "email already exists")
+class ServerError(val reason: String = "Server error")
