@@ -1,31 +1,31 @@
-# snitch
+# Snitch
 
-#### will snitch on your api. with swagger.
+#### Will snitch on your API. With swagger.
 
-### introduction
+### Introduction
 
-snitch is a small and typesafe web framework for kotlin
+Snitch is a small and typesafe web framework for Kotlin
 
 ```kotlin
 fun main() {
-    snitch(gsonjsonparser).onroutes {
-        get("hello") ishandledby { "world".ok }
+    snitch(GsonJsonParser).onRoutes {
+        GET("hello") isHandledBy { "world".ok }
     }.start()
 } 
 ```
 
-#### features
+#### Features
 
-- lightweight and fast.
-- functional approach
-- openapi 3 support
-- fully asynchronous execution
-- plain kotlin. no reflection, code generation, annotation processing.
-- kotlin compiler is enough. no gradle plugins
+- Lightweight and fast.
+- Functional approach
+- OpenAPI 3 support
+- Fully asynchronous execution
+- Plain Kotlin. No reflection, code generation, annotation processing.
+- Kotlin compiler is enough. No Gradle plugins
 
-### getting started 
+### Getting started 
 
-```kotlin
+```Kotlin
 repositories {
     maven(url = "https://jitpack.io")
 }
@@ -34,376 +34,375 @@ dependencies {
     implementation("com.github.memoizr:snitch-bootstrap:3.2.7")
 }
 ```
-that's it, no need for command line tools, gradle plugins. it's just a simple library.
+That's it, no need for command line tools, gradle plugins. It's just a simple library.
 
 
-### router
-#### routing basics
+### Router
+#### Routing basics
 ```kotlin
 val root = routes {
-    get("foo") ishandledby {
+    GET("foo") isHandledBy {
         "bar".ok
     }
-    post("foo") with body<foorequest>() ishandledby {
-        "foovalue: ${body.foovalue}".created
+    POST("foo") with body<FooRequest>() isHandledBy {
+        "fooValue: ${body.fooValue}".created
     }
 }
 ```        
 
-the infix style is optional and a classic fluent approach is also supported.
+The infix style is optional and a classic fluent approach is also supported.
 
 ```kotlin
 val root = routes {
-    get("foo").ishandledby {
+    GET("foo").isHandledBy {
         "bar".ok
     }
-    post("foo")
-        .with(body<foorequest>())
-        .ishandledby {
-        "foovalue: ${body.foovalue}".created
+    POST("foo")
+        .with(body<FooRequest>())
+        .isHandledBy {
+        "fooValue: ${body.fooValue}".created
     }
 }
 ```        
 
-notice that `get("/foo")` and `get("foo")` are the same thing
+Notice that `GET("/foo")` and `GET("foo")` are the same thing
 
-you pass the router to the `onroutes` function 
+You pass the router to the `onRoutes` function 
 ```kotlin
 fun main() {
-    snitch(gsonjsonparser).onroutes(root).start()
+    snitch(GsonJsonParser).onRoutes(root).start()
 } 
 ```
 
-of course in a real application you'd like to separate the route declarations from the endpoint implementations.
+Of course in a real application you'd like to separate the route declarations from the endpoint implementations.
 
 ```kotlin
 val root = routes {
-    get("foo") ishandledby getfoo
-    post("foo") with body<foorequest>() ishandledby postfoo
+    GET("foo") isHandledBy getFoo
+    POST("foo") with body<FooRequest>() isHandledBy postFoo
 }
 
-val getfoo by handling {
+val getFoo by handling {
     "bar".ok
 }
 
-val postfoo by parsing<foorequest>() handling {
-    "foovalue: ${body.foovalue}".created
+val postFoo by parsing<FooRequest>() handling {
+    "fooValue: ${body.fooValue}".created
 }
 ```
 
-#### route nesting
-services often have hundreds of routes, organized hierarchically. this can be modeled in snitch:
+#### Route Nesting
+Services often have hundreds of routes, organized hierarchically. This can be modeled in Snitch:
 ```kotlin
 val root = routes {
-    "health" / healthcontroller
-    "users" / userscontroller
-    "posts" / postscontroller
+    "health" / healthController
+    "users" / usersController
+    "posts" / postsController
     ...
 }
 
-val userscontroller = routes {
-    post() with body<createuserrequest> ishandledby createuser
+val usersController = routes {
+    POST() with body<CreateUserRequest> isHandledBy createUser
     
-    userid / {
-        get() ishandledby getuser
-        delete() ishandledby deleteuser
+    userId / {
+        GET() isHandledBy getUser
+        DELETE() isHandledBy deleteUser
         
         "posts" / {
-            get() ishandledby getposts
-            post() with body<createpostrequest>() ishandledby createpost
-            postid / {
-                get() ishandledby getpost
+            GET() isHandledBy getPosts
+            POST() with body<CreatePostRequest> isHandledBy createPost
+            postId / {
+                GET() isHandledBy getPost
             }
         }
     }
 }
 ```
 
-this will define the following routes:
+This will define the following routes:
 ```
-post users
-get users/{userid}
-delete users/{userid}
-get users/{userid}/posts
-post users/{userid}/posts
-get users/{userid}/posts/{postid}
+POST users
+GET users/{userId}
+DELETE users/{userId}
+GET users/{userId}/posts
+POST users/{userId}/posts
+GET users/{userId}/posts/{postId}
 ```
 
-different teams however will have different styles that they endorse, so for those who would rather have a less dry but more explicit route declaration, they can define the routes as:
+Different teams however will have different styles that they endorse, so for those who would rather have a less DRY but more explicit route declaration, they can define the routes as:
 
 ```kotlin
 val root = routes {
-    healthcontroller
-    userscontroller
-    postscontroller
+    healthController
+    usersController
+    postsController
     ...
 }
-val userscontroller = routes {
-    post("users") with body<createuserrequest> ishandledby createuser
+val usersController = routes {
+    POST("users") with body<CreateUserRequest> isHandledBy createUser
     
-    get("users" / userid) ishandledby getuser
-    delete("users" / userid) ishandledby deleteuser
+    GET("users" / userId) isHandledBy getUser
+    DELETE("users" / userId) isHandledBy deleteUser
 
-    get("users" / userid / "posts") ishandledby getposts
-    post("users" / userid / "posts") with body<createpostrequest>() ishandledby createpost
-    get("users" / userid / "posts" / postid) ishandledby getpost
+    GET("users" / userId / "posts") isHandledBy getPosts
+    POST("users" / userId / "posts") with body<CreatePostRequest> isHandledBy createPost
+    GET("users" / userId / "posts" / postId) isHandledBy getPost
 }
 ```
 
-the dsl is flexible so for teams that would like a measured and hybrid approach they can define the routes howerver they wish. for example grouping by path for all the actions supported on it:
+The DSL is flexible so for teams that would like a measured and hybrid approach they can define the routes howerver they wish. For example grouping by path for all the actions supported on it:
 
 ```kotlin
 val root = routes {
-    healthcontroller
-    userscontroller
-    postscontroller
+    healthController
+    usersController
+    postsController
     ...
 }
-val userscontroller = routes {
+val usersController = routes {
     "users" / {
-        post() with body<createuserrequest> ishandledby createuser
+        POST() with body<CreateUserRequest> isHandledBy createUser
     }
-    "users" / userid / {
-        get() ishandledby getuser
-        delete() ishandledby deleteuser
-    }
-
-    "users" / userid / "posts" / {
-        get() ishandledby getposts
-        post() with body<createpostrequest>() ishandledby createpost
+    "users" / userId / {
+        GET() isHandledBy getUser
+        DELETE() isHandledBy deleteUser
     }
 
-    "users" / userid / "posts" / postid / {
-        get() ishandledby getpost
+    "users" / userId / "posts" / {
+        GET() isHandledBy getPosts
+        POST() with body<CreatePostRequest> isHandledBy createPost
+    }
+
+    "users" / userId / "posts" / postId / {
+        GET() isHandledBy getPost
     }
 }
 ```
 
 
-#### http input parameters
+#### HTTP input parameters
 
 ```kotlin
-val userid by path()
-val showdetails by query(ofboolean)
+val userId by path()
+val showDetails by query(ofBoolean)
 
 val root = routes {
-    get("users" / userid / "profile")
-        .with(showdetails)
-        .ishandledby {
-            val user = userid(request[userid])
-            if (request[showdetails]) {
-                usersrepository().profiledetails(user)
+    GET("users" / userId / "profile")
+        .with(showDetails)
+        .isHandledBy {
+            val user = UserId(request[userId])
+            if (request[showDetails]) {
+                usersRepository().profileDetails(user)
             } else {
-                usersrepository().profilesummary(user)
+                usersRepository().profileSummary(user)
             }.ok
         }
 }
 ```        
 
-note: `userid` and `showdetails` are typed and validated. `request[showdetails]` will return a `boolean` and `request[userid]` will return a `string`. if you don't pass a `validator` such as `ofboolean`, it defaults to `ofnonemptystring`.  
-note: you have to declare the usage of a certain parameter in order to use it.
+Note: `userId` and `showDetails` are typed and validated. `request[showDetails]` will return a `Boolean` and `request[userId]` will return a `String`. If you don't pass a `Validator` such as `ofBoolean`, it defaults to `ofNonEmptyString`.  
+Note: you have to declare the usage of a certain parameter in order to use it.
 
-#### input parameter validation and transformation
-all parameters are validated and transformed to another type by default. here's some more examples, let's add the type parameters explicitly so it's clear what's happening:
+#### Input parameter validation and transformation
+All parameters are validated and transformed to another type by default. Here's some more examples, let's add the type parameters explicitly so it's clear what's happening:
 
-```kotlin
-val userid: string by path(nonemptystring)  
-val filters: set<string> by path(ofnonemptyset)
-val showdetails: boolean by path(ofboolean)
+```Kotlin
+val userId: String by path(nonEmptyString)  
+val filters: Set<String> by path(ofNonEmptySet)
+val showDetails: Boolean by path(ofBoolean)
 ```
 
-#### custom validations
-although there are a few built in validator-transformers, they offer a relatively weak typing. best practice involves transforming and validating raw platform types into domain types. for example a `userid` is rarely actually just a string, for example it's unlikely the content of `shakespeare.txt` parsed as string could possibly be a valid id for a user. you most likely have a `value class userid` defined somewhere. likewise, a search filter is usually something like an `enum` where you have a set of pre-determined filter values. 
+#### Custom validations
+Although there are a few built in validator-transformers, they offer a relatively weak typing. Best practice involves transforming and validating raw platform types into domain types. For example a `userId` is rarely actually just a string, for example it's unlikely the content of `Shakespeare.txt` parsed as string could possibly be a valid ID for a user. You most likely have a `value class UserId` defined somewhere. Likewise, a search filter is usually something like an `Enum` where you have a set of pre-determined filter values. 
 
-defining custom validator-transformers in snitch is simple:
+Defining custom validator-transformers in snitch is simple:
 ```kotlin
-value class userid(val id: uuid)
-enum class filter { expired, active, cancelled, pending }
+value class UserId(val id: UUID)
+enum class Filter { EXPIRED, ACTIVE, CANCELLED, PENDING }
 
-val ofuserid = validator<string, userid> { userid(uuid.fromstring(it)) }
+val ofUserId = validator<String, UserId> { UserId(UUID.fromString(it)) }
 
 // explicit types can be omitted for conciseness, here included for illustrative purposes
-val userid: userid by path(ofuserid)
-val filters: collection<filter> by query(ofrepeatableenum<filter>())
-val filter: filter by query(ofenum<filter>())
+val userId: UserId by path(ofUserId)
+val filters: Collection<Filter> by query(ofRepeatableEnum<Filter>())
+val filter: Filter by query(ofEnum<Filter>())
 ```
 
-> *note:* snitch is optimized for production code use cases, and in the spirit of kotlin, it *enforces* best practices. in production, you almost always need to validate and transfrom inputs consistently. snitch lets you do this in only one line of code in most cases, leading to a more concise, explicit and consistent codebase, making it easier to maintain larger codebases and for new developers to quickly become productive. 
+> *Note:* Snitch is optimized for production code use cases, and in the spirit of Kotlin, it *enforces* best practices. In production, you almost always need to validate and transfrom inputs consistently. Snitch lets you do this in only one line of code in most cases, leading to a more concise, explicit and consistent codebase, making it easier to maintain larger codebases and for new developers to quickly become productive. 
 
-#### optional input parameters
-declaring a parameter with `query` or `header` will make it required. if the parameter is not supplied a `400` message will be returned specifying that that particular parameter was expected but not provided, as well as any other parameter that also does not pass validation. optional parameters can be declared as such:
+#### Optional input parameters
+Declaring a parameter with `query` or `header` will make it required. If the parameter is not supplied a `400` message will be returned specifying that that particular parameter was expected but not provided, as well as any other parameter that also does not pass validation. Optional parameters can be declared as such:
 
 
 ```kotlin
 // request[sort] is nullable
-val sort: sorting? by optionalquery(ofenum<sorting>())
+val sort: Sorting? by optionalQuery(ofEnum<Sorting>())
 ```
 
-the optionality functionality is quite powerful, offering a clear and consistent way of specifying default values as well as defining a behaviour for when these values are provided as empty as or as invalid inputs:
+The optionality functionality is quite powerful, offering a clear and consistent way of specifying default values as well as defining a behaviour for when these values are provided as empty as or as invalid inputs:
 
 ```kotlin
-// request[sort] is not nullable, new is the default value
-val sort: sorting by optionalquery(ofenum<sorting>(), default = new)
+// request[sort] is not nullable, NEW is the default value
+val sort: Sorting by optionalQuery(ofEnum<Sorting>(), default = NEW)
 
-val limit: int by optionalquery(ofnonnegativeint, default = 20, emptyasmissing = true, invalidasmissing = true)
-val offset: int by optionalquery(ofnonnegativeint, default = 0, emptyasmissing = true, invalidasmissing = true)
+val limit: Int by optionalQuery(ofNonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
+val offset: Int by optionalQuery(ofNonNegativeInt, default = 0, emptyAsMissing = true, invalidAsMissing = true)
 ```
 
-#### parameter naming
-snitch aims at being as concise and as less verbose as possible while delivering a full feature set for production use-cases. in this spirit when you define an input parameter such as `val q by query()` it will create a named query parameter that should be supplied as such for example:`?q=urlencodedquery`. note that the name of the parameter `val` in the codebase is by default the same name as in the api. if you want it to be different, it's simple:
+#### Parameter naming
+Snitch aims at being as concise and as less verbose as possible while delivering a full feature set for production use-cases. In this spirit when you define an input parameter such as `val q by query()` it will create a named query parameter that should be supplied as such for example:`?q=urlencodedquery`. Note that the name of the parameter `val` in the codebase is by default the same name as in the API. If you want it to be different, it's simple:
 ```kotlin
-val searchquery by query(name = "searchquery")
+val searchQuery by query(name = "searchQuery")
 ```
 
-`limit` and `offset` here are defined so that if these parameters were not provided, or provided incorrectly, a default value would be provided instead. this is in case a "fail quietly" behaviour is desired. by default, a `fail explicitly` behaviour is supported, so empty or invalid inputs will return a 400 to inform the api user they're probably doing something wrong.
+`limit` and `offset` here are defined so that if these parameters were not provided, or provided incorrectly, a default value would be provided instead. This is in case a "fail quietly" behaviour is desired. By default, a `fail explicitly` behaviour is supported, so empty or invalid inputs will return a 400 to inform the API user they're probably doing something wrong.
 
-#### unsafe, undocumented parameter parsing
-while snitch *enforces* best practices, leading to a less verbose and more consistent codebase that implements them, it also supports an *unsafe* traditional approach. if you want to access a parameter sneakily, and you don't care for the parameter to be included in the documentation, you can do it very simply with the cowboy-friendly syntax:
+#### Unsafe, undocumented parameter parsing
+While Snitch *enforces* best practices, leading to a less verbose and more consistent codebase that implements them, it also supports an *unsafe* traditional approach. If you want to access a parameter sneakily, and you don't care for the parameter to be included in the documentation, you can do it very simply with the cowboy-friendly syntax:
 
 ```kotlin
-val getcows by handling {
+val getCows by handling {
     ...
-    request.queryparams("numberofcows")
-    request.headerparams("ranch")
-    request.pathparams("ranchid")
+    request.queryParams("numberOfCows")
+    request.headerParams("ranch")
+    request.pathParams("ranchId")
     ...
 }
 ```
-although this approach is supported for niche use cases, it is strongly discouraged that this be used for most production applications unless there is a good reason for it.
+Although this approach is supported for niche use cases, it is strongly discouraged that this be used for most production applications unless there is a good reason for it.
 
-#### repeated parameters
-in http one of the hidden challenges to creating a robust and production grade api is that of handling the edge case of query or header parameters provided repeatedly when exactly one or at most one is expected. by default `val searchquery by query()` expects exactly one value being provided and `val searchquery by optionalquery()` provides at most one semantics, unexpected repetition will result in 400. support for repeated parameters can be made explicity by using `... by query(ofstringset)` for example, which uses a repeatable validator. custom validator for repeatable can be created in a very similar way to non-repeatable validators:
+#### Repeated parameters
+In HTTP one of the hidden challenges to creating a robust and production grade API is that of handling the edge case of query or header parameters provided repeatedly when exactly one or at most one is expected. By default `val searchQuery by query()` expects exactly one value being provided and `val searchQuery by optionalQuery()` provides at most one semantics, unexpected repetition will result in 400. Support for repeated parameters can be made explicity by using `... by query(ofStringSet)` for example, which uses a repeatable validator. Custom validator for repeatable can be created in a very similar way to non-repeatable validators:
 
 ```kotlin
-val ofuserid = repeatablevalidator<string, userid> { userid(uuid.fromstring(it)) }
+val ofUserId = repeatableValidator<String, UserId> { UserId(UUID.fromString(it)) }
 ```
-#### body parameter
-body parameters are treated differently than other input parameters as they are used in different ways. while it's common to share the same query parameters or headers between several endpoints (for example consider `limit`, `offset`, `orderby`, `access-token` and so on), body parameters are often single use. snitch aims at encouraging best  practices while reducing verbosity and clutter as much as possible, and in that spirit body parameter types are declared very simply:
+#### Body parameter
+Body parameters are treated differently than other input parameters as they are used in different ways. While it's common to share the same query parameters or headers between several endpoints (for example consider `limit`, `offset`, `orderBy`, `Access-Token` and so on), body parameters are often single use. Snitch aims at encouraging best  practices while reducing verbosity and clutter as much as possible, and in that spirit body parameter types are declared very simply:
 ```kotlin
-post("mypath") with body<myrequest>() ishandleby {
-    // already parsed to myrequest domain type
+POST("mypath") with body<MyRequest>() isHandleBy {
+    // already parsed to MyRequest domain type
     request.body
 }
 ```
-this approach is typesafe, so if you were to omit the declaration of the body type, it would not be possible for you to access it within the handler:
+This approach is typesafe, so if you were to omit the declaration of the body type, it would not be possible for you to access it within the handler:
 
 ```kotlin
-post("mypath") ishandleby {
-    // this resolves to kotlin's nothing special type and would not compile
+POST("mypath") isHandleBy {
+    // this resolves to Kotlin's Nothing special type and would not compile
     request.body
 }
 ```
-binary path can also be supported inituitively by: `with(body<bytearray>())`
+Binary path can also be supported inituitively by: `with(body<ByteArray>())`
 
-### middleware 
-snitch supports a very powerful and flexible middleware mechanism that can be used to implement a wide variety of features. let's see how you can use it to create a simple logging behaviour applied to a route hierarchy:
+### Middleware 
+Snitch supports a very powerful and flexible middleware mechanism that can be used to implement a wide variety of features. Let's see how you can use it to create a simple logging behaviour applied to a route hierarchy:
 
 ```kotlin
-val router.log get() = decoratewith {
-    logger().info("begin request: ${request.method.name} ${request.path}")
+val Router.log get() = decorating {
+    logger().info("Begin Request: ${request.method.name} ${request.path}")
     next().also {
-        logger().info("end request: ${request.method.name} ${request.path} ${it.statuscode.code} ${it.value(parser)}")
+        logger().info("End Request: ${request.method.name} ${request.path} ${it.statusCode.code} ${it.value(parser)}")
     }
 }
 
-val rootrouter = routes {
+val rootRouter = routes {
     log {
-        "health" / healthcontroller
-        "users" / userscontroller
+        "health" / healthController
+        "users" / usersController
     }
 }
 ```
 
-here `log` is a custom defined middleware logging behaviour. its usage is very intuitive, and it's clear that such behaviour should be applied to any route defined within its block. defining a new middleware is as straightforward as possible, here's the identity middleware, that simply calls the next action:
+here `log` is a custom defined middleware logging behaviour. Its usage is very intuitive, and it's clear that such behaviour should be applied to any route defined within its block. Defining a new middleware is as straightforward as possible, here's the identity middleware, that simply calls the next action:
 ```kotlin
-val router.identity get() = decoratewith { next() }
+val Router.identity get() = decorateWith { next() }
 ```
 
-the code block provided to `decoratewith` works similarly to the way handlers work, you can still access the request parameter in the same way with `request[myparam]` and can return responses with `ok` `created` `badrequest()` etc like in normal handlers.
+the code block provided to `decorateWith` works similarly to the way handlers work, you can still access the request parameter in the same way with `request[myParam]` and can return responses with `ok` `created` `badRequest()` etc like in normal handlers.
 
-calling `next()` executes the code in the block of any nested middleware until it gets to the code block of the handler. `next()` returns the response from the next layer of the middleware and as such it can be transformed as appropriate. 
+Calling `next()` executes the code in the block of any nested middleware until it gets to the code block of the handler. `next()` returns the response from the next layer of the middleware and as such it can be transformed as appropriate. 
 
-#### order of execution
-the order of execution, that is, what code is executed by the `next()` call, is dependent on the order of declaration. it works as your intuition would expect, inside out, from most nested to least nested:
+#### Order of execution
+The order of execution, that is, what code is executed by the `next()` call, is dependent on the order of declaration. It works as your intuition would expect, inside out, from most nested to least nested:
 ```kotlin
 //called second
 log {
     // called first
     statistics {
-        get() ...
+        GET() ...
     }
 }
 ```
 
-### security and access control
-middleware allows for the implementation of powerful and granular access control systems. here's a realistic example:
+### Security and access control
+middleware allows for the implementation of powerful and granular access control systems. Here's a realistic example:
 
 ```kotlin
-val router.authenticated
-    get() = transformendpoints {
-        with(listof(accesstoken)).decorate {
-            when (request[accesstoken]) {
-                is authentication.authenticated -> next()
-                is authentication.unauthenticated -> unauthorized()
+val Router.authenticated
+    get() = transformEndpoints {
+        with(listof(accessToken)).decorate {
+            when (request[accessToken]) {
+                is Authentication.Authenticated -> next()
+                is Authentication.Unauthenticated -> UNAUTHORIZED()
             }
         }
     }
 
-val accesstoken: authentication by header(validaccesstoken)
+val accessToken: Authentication by header(validAccesstoken)
 
-val validaccesstoken = validator<string, authentication> { jwt().validate(it) }
+val validAccesstoken = validator<String, Authentication> { jwt().validate(it) }
 
-sealed interface authentication {
-    data class authenticated(val claims: jwtclaims) : authentication
-    interface unauthenticated : authentication
-    object invalidtoken : unauthenticated
-    object expiredtoken : unauthenticated
-    object missingtoken : unauthenticated
-    object invalidclaims : unauthenticated
+sealed interface Authentication {
+    data class Authenticated(val claims: JwtClaims) : Authentication
+    interface Unauthenticated : Authentication
+    object InvalidToken : Unauthenticated
+    object ExpiredToken : Unauthenticated
+    object MissingToken : Unauthenticated
+    object InvalidClaims : Unauthenticated
 }
 ```
 
-and this is how this is used
+and this is how this is used:
 ```kotlin
-
 authenticated {
         ...
-        get(userid / "posts") ishandledby getposts
+        GET(userId / "posts") isHandledBy getPosts
         ...
     }
 }
 ```
 now, there's a lot to unpack in a few lines of code, let's break it down:
 ```kotlin
-val router.authenticated
-    get() = decorateendpoints {
-        with(listof(accesstoken)).decorate {
-            when (request[accesstoken]) {
-                is authentication.authenticated -> next()
-                is authentication.unauthenticated -> unauthorized()
+val Router.authenticated
+    get() = decorateEndpoints {
+        withHeader(accessToken).decorate {
+            when (request[accessToken]) {
+                is Authentication.Authenticated -> next()
+                is Authentication.Unauthenticated -> UNAUTHORIZED()
             }
         }
     }
 ```
 
-`decorateendpoints` will apply whatever transformation inside the block to any endpoint to which this will be applied. `with(listof(accesstoken))` is declaring and adding the `accesstoken` header parameter to the endpoints, documentation will reflect that. `request[accesstoken]` parses, validates and transforms the access token provided in the headers. it returns a domain type, and we can proceed to the next layer of middleware in case the token is valid, and return a 401 error in case it is not.
+`decorateEndpoints` will apply whatever transformation inside the block to any endpoint to which this will be applied. `withHeader(accessToken)` is declaring and adding the `accessToken` header parameter to the endpoints, documentation will reflect that. `request[accessToken]` parses, validates and transforms the access token provided in the headers. It returns a domain type, and we can proceed to the next layer of middleware in case the token is valid, and return a 401 error in case it is not.
 
-### database integration
-snitch is an http focused tool, and as such it abstains from offering solutions to non-http problems such as deeply integrating with databases. we believe it is better to leave that job to specialized tools such as jooq or exposed. that said what snitch does offer is an extremely easy way of integrating with such tools. for example, here's how simple it is to declare that endpoints within a given hierarchy should all execute the code within a `exposed` transaction:
+### Database integration
+Snitch is an HTTP focused tool, and as such it abstains from offering solutions to non-HTTP problems such as deeply integrating with databases. We believe it is better to leave that job to specialized tools such as Jooq or Exposed. That said what snitch does offer is an extremely easy way of integrating with such tools. For example, here's how simple it is to declare that endpoints within a given hierarchy should all execute the code within an `Exposed` transaction:
 
 ```kotlin
-withtransaction {
-    post() with body<createuserrequest>() ishandledby createuser
-    post("login") with body<loginrequest>() ishandledby userlogin
+withTransaction {
+    POST() with body<CreateUserRequest>() isHandledBy createUser
+    POST("login") with body<LoginRequest>() isHandledBy userLogin
 
-    userid / "posts" / {
+    userId / "posts" / {
         authenticated {
-            get() onlyif principalequals(userid) ishandledby getposts
-            post() onlyif principalequals(userid) with body<createpostrequest>() ishandledby createpost
+            GET() onlyIf principalEquals(userId) isHandledBy getPosts
+            POST() onlyIf principalEquals(userId) with body<CreatePostRequest>() isHandledBy createPost
 
-            get(postid) ishandledby getpost
-            put(postid) with body<updatepostrequest>() onlyif principalequals(userid) ishandledby updatepost
-            delete(postid) onlyif (principalequals(userid) or hasadminrole) ishandledby deletepost
+            GET(postId) isHandledBy getPost
+            PUT(postId) with body<UpdatePostRequest>() onlyIf principalEquals(userId) isHandledBy updatePost
+            DELETE(postId) onlyif (principalEquals(userId) or hasAdminRole) isHandledBy deletePost
         }
     }
 }
@@ -411,144 +410,143 @@ withtransaction {
 
 here's how withtransaction is implemented:
 ```kotlin
-// transaction {} from exposed framework
-val router.withtransaction get() = decoratewith { transaction { next() } }
+// transaction {} from Exposed framework
+val Router.withTransaction get() = decorateWith { transaction { next() } }
 ```
-the ease with which this feature can be implemented is a testament to the power and flexibility of middleware. this can also be done in a granular way, by endpoint:
+The ease with which this feature can be implemented is a testament to the power and flexibility of middleware. This can also be done in a granular way, by endpoint:
 ```kotlin
-get() decorated withexposedtransaction onlyif principalequals(userid) ishandledby getposts
+GET() decorated withExposedTransaction onlyIf principalEquals(userId) isHandledBy getPosts
 ```
 and this is the declaration of this decoration, which can be reused across different endpoints:
 ```kotlin
-val withexposedtransaction = decoration { transaction { next() } }
+val withExposedTransaction = decoration { transaction { next() } }
 ```
-this code hardly needs any explanation, in the spirit of snitch philosophy. 
+this code hardly needs any explanation, in the spirit of Snitch philosophy. 
 
-the transaction example was just one way of showing how the flexibility and power of the dsl makes it extremely convenient to integrate with purpose built tools for database and other purposes. snitch focuses on http, but it seamlessly integrates with other tools with other focuses.
+the transaction example was just one way of showing how the flexibility and power of the dsl makes it extremely convenient to integrate with purpose built tools for database and other purposes. Snitch focuses on HTTP, but it seamlessly integrates with other tools with other focuses.
 
-### guards
-still on top of the same underlying mechanism we've built a powerful and granular guard mechanism, here's an example of it at work:
+### Guards
+Still on top of the same underlying mechanism we've built a powerful and granular guard mechanism, here's an example of it at work:
 
 ```kotlin
-val requestwrapper.role: role get() = (request[accesstoken] as authentication.authenticated).claims.role
+val requestWrapper.role: Role get() = (request[accessToken] as Authentication.Authenticated).claims.role
 
-val hasadminrole = condition {
+val hasAdminRole = condition {
     when (role) {
-        admin -> successful()
-        else -> failed(forbidden())
+        ADMIN -> Successful()
+        else -> Failed(FORBIDDEN())
     }
 }
 ```
 and this is how it's used
 ```kotlin
-delete(postid) onlyif hasadminrole ishandledby deletepost
+DELETE(postId) onlyIf hasAdminRole isHandledBy deletePost
 ```
 
-`onlif` takes a condition which can be either `successful` or `failed` and will either proceed with the request or terminate early accordingly.
+`onlIf` takes a condition which can be either `Successful` or `Failed` and will either proceed with the request or terminate early accordingly.
 
-this offers a high degree of granularity when specifying access control as applied to individual routes.
+This offers a high degree of granularity when specifying access control as applied to individual routes.
 
-#### composing conditions
-conditions are composable and support basic boolean logic operations:
+#### Composing conditions
+Conditions are composable and support basic boolean logic operations:
 
 ```kotlin
-delete(postid) onlyif (principalequals(userid) or hasadminrole) ishandledby deletepost
+DELETE(postId) onlyIf (principalEquals(userId) or hasAdminRole) isHandledBy deletePost
 ```
 
-the code above hardly needs an explanation for what it's doing, despite the fact that it's not trivial behaviour.
+The code above hardly needs an explanation for what it's doing, despite the fact that it's not trivial behaviour.
 
-here's the definition of `principalequals`:
+here's the definition of `principalEquals`:
 ```kotlin
-fun principalequals(param: parameter<out any, *>) = condition {
-    if (principal.value == request[param]) successful()
-    else failed(forbidden())
+fun principalEquals(param: Parameter<out Any, *>) = condition {
+    if (principal.value == request[param]) Successful()
+    else Failed(FORBIDDEN())
 }
 
-val requestwrapper.principal: userid get() = (request[accesstoken] as authentication.authenticated).claims.userid
+val RequestWrapper.principal: UserId get() = (request[accessToken] as Authentication.Authenticated).claims.userId
 ```
 
-#### reusing conditions
-although it's possible to customize each and every endpoint to lock it down to the exact security guarantees your business logic needs to enforce, it's often the case that you need to share the same guard logic across several endpoints. snitch offers two ways of doing this, the first one is obvious:
+#### Reusing conditions
+Although it's possible to customize each and every endpoint to lock it down to the exact security guarantees your business logic needs to enforce, it's often the case that you need to share the same guard logic across several endpoints. Snitch offers two ways of doing this, the first one is obvious:
 
 ```kotlin
-val owneroradmin = principalequals(userid) or hasadminrole
+val ownerOrAdmin = principalEquals(userId) or hasAdminRole
 
-delete(postid) onlyif owneroradmin ishandledby deletepost
+DELETE(postId) onlyIf ownerOrAdmin isHandledBy deletePost
 ```
 
-the second one is even more generic, as it can be applied to an entire sub-hierarchy of routes. it works similarly to how middleware does:
+The second one is even more generic, as it can be applied to an entire sub-hierarchy of routes. It works similarly to how middleware does:
 
 ```kotlin
-onlyif(principalequals(userid) or hasadminrole) {
+onlyIf(principalEquals(userId) or hasAdminRole) {
     ...
-    delete(postid) ishandledby deletepost
-    patch(postid) with body<updatepostrequest>() ishandledby updatepost
+    DELETE(postId) isHandledBy deletePost
+    PATCH(postId) with body<UpdatePostRequest>() isHandledBy updatePost
     ...
 }
 ```
 
-note that this approach to guards is in line with what we call "snitch's way" or "snitchy". of course good old imperative checks inside the handler are still possible and supported, and in some cases that's the best thing to do. but sticking to snitch's way allows for more consistent, readable and manageable codebases at any scale.
+Note that this approach to Guards is in line with what we call "Snitch's way" or "Snitchy". Of course good old imperative checks inside the handler are still possible and supported, and in some cases that's the best thing to do. But sticking to Snitch's way allows for more consistent, readable and manageable codebases at any scale.
 
-### error handling
-although snitch encourages a more functional approach to errors, it also supports global exception handling for both unexpected behaviour and for flow control.
+### Error handling
+Although Snitch encourages a more functional approach to errors, it also supports global exception handling for both unexpected behaviour and for flow control.
 
 ```kotlin
-snitch(gsonjsonparser)
-    .onroutes(root)
-    .handleexception(myexception::class) { exception ->
-        mycustomerroresponse(exception.reason)
-            .also { logger().error(it.tostring()) }
-            .badrequest()
+snitch(GsonJsonParser)
+    .onRoutes(root)
+    .handleException(MyException::class) { exception ->
+        MyCustomErroResponse(exception.reason)
+            .also { logger().error(it.toString()) }
+            .badRequest()
     }
     .start()
 ```
 
-note that the body of the exception handler works like the normal handlers', with the only difference that it has a referfence to the exception being handled, thie `it` of the lambda, which can be optionally named as in the example above. note that it's not necessary to return an error response, it's possible to return an alternative successful response instead. you can see that there is a lot of functionality packed in a small amount of code, yet it still remains fairly intuitive and readable.
+Note that the body of the exception handler works like the normal handlers', with the only difference that it has a referfence to the exception being handled, thie `it` of the lambda, which can be optionally named as in the example above. Note that it's not necessary to return an error response, it's possible to return an alternative successful response instead. You can see that there is a lot of functionality packed in a small amount of code, yet it still remains fairly intuitive and readable.
 
-#### polymorphic error handling
-note that error handling is polymorphic, so if `myexception` extends `mybaseexception` `.handleexception(mybaseexception::class)...` would handle `myexception` as well as any other subclass of `mybaseexception`. for this reason, ordering of the declaration of exception handlers matters. you should always put the most specific handlers first, otherwise a more generic polymorphic handler would handle the exception instead. note that this feature implementation relies on some reflection, and while it's relatively efficient, it's not as efficient as a more functional approach. for that reason this should not be used as a main flow control mechanism for performance critical applications.
+#### Polymorphic error handling
+Note that error handling is polymorphic, so if `MyException` extends `MyBaseException` `.handleException(MyBaseException::class)...` would handle `MyException` as well as any other subclass of `MyBaseException`. For this reason, ordering of the declaration of exception handlers matters. You should always put the most specific handlers first, otherwise a more generic polymorphic handler would handle the exception instead. Note that this feature implementation relies on some reflection, and while it's relatively efficient, it's not as efficient as a more functional approach. For that reason this should not be used as a main flow control mechanism for performance critical applications.
 
-### testing
-snitch supports a fluent and concise integration testing dsl. in accordance with the rest of the library, it is designed with simplicity, intuitiveness and readability in mind. the expressiveness and simplicity is aimed at encouraging a tdd approach. here is what simple tests would look like, including an example of the base class and application object:
+### Testing
+Snitch supports a fluent and concise integration testing DSL. In accordance with the rest of the library, it is designed with simplicity, intuitiveness and readability in mind. The expressiveness and simplicity is aimed at encouraging a TDD approach. Here is what simple tests would look like, including an example of the base class and application object:
 ```kotlin
-class healthtest : basetest() {
-    @test
+class HealthTest : BaseTest() {
+    @Test
     fun `foo does bar`() {
-        get("/foo/bar")
-            .expectcode(200)
-            .expectbody("""{"status": "ok"}""")
+        GET("/foo/bar")
+            .expectCode(200)
+            .expectBody("""{"status": "ok"}""")
     }
     
-    @test
+    @Test
     fun `post`() {
-        post("/foo/bar")
-            .withbody(myrequestbody)
-            .expectcode(200)
-            .expectbody("""{"status": "ok"}""")
+        POST("/foo/bar")
+            .withBody(myRequestBody)
+            .expectCode(200)
+            .expectBody("""{"status": "ok"}""")
     }
 }
 
-@testinstance(testinstance.lifecycle.per_class)
-abstract class basetest : snitchtest({ application.setup(it) }) {
-    @beforeall
-    fun beforeall() = super.before()
+@TestInstance(Testinstance.Lifecycle.PER_CLASS)
+abstract class BaseTest : SnitchTest({ Application.setup(it) }) {
+    @BeforeAll
+    fun beforeAll() = super.before()
 
-    @afterall
-    fun afterall() = super.after()
+    @AfterAll
+    fun afterAll() = super.after()
 }
 
-object application {
-    fun setup(port: int): routedservice =
-        snitch(gsonjsonparser, snitchconfig(service(port = port)))
-            .onroutes(rootrouter)
-            .handleexceptions()
+object Application {
+    fun setup(port: Int): RoutedService =
+        snitch(GsonJsonParser, snitchConfig(Service(port = port)))
+            .onRoutes(rootRouter)
+            .handleExceptions()
 }
 ```
 please refer to the `example` module in the repository source code for more in-depth examples involving real-world use cases complete with database setup and access, dependency injection and more.
 
-### intellij integration
-snitch has the best in class intellij integration plugin and it ships by default with the ide: jetbrain's kotlin plugin. that's all that's needed to unleash the full power of snitch and have autocompletion, syntax higlighting and so on. because snitch aims at being plain kotlin only, without reflection or annotation processing or code generation, the kotlin compiler is fully capable of understanding each aspect of the library and its uses. snitch usage errors are more often than not resolved at compile time. one of the leading design principles of snitch is that the user of the library should always be able to use the ide to navigate to middleware definitions, follow the nesting of routes upsream and downstream, and so on. a user should never be in the position of not knowing what some code does. they might not necessarily understand every aspect of how the internals work, but they should at the very least be able to see the internals, and explore them with their ide. the pure kotlin approach makes this easy.
-
+### Intellij integration
+Snitch has the best in class IntelliJ integration plugin and it ships by default with the IDE: Jetbrain's Kotlin plugin. that's all that's needed to unleash the full power of snitch and have autocompletion, syntax higlighting and so on. because snitch aims at being plain kotlin only, without reflection or annotation processing or code generation, the kotlin compiler is fully capable of understanding each aspect of the library and its uses. Snitch usage errors are more often than not resolved at compile time. One of the leading design principles of Snitch is that the user of the library should always be able to use the IDE to navigate to middleware definitions, follow the nesting of routes upsream and downstream, and so on. A user should never be in the position of not knowing what some code does. They might not necessarily understand every aspect of how the internals work, but they should at the very least be able to see the internals, and explore them with their IDE. The pure kotlin approach makes this easy.
 
 ### Showcase
 
