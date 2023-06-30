@@ -29,7 +29,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "me.snitchon"
+            groupId = "snitch"
             artifactId = "undertow"
             version = "1.0"
 

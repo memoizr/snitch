@@ -7,7 +7,7 @@ plugins {
     jacoco
 }
 
-group = "com.snitch.core"
+group = "snitch.core"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -42,7 +42,7 @@ tasks.withType<KotlinCompile> {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "me.snitchon"
+            groupId = "snitch"
             artifactId = "core"
             version = "1.0"
 

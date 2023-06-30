@@ -38,8 +38,8 @@ tasks.withType<KotlinCompile> {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "me.snitchon"
-            artifactId = "core"
+            groupId = "snitch"
+            artifactId = "bootstrap"
             version = "1.0"
 
             from(components["java"])

@@ -33,8 +33,8 @@ tasks.getByName<Test>("test") {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "me.snitchon"
-            artifactId = "snitch-parsers-json"
+            groupId = "snitch"
+            artifactId = "gsonjsonparser"
             version = "1.0"
 
             from(components["java"])

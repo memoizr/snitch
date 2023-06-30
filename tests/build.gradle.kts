@@ -43,7 +43,7 @@ tasks.withType<KotlinCompile> {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "me.snitchon"
+            groupId = "snitch"
             artifactId = "tests"
             version = "1.0"
 
