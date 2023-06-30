@@ -1,0 +1,239 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Ported</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.tests</a>
+</div>
+
+<h1>Coverage Summary for Class: Ported (snitch.tests)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">Ported</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.tests
+&nbsp;
+&nbsp;import snitch.parsers.GsonJsonParser
+&nbsp;import snitch.parsers.GsonJsonParser.parse
+&nbsp;import snitch.tests.TestMethods.HttpClient.delete
+&nbsp;import snitch.tests.TestMethods.HttpClient.get
+&nbsp;import snitch.tests.TestMethods.HttpClient.patch
+&nbsp;import snitch.tests.TestMethods.HttpClient.post
+&nbsp;import snitch.tests.TestMethods.HttpClient.put
+&nbsp;import snitch.service.RoutedService
+&nbsp;import java.net.BindException
+&nbsp;import java.net.ConnectException
+&nbsp;import java.net.URI
+&nbsp;import java.net.http.HttpRequest
+&nbsp;import java.net.http.HttpResponse
+&nbsp;import java.util.*
+&nbsp;
+&nbsp;private fun &lt;T&gt; retry(block: () -&gt; T): T {
+&nbsp;    fun go(): T {
+&nbsp;        try {
+&nbsp;            return block()
+&nbsp;        } catch (b: BindException) {
+&nbsp;            return go()
+&nbsp;        } catch (e: ConnectException) {
+&nbsp;            return go()
+&nbsp;        }
+&nbsp;    }
+&nbsp;    return go()
+&nbsp;}
+&nbsp;
+&nbsp;interface Ported {
+&nbsp;    val port: Int
+&nbsp;}
+&nbsp;
+&nbsp;interface TestMethods : Ported {
+&nbsp;    infix fun GET(endpoint: String): Expectation {
+&nbsp;        return Expectation(port, HttpMethod.GET, endpoint)
+&nbsp;    }
+&nbsp;
+&nbsp;    infix fun POST(endpoint: String): Expectation {
+&nbsp;        return Expectation(port, HttpMethod.POST, endpoint)
+&nbsp;    }
+&nbsp;
+&nbsp;    infix fun DELETE(endpoint: String): Expectation {
+&nbsp;        return Expectation(port, HttpMethod.DELETE, endpoint)
+&nbsp;    }
+&nbsp;
+&nbsp;    infix fun PUT(endpoint: String): Expectation {
+&nbsp;        return Expectation(port, HttpMethod.PUT, endpoint)
+&nbsp;    }
+&nbsp;
+&nbsp;    infix fun PATCH(endpoint: String): Expectation {
+&nbsp;        return Expectation(port, HttpMethod.PATCH, endpoint)
+&nbsp;    }
+&nbsp;
+&nbsp;    object HttpClient {
+&nbsp;
+&nbsp;        fun call(
+&nbsp;            url: String,
+&nbsp;            headers: Map&lt;String, String&gt;,
+&nbsp;            fn: HttpRequest.Builder.() -&gt; HttpRequest.Builder
+&nbsp;        ) =
+&nbsp;            retry {
+&nbsp;                clnt.send(
+&nbsp;                    HttpRequest.newBuilder()
+&nbsp;                        .uri(URI.create(url))
+&nbsp;                        .apply {
+&nbsp;                            headers.forEach {
+&nbsp;                                setHeader(it.key, it.value)
+&nbsp;                            }
+&nbsp;                        }
+&nbsp;                        .fn()
+&nbsp;                        .build(), HttpResponse.BodyHandlers.ofString()
+&nbsp;                )
+&nbsp;            }
+&nbsp;
+&nbsp;        fun get(url: String, headers: Map&lt;String, String&gt;) = call(url, headers) { GET() }
+&nbsp;        fun post(url: String, headers: Map&lt;String, String&gt;, body: String?) =
+&nbsp;            call(url, headers) { POST(HttpRequest.BodyPublishers.ofString(body.orEmpty())) }
+&nbsp;
+&nbsp;        fun put(url: String, headers: Map&lt;String, String&gt;, body: String?) =
+&nbsp;            call(url, headers) { PUT(HttpRequest.BodyPublishers.ofString(body.orEmpty())) }
+&nbsp;
+&nbsp;        fun delete(url: String, headers: Map&lt;String, String&gt;) = call(url, headers) { DELETE() }
+&nbsp;        fun patch(url: String, headers: Map&lt;String, String&gt;, body: String?) =
+&nbsp;            call(url, headers) { method(&quot;PATCH&quot;, HttpRequest.BodyPublishers.ofString(body.orEmpty())) }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;}
+&nbsp;
+&nbsp;enum class HttpMethod {
+&nbsp;    POST, GET, PUT, DELETE, PATCH;
+&nbsp;}
+&nbsp;
+&nbsp;data class Expectation(
+&nbsp;    val port: Int,
+&nbsp;    private val method: HttpMethod,
+&nbsp;    private val endpoint: String,
+&nbsp;    private val headers: Map&lt;String, String&gt; = emptyMap(),
+&nbsp;    private val body: Any? = null
+&nbsp;) {
+&nbsp;    val response: HttpResponse&lt;String&gt; by lazy {
+&nbsp;        with(GsonJsonParser) {
+&nbsp;            when (method) {
+&nbsp;                HttpMethod.GET -&gt; get(&quot;http://localhost:${port}$endpoint&quot;, headers)
+&nbsp;                HttpMethod.PUT -&gt; put(
+&nbsp;                    &quot;http://localhost:${port}$endpoint&quot;,
+&nbsp;                    headers,
+&nbsp;                    if (body is String) body else body?.serialized
+&nbsp;                )
+&nbsp;
+&nbsp;                HttpMethod.POST -&gt; post(
+&nbsp;                    &quot;http://localhost:${port}$endpoint&quot;,
+&nbsp;                    headers,
+&nbsp;                    if (body is String) body else body?.serialized
+&nbsp;                )
+&nbsp;
+&nbsp;                HttpMethod.DELETE -&gt; delete(&quot;http://localhost:${port}$endpoint&quot;, headers)
+&nbsp;                HttpMethod.PATCH -&gt; patch(
+&nbsp;                    &quot;http://localhost:${port}$endpoint&quot;, headers,
+&nbsp;                    if (body is String) body else body?.serialized
+&nbsp;                )
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    infix fun withBody(body: Any) = copy(body = body)
+&nbsp;
+&nbsp;    infix fun withHeaders(headers: Map&lt;String, Any?&gt;) =
+&nbsp;        copy(headers = headers.map { it.key to it.value.toString() }.toMap())
+&nbsp;
+&nbsp;    infix fun withHeader(header: Pair&lt;String, String&gt;) =
+&nbsp;        copy(headers = headers + header)
+&nbsp;
+&nbsp;    infix fun expectBody(body: String) = apply {
+&nbsp;        com.memoizr.assertk.expect that response.body() isEqualTo body
+&nbsp;    }
+&nbsp;
+&nbsp;    infix fun expectCode(expected: Int) = apply {
+&nbsp;        val actual = response.statusCode()
+&nbsp;        assert(actual == expected)
+&nbsp;        { &quot;Expecting code: $expected, but got: $actual&quot; }
+&nbsp;    }
+&nbsp;
+&nbsp;    infix fun expect(block: (HttpResponse&lt;String&gt;) -&gt; Unit): Expectation {
+&nbsp;        block(response)
+&nbsp;        return this
+&nbsp;    }
+&nbsp;
+&nbsp;    infix inline fun &lt;reified T : Any&gt; expectBodyJson(body: T) = apply {
+&nbsp;        val r = response.body()
+&nbsp;        com.memoizr.assertk.expect that r.parse(T::class.java) isEqualTo body
+&nbsp;    }
+&nbsp;}
+&nbsp;
+&nbsp;
+&nbsp;abstract class SnitchTest(service: (Int) -&gt; RoutedService) : Ported, TestMethods {
+&nbsp;    override open val port = Random().nextInt(5000) + 2000
+&nbsp;    val activeService by lazy { service(port) }
+&nbsp;    protected val whenPerform = this
+&nbsp;
+&nbsp;    open fun before() {
+&nbsp;        activeService.start()
+&nbsp;    }
+&nbsp;
+&nbsp;    open fun after() {
+&nbsp;        activeService.stop()
+&nbsp;    }
+&nbsp;}
+&nbsp;
+&nbsp;private val clnt = java.net.http.HttpClient.newBuilder().build()
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>

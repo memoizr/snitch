@@ -1,0 +1,165 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CommonResponses</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.response</a>
+</div>
+
+<h1>Coverage Summary for Class: CommonResponses (snitch.response)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+  <tr>
+    <td class="name">CommonResponses$DefaultImpls</td>
+<td class="coverageStat">
+  <span class="percent">
+    41.7%
+  </span>
+  <span class="absValue">
+    (5/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    41.7%
+  </span>
+  <span class="absValue">
+    (5/12)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">CommonResponses$serializer$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    38.5%
+  </span>
+  <span class="absValue">
+    (5/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    38.5%
+  </span>
+  <span class="absValue">
+    (5/13)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.response
+&nbsp;
+&nbsp;import snitch.types.Format
+&nbsp;import snitch.types.StatusCodes
+&nbsp;
+&nbsp;interface CommonResponses {
+&nbsp;    fun &lt;T, S : StatusCodes&gt; HttpResponse&lt;T, S&gt;.format(newFormat: Format) =
+<b class="fc">&nbsp;        if (this is SuccessfulHttpResponse&lt;T, S&gt;) copy(_format = newFormat) else this</b>
+&nbsp;
+&nbsp;    val &lt;T, S : StatusCodes&gt; HttpResponse&lt;T, S&gt;.plainText get() =
+<b class="fc">&nbsp;        if (this is SuccessfulHttpResponse&lt;T, S&gt;) copy(_format = Format.TextPlain) else this</b>
+&nbsp;
+&nbsp;    fun &lt;T, S : StatusCodes&gt; HttpResponse&lt;T, S&gt;.serializer(serializer: (T) -&gt; Any) =
+<b class="nc">&nbsp;        if (this is SuccessfulHttpResponse&lt;T, S&gt;) copy(value = { serializer(this.body) }) else this</b>
+&nbsp;
+&nbsp;    val &lt;T&gt; T.ok
+<b class="fc">&nbsp;        get() = SuccessfulHttpResponse(StatusCodes.OK, this)</b>
+&nbsp;
+&nbsp;    val &lt;T&gt; T.created: SuccessfulHttpResponse&lt;T, StatusCodes.CREATED&gt;
+<b class="nc">&nbsp;        get() = SuccessfulHttpResponse(StatusCodes.CREATED, this)</b>
+&nbsp;
+&nbsp;    val &lt;T&gt; T.accepted
+<b class="nc">&nbsp;        get() = SuccessfulHttpResponse(StatusCodes.ACCEPTED, this)</b>
+&nbsp;
+<b class="nc">&nbsp;    val &lt;T&gt; T.noContent get() = SuccessfulHttpResponse(StatusCodes.NO_CONTENT, this)</b>
+&nbsp;
+<b class="fc">&nbsp;    fun &lt;T, E, S: StatusCodes&gt; E.badRequest() = ErrorHttpResponse&lt;T, _, S&gt;(StatusCodes.BAD_REQUEST, this)</b>
+&nbsp;
+<b class="nc">&nbsp;    fun &lt;T, E, S: StatusCodes&gt; E.unauthorized() = ErrorHttpResponse&lt;T, _,S&gt;(StatusCodes.UNAUTHORIZED, this)</b>
+&nbsp;
+<b class="nc">&nbsp;    fun &lt;T, E, S: StatusCodes&gt; E.forbidden() = ErrorHttpResponse&lt;T, _, S&gt;(StatusCodes.FORBIDDEN, this)</b>
+&nbsp;
+<b class="nc">&nbsp;    fun &lt;T, E, S: StatusCodes&gt; E.notFound() = ErrorHttpResponse&lt;T, _, S&gt;(StatusCodes.NOT_FOUND, this)</b>
+&nbsp;
+<b class="fc">&nbsp;    fun &lt;T, E, S: StatusCodes&gt; E.serverError() = ErrorHttpResponse&lt;T, _, S&gt;(StatusCodes.INTERNAL_SERVER_ERROR, this)</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>

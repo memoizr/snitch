@@ -1,0 +1,118 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PathFactoriesKt</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.parameters</a>
+</div>
+
+<h1>Coverage Summary for Class: PathFactoriesKt (snitch.parameters)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PathFactoriesKt</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.parameters
+&nbsp;
+&nbsp;import snitch.validation.ofNonEmptyString
+&nbsp;import snitch.validation.Validator
+&nbsp;
+&nbsp;
+<b class="fc">&nbsp;inline fun &lt;reified T, R&gt; path(condition: Validator&lt;T, R&gt;, name: String = &quot;&quot;, description: String = &quot;&quot;) =</b>
+<b class="fc">&nbsp;    PathParamDelegate(</b>
+&nbsp;        type = T::class.java,
+<b class="fc">&nbsp;        name = name,</b>
+<b class="fc">&nbsp;        pattern = condition,</b>
+<b class="fc">&nbsp;        description = description</b>
+&nbsp;    )
+&nbsp;
+<b class="fc">&nbsp;fun path(name: String = &quot;&quot;, description: String = &quot;&quot;) = path(ofNonEmptyString, name, description)</b>
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>

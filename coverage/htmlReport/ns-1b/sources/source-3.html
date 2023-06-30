@@ -1,0 +1,285 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > UndertowServiceKt</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.undertow</a>
+</div>
+
+<h1>Coverage Summary for Class: UndertowServiceKt (snitch.undertow)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UndertowServiceKt</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.undertow
+&nbsp;
+&nbsp;import io.undertow.Undertow
+&nbsp;import io.undertow.server.HttpServerExchange
+&nbsp;import io.undertow.server.RoutingHandler
+&nbsp;import io.undertow.util.HttpString
+&nbsp;import io.undertow.util.Methods.*
+&nbsp;import snitch.parsing.Parser
+&nbsp;import snitch.response.HttpResponse
+&nbsp;import snitch.router.Routes
+&nbsp;import snitch.service.RoutedService
+&nbsp;import snitch.service.exceptionhandling.handleInvalidParameters
+&nbsp;import snitch.service.exceptionhandling.handleParsingException
+&nbsp;import snitch.service.exceptionhandling.handleUnregisteredParameters
+&nbsp;import snitch.types.ContentType
+&nbsp;import snitch.types.EndpointBundle
+&nbsp;import snitch.types.Format
+&nbsp;import snitch.types.HTTPMethods
+&nbsp;import snitch.request.RequestWrapper
+&nbsp;import snitch.response.ErrorHttpResponse
+&nbsp;import snitch.response.SuccessfulHttpResponse
+&nbsp;import snitch.router.Router
+&nbsp;import snitch.service.SnitchService
+&nbsp;import java.nio.ByteBuffer
+&nbsp;import kotlin.reflect.KClass
+&nbsp;import kotlin.reflect.full.isSubclassOf
+&nbsp;
+&nbsp;fun snitch(
+&nbsp;    parser: Parser,
+<b class="nc">&nbsp;    config: snitch.config.SnitchConfig = snitch.config.SnitchConfig()</b>
+<b class="nc">&nbsp;) = UndertowSnitchService(parser, config)</b>
+&nbsp;
+&nbsp;@Suppress(&quot;UNCHECKED_CAST&quot;)
+&nbsp;class UndertowSnitchService(
+&nbsp;    private val parser: Parser,
+&nbsp;    override val config: snitch.config.SnitchConfig = snitch.config.SnitchConfig()
+&nbsp;) : SnitchService {
+&nbsp;
+&nbsp;    private var onStop: () -&gt; Unit = {}
+&nbsp;    private lateinit var service: Undertow
+&nbsp;    private val handlers = mutableListOf&lt;RoutingHandler&gt;()
+&nbsp;    private val exceptionHandlers =
+&nbsp;        LinkedHashMap&lt;KClass&lt;*&gt;, context(Parser) RequestWrapper.(Throwable) -&gt; HttpResponse&lt;*, *&gt;&gt;()
+&nbsp;
+&nbsp;    private val routingHandler = RoutingHandler()
+&nbsp;    private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.service.port, &quot;localhost&quot;) }
+&nbsp;
+&nbsp;    override fun onRoutes(routerConfiguration: Routes): RoutedService {
+&nbsp;        val router = Router(config, this@UndertowSnitchService, emptySet(), parser, &quot;&quot;)
+&nbsp;        routerConfiguration(router)
+&nbsp;        return RoutedService(
+&nbsp;            service = this,
+&nbsp;            router = router,
+&nbsp;            onStart = ::start,
+&nbsp;            onStop = ::stop
+&nbsp;        )
+&nbsp;            .handleInvalidParameters()
+&nbsp;            .handleUnregisteredParameters()
+&nbsp;            .handleParsingException()
+&nbsp;    }
+&nbsp;
+&nbsp;    override fun onStop(action: () -&gt; Unit): SnitchService = also {
+&nbsp;        onStop = action
+&nbsp;    }
+&nbsp;
+&nbsp;    override fun &lt;T : Throwable, R : HttpResponse&lt;*, *&gt;&gt; handleException(
+&nbsp;        exceptionClass: KClass&lt;T&gt;,
+&nbsp;        exceptionHandler: context (Parser) RequestWrapper.(T) -&gt; R
+&nbsp;    ) {
+&nbsp;        exceptionHandlers[exceptionClass] =
+&nbsp;            exceptionHandler as context(Parser) RequestWrapper.(Throwable) -&gt; R
+&nbsp;    }
+&nbsp;
+&nbsp;    override fun registerMethod(endpointBundle: EndpointBundle&lt;*&gt;, path: String) {
+&nbsp;        with(parser) {
+&nbsp;            handlers.add(
+&nbsp;                routingHandler.add(
+&nbsp;                    endpointBundle.endpoint.httpMethod.toUndertow(),
+&nbsp;                    path,
+&nbsp;                    endpointBundle.undertowHandler
+&nbsp;                )
+&nbsp;            )
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private fun start() {
+&nbsp;        service = handlers
+&nbsp;            .fold(serviceBuilder) { builder, routingHandler -&gt; builder.setHandler(routingHandler) }
+&nbsp;            .build()
+&nbsp;        service.start()
+&nbsp;    }
+&nbsp;
+&nbsp;    private fun stop() {
+&nbsp;        onStop()
+&nbsp;        service.stop()
+&nbsp;    }
+&nbsp;
+&nbsp;    context (Parser)
+&nbsp;    private val EndpointBundle&lt;*&gt;.undertowHandler: (exchange: HttpServerExchange) -&gt; Unit
+&nbsp;        get() = { exchange: HttpServerExchange -&gt;
+&nbsp;            val byteArrayHandler = { byteArray: ByteArray? -&gt;
+&nbsp;                handle(exchange) {
+&nbsp;                    with(parser) {
+&nbsp;                        when (endpoint.body.contentType) {
+&nbsp;                            ContentType.APPLICATION_JSON -&gt; byteArray?.parse(endpoint.body.klass.java)
+&nbsp;                            ContentType.APPLICATION_OCTET_STREAM -&gt; byteArray
+&nbsp;                            else -&gt; byteArray.contentToString()
+&nbsp;                        }
+&nbsp;                    }
+&nbsp;                }
+&nbsp;            }
+&nbsp;            if (endpoint.body.klass == Nothing::class) {
+&nbsp;                byteArrayHandler(null)
+&nbsp;            } else {
+&nbsp;                exchange.requestReceiver.receiveFullBytes { _, byteArray -&gt; byteArrayHandler(byteArray) }
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+&nbsp;    context (Parser)
+&nbsp;    private fun EndpointBundle&lt;*&gt;.handle(exchange: HttpServerExchange, b: () -&gt; Any?) {
+&nbsp;        exchange.dispatch(Runnable {
+&nbsp;            try {
+&nbsp;                handler(UndertowRequestWrapper(parser, params, exchange, b))
+&nbsp;                    .dispatch(exchange)
+&nbsp;            } catch (ex: Throwable) {
+&nbsp;                ex.printStackTrace()
+&nbsp;                exceptionHandlers.keys
+&nbsp;                    .find { ex::class.isSubclassOf(it) }?.let { exceptionHandlers[it] }
+&nbsp;                    ?.invoke(
+&nbsp;                        parser,
+&nbsp;                        UndertowRequestWrapper(parser, params, exchange) { null },
+&nbsp;                        ex,
+&nbsp;                    )?.dispatch(exchange)
+&nbsp;            }
+&nbsp;        })
+&nbsp;    }
+&nbsp;
+&nbsp;    context (Parser)
+&nbsp;    private fun HttpResponse&lt;*, *&gt;.dispatch(exchange: HttpServerExchange) {
+&nbsp;        when (this) {
+&nbsp;            is SuccessfulHttpResponse&lt;*, *&gt; -&gt; dispatchSuccessfulResponse(exchange)
+&nbsp;            is ErrorHttpResponse&lt;*, *, *&gt; -&gt; dispatchFailedResponse(exchange)
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    context (Parser)
+&nbsp;    private fun &lt;T&gt; ErrorHttpResponse&lt;*, T, *&gt;.dispatchFailedResponse(exchange: HttpServerExchange) {
+&nbsp;        exchange.setStatusCode(this.statusCode.code)
+&nbsp;        exchange.responseHeaders.put(HttpString(&quot;content-type&quot;), Format.Json.type)
+&nbsp;        exchange.responseSender.send(this.details?.serialized)
+&nbsp;    }
+&nbsp;
+&nbsp;    private fun SuccessfulHttpResponse&lt;*, *&gt;.dispatchSuccessfulResponse(exchange: HttpServerExchange) {
+&nbsp;        exchange.setStatusCode(this.statusCode.code)
+&nbsp;        exchange.responseHeaders.put(HttpString(&quot;content-type&quot;), this._format.type)
+&nbsp;        headers.forEach {
+&nbsp;            exchange.responseHeaders.put(HttpString(it.key), it.value)
+&nbsp;        }
+&nbsp;        if (this._format == Format.Json) {
+&nbsp;            val value1 = value(parser)!!
+&nbsp;
+&nbsp;            exchange.responseSender.send(value1.toString())
+&nbsp;        } else {
+&nbsp;            if (body!!::class == ByteArray::class) {
+&nbsp;                exchange.responseSender.send(ByteBuffer.wrap(body as ByteArray))
+&nbsp;            } else {
+&nbsp;                exchange.responseSender.send(body.toString())
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private fun HTTPMethods.toUndertow() = when (this) {
+&nbsp;        HTTPMethods.GET -&gt; GET
+&nbsp;        HTTPMethods.POST -&gt; POST
+&nbsp;        HTTPMethods.PUT -&gt; PUT
+&nbsp;        HTTPMethods.DELETE -&gt; DELETE
+&nbsp;        HTTPMethods.PATCH -&gt; PATCH
+&nbsp;        HTTPMethods.HEAD -&gt; HEAD
+&nbsp;        HTTPMethods.OPTIONS -&gt; OPTIONS
+&nbsp;    }
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>

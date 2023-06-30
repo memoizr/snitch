@@ -1,0 +1,268 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ParsingKt</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.documentation</a>
+</div>
+
+<h1>Coverage Summary for Class: ParsingKt (snitch.documentation)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ParsingKt</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.5%
+  </span>
+  <span class="absValue">
+    (109/113)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.documentation
+&nbsp;
+&nbsp;import snitch.types.Sealed
+&nbsp;import java.util.*
+&nbsp;import kotlin.reflect.KClass
+&nbsp;import kotlin.reflect.KParameter
+&nbsp;import kotlin.reflect.KType
+&nbsp;import kotlin.reflect.full.primaryConstructor
+&nbsp;import kotlin.reflect.full.starProjectedType
+&nbsp;import kotlin.reflect.jvm.jvmErasure
+&nbsp;
+&nbsp;internal fun toSchema(documentationSerializer: DocumentationSerializer, type: KType): Schemas {
+<b class="fc">&nbsp;    val klass = type.jvmErasure</b>
+<b class="fc">&nbsp;    val schema = when {</b>
+<b class="fc">&nbsp;        klass == String::class -&gt; Schemas.StringSchema()</b>
+<b class="fc">&nbsp;        klass == Int::class -&gt; Schemas.IntSchema()</b>
+<b class="fc">&nbsp;        klass == Long::class -&gt; Schemas.LongSchema()</b>
+<b class="fc">&nbsp;        klass == Float::class -&gt; Schemas.FloatSchema()</b>
+<b class="fc">&nbsp;        klass == Double::class -&gt; Schemas.DoubleSchema()</b>
+<b class="fc">&nbsp;        klass == Boolean::class -&gt; Schemas.BooleanSchema()</b>
+<b class="fc">&nbsp;        klass == Date::class -&gt; Schemas.DateSchema()</b>
+<b class="fc">&nbsp;        klass == ByteArray::class -&gt; Schemas.BinarySchema()</b>
+<b class="fc">&nbsp;        klass == List::class -&gt; Schemas.ArraySchema(items = toSchema(documentationSerializer, type.arguments.first().type!!))</b>
+<b class="fc">&nbsp;        klass.java.isEnum -&gt; Schemas.StringSchema(enum = klass.java.enumConstants.map { it.toString() })</b>
+<b class="fc">&nbsp;        klass.isSealed &amp;&amp; Sealed::class.java.isAssignableFrom(klass.java) -&gt; sealedSchema(documentationSerializer, klass, type)</b>
+<b class="fc">&nbsp;        klass.objectInstance != null -&gt; Schemas.ObjectSchema()</b>
+<b class="fc">&nbsp;        klass.primaryConstructor == null -&gt; Schemas.StringSchema()</b>
+<b class="fc">&nbsp;        else -&gt; objectSchema(documentationSerializer, type)</b>
+&nbsp;    }
+<b class="fc">&nbsp;    return schema.apply {</b>
+<b class="fc">&nbsp;        if (type.isMarkedNullable) nullable = true</b>
+<b class="fc">&nbsp;    }</b>
+&nbsp;}
+&nbsp;
+&nbsp;private fun objectSchema(serializer: DocumentationSerializer, type: KType): Schemas.ObjectSchema {
+<b class="fc">&nbsp;    val parameters: List&lt;KParameter&gt; = type.jvmErasure.primaryConstructor!!.parameters</b>
+<b class="fc">&nbsp;    return Schemas.ObjectSchema(</b>
+<b class="fc">&nbsp;        properties = parameters.map { param -&gt;</b>
+<b class="fc">&nbsp;            val paramType = if (param.type.jvmErasure.java == Object::class.java) {</b>
+<b class="fc">&nbsp;                type.arguments.singleOrNull()?.type</b>
+<b class="fc">&nbsp;            } else null</b>
+<b class="fc">&nbsp;            serializer.serializeField(param, type.jvmErasure) to (toSchema(serializer, paramType ?: param.type)</b>
+<b class="fc">&nbsp;                .let { schema -&gt;</b>
+<b class="fc">&nbsp;                    val desc = param.annotations.find { it is Description }?.let { (it as Description) }</b>
+<b class="fc">&nbsp;                    when (schema) {</b>
+<b class="fc">&nbsp;                        is Schemas.ArraySchema -&gt; schema.apply {</b>
+<b class="fc">&nbsp;                            description = desc?.description</b>
+<b class="fc">&nbsp;                            example = when {</b>
+<b class="fc">&nbsp;                                desc?.exEmptyList != null &amp;&amp; desc.exEmptyList -&gt; listOf&lt;Any&gt;()</b>
+<b class="fc">&nbsp;                                else -&gt; null</b>
+&nbsp;                            }
+<b class="fc">&nbsp;                            pattern = desc?.pattern</b>
+<b class="fc">&nbsp;                            visibility = desc?.visibility</b>
+<b class="fc">&nbsp;                        }</b>
+&nbsp;
+<b class="fc">&nbsp;                        is Schemas.StringSchema -&gt; schema.apply {</b>
+<b class="fc">&nbsp;                            description = desc?.description</b>
+<b class="fc">&nbsp;                            example = desc?.exString?.nullIfEmpty()</b>
+<b class="fc">&nbsp;                            pattern = desc?.pattern</b>
+<b class="fc">&nbsp;                            visibility = desc?.visibility</b>
+<b class="fc">&nbsp;                        }</b>
+&nbsp;
+<b class="fc">&nbsp;                        is Schemas.FloatSchema -&gt; schema.apply {</b>
+<b class="fc">&nbsp;                            description = desc?.description</b>
+<b class="fc">&nbsp;                            example = desc?.exFloat?.nullIfZero()</b>
+<b class="fc">&nbsp;                            pattern = desc?.pattern</b>
+<b class="fc">&nbsp;                            visibility = desc?.visibility</b>
+<b class="fc">&nbsp;                        }</b>
+&nbsp;
+<b class="fc">&nbsp;                        is Schemas.DoubleSchema -&gt; schema.apply {</b>
+<b class="fc">&nbsp;                            description = desc?.description</b>
+<b class="fc">&nbsp;                            example = desc?.exDouble?.nullIfZero()</b>
+<b class="fc">&nbsp;                            pattern = desc?.pattern</b>
+<b class="fc">&nbsp;                            visibility = desc?.visibility</b>
+<b class="fc">&nbsp;                        }</b>
+&nbsp;
+<b class="fc">&nbsp;                        is Schemas.IntSchema -&gt; schema.apply {</b>
+<b class="fc">&nbsp;                            description = desc?.description</b>
+<b class="fc">&nbsp;                            example = desc?.exInt?.nullIfZero()</b>
+<b class="fc">&nbsp;                            pattern = desc?.pattern</b>
+<b class="fc">&nbsp;                            visibility = desc?.visibility</b>
+<b class="fc">&nbsp;                        }</b>
+&nbsp;
+<b class="fc">&nbsp;                        is Schemas.LongSchema -&gt; schema.apply {</b>
+<b class="fc">&nbsp;                            description = desc?.description</b>
+<b class="fc">&nbsp;                            example = desc?.exLong?.nullIfZero()</b>
+<b class="fc">&nbsp;                            pattern = desc?.pattern</b>
+<b class="fc">&nbsp;                            visibility = desc?.visibility</b>
+<b class="fc">&nbsp;                        }</b>
+&nbsp;
+<b class="fc">&nbsp;                        is Schemas.BaseSchema&lt;*&gt; -&gt; schema.apply {</b>
+<b class="fc">&nbsp;                            description = desc?.description</b>
+<b class="fc">&nbsp;                            pattern = desc?.pattern</b>
+<b class="fc">&nbsp;                            visibility = desc?.visibility</b>
+<b class="fc">&nbsp;                        }</b>
+&nbsp;
+<b class="nc">&nbsp;                        else -&gt; schema</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                    )
+&nbsp;        }
+<b class="fc">&nbsp;            .toMap(),</b>
+<b class="fc">&nbsp;        required = parameters.filter { !it.type.isMarkedNullable }.map { it.name!! }</b>
+&nbsp;    )
+&nbsp;}
+&nbsp;
+&nbsp;private fun sealedSchema(
+&nbsp;    documentationSerializer: DocumentationSerializer,
+&nbsp;    klass: KClass&lt;*&gt;,
+&nbsp;    type: KType
+&nbsp;): Schemas.ObjectSchema {
+<b class="fc">&nbsp;    val subtypes = klass.nestedClasses.filter { it.isFinal &amp;&amp; Sealed::class.java.isAssignableFrom(it.java) }</b>
+<b class="fc">&nbsp;        .map { it.starProjectedType }</b>
+<b class="fc">&nbsp;    return Schemas.ObjectSchema(anyOf = subtypes.map { o -&gt;</b>
+<b class="fc">&nbsp;        toSchema(documentationSerializer, o).let {</b>
+<b class="fc">&nbsp;            when (it) {</b>
+<b class="fc">&nbsp;                is Schemas.ObjectSchema -&gt; {</b>
+<b class="fc">&nbsp;                    it.copy(</b>
+<b class="fc">&nbsp;                        properties = mapOf(Sealed::`$type`.name to Schemas.StringSchema(description = o.jvmErasure.simpleName)) + (it.properties</b>
+<b class="fc">&nbsp;                            ?: emptyMap()),</b>
+<b class="fc">&nbsp;                        required = listOf(Sealed::`$type`.name) + (it.required ?: emptyList())</b>
+&nbsp;                    )
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                else -&gt; it</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;    }, example = getExample(type))</b>
+&nbsp;}
+&nbsp;
+<b class="fc">&nbsp;private fun String.nullIfEmpty() = if (isEmpty()) null else this</b>
+<b class="fc">&nbsp;private fun Int.nullIfZero() = if (this == 0) null else this</b>
+<b class="fc">&nbsp;private fun Long.nullIfZero() = if (this == 0L) null else this</b>
+<b class="fc">&nbsp;private fun Double.nullIfZero() = if (this == 0.0) null else this</b>
+<b class="fc">&nbsp;private fun Float.nullIfZero() = if (this == 0f) null else this</b>
+&nbsp;
+&nbsp;@Suppress(&quot;IMPLICIT_CAST_TO_ANY&quot;)
+&nbsp;private fun getExample(type: KType): Any {
+<b class="fc">&nbsp;    val klass = type.jvmErasure</b>
+<b class="fc">&nbsp;    val value = when {</b>
+<b class="fc">&nbsp;        klass == String::class -&gt; &quot;string&quot;</b>
+<b class="fc">&nbsp;        klass == Int::class -&gt; 0</b>
+<b class="fc">&nbsp;        klass == Long::class -&gt; 0</b>
+<b class="fc">&nbsp;        klass == Float::class -&gt; 0.0f</b>
+<b class="fc">&nbsp;        klass == Double::class -&gt; 0.0</b>
+<b class="fc">&nbsp;        klass == Boolean::class -&gt; false</b>
+<b class="fc">&nbsp;        klass == ByteArray::class -&gt; listOf&lt;String&gt;()</b>
+<b class="fc">&nbsp;        klass == Date::class -&gt; Date().toString()</b>
+<b class="fc">&nbsp;        klass == List::class -&gt; listOf(getExample(type.arguments.first().type!!))</b>
+<b class="fc">&nbsp;        klass.java.isEnum -&gt; klass.java.enumConstants.map { it.toString() }.first()</b>
+<b class="fc">&nbsp;        klass.objectInstance != null &amp;&amp; Sealed::class.java.isAssignableFrom(klass.java) -&gt; mapOf(Sealed::`$type`.name to klass.simpleName)</b>
+<b class="fc">&nbsp;        klass.isSealed &amp;&amp; Sealed::class.java.isAssignableFrom(klass.java) -&gt; {</b>
+<b class="fc">&nbsp;            val subclass =</b>
+<b class="fc">&nbsp;                klass.nestedClasses.filter { it.isFinal &amp;&amp; Sealed::class.java.isAssignableFrom(it.java) }.first()</b>
+<b class="fc">&nbsp;            val ex = getExample(subclass.starProjectedType) as Map&lt;Any, Any&gt;</b>
+<b class="fc">&nbsp;            mapOf(Sealed::`$type`.name to subclass.simpleName) + ex</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        else -&gt; {
+<b class="nc">&nbsp;            val parameters = klass.primaryConstructor!!.parameters</b>
+<b class="nc">&nbsp;            parameters.map { it.name!! to getExample(it.type) }.toMap()</b>
+&nbsp;        }
+&nbsp;    }
+<b class="fc">&nbsp;    return value</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>

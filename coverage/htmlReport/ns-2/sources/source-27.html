@@ -1,0 +1,290 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Spec</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.documentation</a>
+</div>
+
+<h1>Coverage Summary for Class: Spec (snitch.documentation)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Spec</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.documentation
+&nbsp;
+&nbsp;import snitch.types.Format.*
+&nbsp;import snitch.parameters.Parameter
+&nbsp;import snitch.router.Router
+&nbsp;import snitch.types.ContentType
+&nbsp;import snitch.types.EndpointBundle
+&nbsp;import snitch.types.StatusCodes
+&nbsp;import snitch.service.RoutedService
+&nbsp;import kotlin.reflect.full.starProjectedType
+&nbsp;import kotlin.reflect.jvm.jvmErasure
+&nbsp;
+&nbsp;fun RoutedService.generateDocumentation(
+&nbsp;    documentationSerializer: DocumentationSerializer = DefaultDocumentatoinSerializer,
+&nbsp;    documentationConfig: DocumentationConfig = DocumentationConfig(
+&nbsp;        port = this.service.config.service.port,
+&nbsp;        basePath = this.service.config.service.basePath
+&nbsp;    )
+&nbsp;): DocumentedService {
+&nbsp;    val openApi =
+&nbsp;        OpenApi(info = Info(documentationConfig.title, &quot;1.0&quot;), servers = listOf(Server(documentationConfig.host)))
+&nbsp;    return router.endpoints
+&nbsp;        .groupBy { it.endpoint.path }
+&nbsp;        .map { entry -&gt;
+&nbsp;            entry.key to entry.value.foldRight(Path()) { bundle: EndpointBundle&lt;*&gt;, path -&gt;
+&nbsp;                path.withOperation(
+&nbsp;                    bundle.endpoint.httpMethod,
+&nbsp;                    Operation(
+&nbsp;                        tags = bundle.endpoint.tags,
+&nbsp;                        summary = bundle.endpoint.summary,
+&nbsp;                        description = bundle.endpoint.description,
+&nbsp;                        responses = emptyMap(),
+&nbsp;                        visibility = bundle.endpoint.visibility
+&nbsp;                    )
+&nbsp;                        .withResponse(
+&nbsp;                            documentationSerializer,
+&nbsp;                            if (bundle.response.type.jvmErasure == ByteArray::class) {
+&nbsp;                                ContentType.APPLICATION_OCTET_STREAM
+&nbsp;                            } else {
+&nbsp;                                ContentType.APPLICATION_JSON
+&nbsp;                            },
+&nbsp;                            bundle.response.type,
+&nbsp;                            (bundle.response.statusCode.jvmErasure.objectInstance as? StatusCodes)?.code?.toString()
+&nbsp;                                ?: &quot;200&quot;
+&nbsp;                        )
+&nbsp;                        .let {
+&nbsp;                            if (bundle.endpoint.body.klass != Nothing::class) {
+&nbsp;                                it.withRequestBody(
+&nbsp;                                    documentationSerializer,
+&nbsp;                                    bundle.endpoint.body.contentType,
+&nbsp;                                    bundle.endpoint.body.klass
+&nbsp;                                )
+&nbsp;                            } else it
+&nbsp;                        }
+&nbsp;                        .let {
+&nbsp;                            bundle.endpoint.headerParams.fold(it) { acc, p -&gt;
+&nbsp;                                acc.withParameter(
+&nbsp;                                    Parameters.HeaderParameter(
+&nbsp;                                        name = p.name,
+&nbsp;                                        required = p.required,
+&nbsp;                                        description = getDescription(p),
+&nbsp;                                        visibility = p.visibility,
+&nbsp;                                        schema = toSchema(documentationSerializer, p.type.kotlin.starProjectedType)
+&nbsp;                                            .withPattern(p.pattern.regex)
+&nbsp;
+&nbsp;                                    )
+&nbsp;                                )
+&nbsp;                            }
+&nbsp;                        }
+&nbsp;                        .let {
+&nbsp;                            bundle.endpoint.pathParams.fold(it) { acc, param -&gt;
+&nbsp;                                acc.withParameter(
+&nbsp;                                    Parameters.PathParameter(
+&nbsp;                                        name = param.name,
+&nbsp;                                        description = getDescription(param),
+&nbsp;                                        schema = toSchema(documentationSerializer, param.type.kotlin.starProjectedType)
+&nbsp;                                            .withPattern(param.pattern.regex)
+&nbsp;                                    )
+&nbsp;                                )
+&nbsp;                            }
+&nbsp;                        }
+&nbsp;                        .let {
+&nbsp;                            bundle.endpoint.queryParams.fold(it) { acc, p -&gt;
+&nbsp;                                acc.withParameter(
+&nbsp;                                    Parameters.QueryParameter(
+&nbsp;                                        name = p.name,
+&nbsp;                                        description = getDescription(p),
+&nbsp;                                        allowEmptyValue = p.emptyAsMissing,
+&nbsp;                                        required = p.required,
+&nbsp;                                        visibility = p.visibility,
+&nbsp;                                        schema = toSchema(documentationSerializer, p.type.kotlin.starProjectedType)
+&nbsp;                                            .withPattern(p.pattern.regex)
+&nbsp;
+&nbsp;                                    )
+&nbsp;                                )
+&nbsp;                            }
+&nbsp;                        }
+&nbsp;                )
+&nbsp;            }
+&nbsp;        }.fold(openApi) { a, b -&gt; a.withPath(b.first, b.second) }
+&nbsp;        .let {
+&nbsp;            DocumentedService(this, Spec(with(router.parser) { it.serialized }, router))
+&nbsp;        }
+&nbsp;}
+&nbsp;
+<b class="fc">&nbsp;class Spec internal constructor(</b>
+<b class="fc">&nbsp;    val spec: String,</b>
+<b class="fc">&nbsp;    val router: Router,</b>
+&nbsp;)
+&nbsp;
+&nbsp;fun DocumentedService.servePublicDocumenation(): DocumentedService {
+&nbsp;    with(Router(service.router.config, service.service, emptySet(), service.router.parser, service.router.path)) {
+&nbsp;        val path = &quot;/&quot;// config.publicDocumentationPath.ensureLeadingSlash()
+&nbsp;        val docPath = &quot;/spec.json&quot;//.ensureLeadingSlash()
+&nbsp;        GET(path).isHandledBy {
+&nbsp;            index(docPath).ok.format(TextHTML)
+&nbsp;        }
+&nbsp;        GET(docPath).isHandledBy {
+&nbsp;            documentation.spec.ok.format(Json).serializer { it }
+&nbsp;        }
+&nbsp;        endpoints.forEach { service.registerMethod(it, it.endpoint.path) }
+&nbsp;    }
+&nbsp;    return this
+&nbsp;}
+&nbsp;
+&nbsp;fun RoutedService.serveDocumentation() =
+&nbsp;    generateDocumentation().servePublicDocumenation()
+&nbsp;
+&nbsp;private fun getDescription(param: Parameter&lt;*, *&gt;) =
+&nbsp;    &quot;${param.description} - ${param.pattern.description}${if (param.invalidAsMissing) &quot; - Invalid as Missing&quot; else &quot;&quot;}${if (param.emptyAsMissing) &quot; - Empty as Missing&quot; else &quot;&quot;}&quot;
+&nbsp;
+&nbsp;fun index(docPath: String) = &quot;&quot;&quot;
+&nbsp;&lt;!DOCTYPE html&gt;
+&nbsp;&lt;html lang=&quot;en&quot;&gt;
+&nbsp;  &lt;head&gt;
+&nbsp;    &lt;meta charset=&quot;UTF-8&quot;&gt;
+&nbsp;    &lt;title&gt;Swagger UI&lt;/title&gt;
+&nbsp;    &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/swagger-ui.css&quot;&gt;
+&nbsp;    &lt;link rel=&quot;icon&quot; type=&quot;image/png&quot; href=&quot;https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/favicon-32x32.png&quot; sizes=&quot;32x32&quot; /&gt;
+&nbsp;    &lt;link rel=&quot;icon&quot; type=&quot;image/png&quot; href=&quot;https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/favicon-32x32.png&quot; sizes=&quot;16x16&quot; /&gt;
+&nbsp;    &lt;style&gt;
+&nbsp;      html {
+&nbsp;        box-sizing: border-box;
+&nbsp;        overflow: -moz-scrollbars-vertical;
+&nbsp;        overflow-y: scroll;
+&nbsp;      }
+&nbsp;
+&nbsp;      *, *:before, *:after {
+&nbsp;        box-sizing: inherit;
+&nbsp;      }
+&nbsp;
+&nbsp;      body {
+&nbsp;        margin:0;
+&nbsp;        background: #fafafa;
+&nbsp;      }
+&nbsp;    &lt;/style&gt;
+&nbsp;  &lt;/head&gt;
+&nbsp;
+&nbsp;  &lt;body&gt;
+&nbsp;    &lt;div id=&quot;swagger-ui&quot;&gt;&lt;/div&gt;
+&nbsp;
+&nbsp;    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/swagger-ui-standalone-preset.js&quot;&gt;&lt;/script&gt;
+&nbsp;    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/swagger-ui-bundle.js&quot;&gt;&lt;/script&gt;
+&nbsp;    &lt;script&gt;
+&nbsp;    window.onload = function() {
+&nbsp;      // Begin Swagger UI call region
+&nbsp;      const ui = SwaggerUIBundle({
+&nbsp;        url: &quot;.$docPath&quot;,
+&nbsp;        dom_id: &#39;#swagger-ui&#39;,
+&nbsp;        deepLinking: true,
+&nbsp;        presets: [
+&nbsp;          SwaggerUIBundle.presets.apis,
+&nbsp;          SwaggerUIStandalonePreset
+&nbsp;        ],
+&nbsp;        plugins: [
+&nbsp;          SwaggerUIBundle.plugins.DownloadUrl
+&nbsp;        ],
+&nbsp;        layout: &quot;StandaloneLayout&quot;
+&nbsp;      });
+&nbsp;      // End Swagger UI call region
+&nbsp;
+&nbsp;      window.ui = ui;
+&nbsp;    };
+&nbsp;  &lt;/script&gt;
+&nbsp;  &lt;/body&gt;
+&nbsp;&lt;/html&gt;
+&nbsp;&quot;&quot;&quot;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>

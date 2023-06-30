@@ -1,0 +1,283 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PostgresPostsRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.example.database.repositories.posts</a>
+</div>
+
+<h1>Coverage Summary for Class: PostgresPostsRepository (snitch.example.database.repositories.posts)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PostgresPostsRepository</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/38)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PostgresPostsRepository$deletePost$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PostgresPostsRepository$putPost$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PostgresPostsRepository$putPost$1$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PostgresPostsRepository$updatePost$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PostgresPostsRepository$updatePost$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/51)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.example.database.repositories.posts
+&nbsp;
+&nbsp;import org.jetbrains.exposed.sql.*
+&nbsp;import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+&nbsp;import snitch.example.ApplicationModule
+&nbsp;import snitch.example.database.Posts
+&nbsp;import snitch.example.database.Posts.id
+&nbsp;import snitch.example.database.TransactionResult
+&nbsp;import snitch.example.database.Users
+&nbsp;import snitch.example.types.*
+&nbsp;import java.util.*
+&nbsp;
+<b class="nc">&nbsp;class PostgresPostsRepository() : PostsRepository {</b>
+&nbsp;    override fun putPost(post: CreatePostAction): TransactionResult&lt;PostId&gt; =
+<b class="nc">&nbsp;        tryStatement {</b>
+<b class="nc">&nbsp;            Posts.insert {</b>
+<b class="nc">&nbsp;                it[id] = post.id?.value ?: UUID.randomUUID().toString()</b>
+<b class="nc">&nbsp;                it[title] = post.title.value</b>
+<b class="nc">&nbsp;                it[content] = post.content.value</b>
+<b class="nc">&nbsp;                it[creatorId] = post.creator.value</b>
+<b class="nc">&nbsp;                it[createdAt] = post.createDate ?: ApplicationModule.now()</b>
+<b class="nc">&nbsp;            }.let { PostId(it[id]) }</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    override fun getPosts(userId: UserId) =
+<b class="nc">&nbsp;        Posts</b>
+<b class="nc">&nbsp;            .leftJoin(Users)</b>
+<b class="nc">&nbsp;            .select {</b>
+<b class="nc">&nbsp;                Posts.creatorId eq userId.value</b>
+<b class="nc">&nbsp;            }.map {</b>
+<b class="nc">&nbsp;                Post(</b>
+<b class="nc">&nbsp;                    PostId(it[Posts.id]),</b>
+<b class="nc">&nbsp;                    UserView(</b>
+<b class="nc">&nbsp;                        UserId(it[Users.id]),</b>
+<b class="nc">&nbsp;                        UserName(it[Users.name]),</b>
+&nbsp;                    ),
+<b class="nc">&nbsp;                    PostTitle(it[Posts.title]),</b>
+<b class="nc">&nbsp;                    PostContent(it[Posts.content]),</b>
+<b class="nc">&nbsp;                    it[Posts.createdAt]</b>
+&nbsp;                )
+&nbsp;            }
+&nbsp;
+&nbsp;    override fun deletePost(userId: UserId, postId: PostId) {
+<b class="nc">&nbsp;        Posts.deleteWhere {</b>
+<b class="nc">&nbsp;            id eq postId.value and (creatorId eq userId.value)</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    override fun updatePost(updatePostAction: UpdatePostAction) {
+<b class="nc">&nbsp;        Posts.update({</b>
+<b class="nc">&nbsp;            id eq updatePostAction.id.value</b>
+&nbsp;        }) {
+<b class="nc">&nbsp;            updatePostAction.title?.value?.let { t -&gt; it[title] = t }</b>
+<b class="nc">&nbsp;            updatePostAction.content?.value?.let { c -&gt; it[content] = c }</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    override fun getPost(postId: PostId): Post? {
+<b class="nc">&nbsp;        val post = Posts.select {</b>
+<b class="nc">&nbsp;            id eq postId.value</b>
+<b class="nc">&nbsp;        }.firstOrNull() ?: return null</b>
+&nbsp;
+<b class="nc">&nbsp;        val user = Users.select {</b>
+<b class="nc">&nbsp;            Users.id eq post[Posts.creatorId]</b>
+<b class="nc">&nbsp;        }.firstOrNull() ?: return null</b>
+&nbsp;
+<b class="nc">&nbsp;        return Post(</b>
+<b class="nc">&nbsp;            PostId(post[Posts.id]),</b>
+<b class="nc">&nbsp;            UserView(</b>
+<b class="nc">&nbsp;                UserId(user[Users.id]),</b>
+<b class="nc">&nbsp;                UserName(user[Users.name]),</b>
+&nbsp;            ),
+<b class="nc">&nbsp;            PostTitle(post[Posts.title]),</b>
+<b class="nc">&nbsp;            PostContent(post[Posts.content]),</b>
+<b class="nc">&nbsp;            post[Posts.createdAt]</b>
+&nbsp;        )
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>

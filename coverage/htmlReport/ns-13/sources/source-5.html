@@ -1,0 +1,228 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > RequestWrapper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.request</a>
+</div>
+
+<h1>Coverage Summary for Class: RequestWrapper (snitch.request)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+  <tr>
+    <td class="name">RequestWrapper$DefaultImpls</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.9%
+  </span>
+  <span class="absValue">
+    (10/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.3%
+  </span>
+  <span class="absValue">
+    (42/45)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    90.9%
+  </span>
+  <span class="absValue">
+    (10/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.3%
+  </span>
+  <span class="absValue">
+    (42/45)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.request
+&nbsp;
+&nbsp;import snitch.extensions.print
+&nbsp;import snitch.parameters.*
+&nbsp;import snitch.parsing.Parser
+&nbsp;import snitch.response.CommonResponses
+&nbsp;import snitch.types.HTTPMethods
+&nbsp;import snitch.validation.UnregisteredParamException
+&nbsp;
+&nbsp;interface RequestWrapper : CommonResponses {
+<b class="fc">&nbsp;    val body: () -&gt; Any?</b>
+&nbsp;    val params: Set&lt;Parameter&lt;*, *&gt;&gt;
+&nbsp;    val parser: Parser
+&nbsp;    val method: HTTPMethods
+&nbsp;    val path: String
+&nbsp;    val request get() = this
+<b class="nc">&nbsp;</b>
+&nbsp;    fun params(name: String): String?
+&nbsp;    fun headers(name: String): Collection&lt;String&gt;
+&nbsp;    fun queryParams(name: String): Collection&lt;String&gt;
+&nbsp;    fun getPathParam(param: PathParam&lt;*, *&gt;): String?
+&nbsp;    fun getQueryParam(param: QueryParameter&lt;*, *&gt;): Collection&lt;String&gt;?
+&nbsp;    fun getHeaderParam(param: HeaderParameter&lt;*, *&gt;): Collection&lt;String&gt;?
+&nbsp;
+&nbsp;    private fun missingParameterMessage(path: String, it: Parameter&lt;*, *&gt;) =
+&nbsp;        &quot;&quot;&quot;Required $path parameter `${it.name}` is missing&quot;&quot;&quot;
+<b class="fc">&nbsp;</b>
+&nbsp;    private fun invalidParameterMessage(query: String, it: Parameter&lt;*, *&gt;, value: Collection&lt;String&gt;?) =
+&nbsp;        &quot;&quot;&quot;$query parameter `${it.name}` is invalid, expecting ${it.pattern.description}, got `${value?.joinToString(&quot;,&quot;)}`&quot;&quot;&quot;
+<b class="fc">&nbsp;</b>
+&nbsp;    fun getInvalidParams(): List&lt;String&gt; {
+&nbsp;        return params
+<b class="fc">&nbsp;            .map {</b>
+<b class="fc">&nbsp;                when (it) {</b>
+<b class="fc">&nbsp;                    is PathParam&lt;*, *&gt; -&gt; validateParam(it, listOf(getPathParam(it).orEmpty()), &quot;Path&quot;)</b>
+<b class="fc">&nbsp;                    is QueryParameter&lt;*, *&gt; -&gt; validateParam(it, getQueryParam(it), &quot;Query&quot;)</b>
+<b class="fc">&nbsp;                    is HeaderParameter&lt;*, *&gt; -&gt; validateParam(it, getHeaderParam(it), &quot;Header&quot;)</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }.filterNotNull().print()
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    private fun validateParam(it: Parameter&lt;*, *&gt;, value: Collection&lt;String&gt;?, path: String): String? {
+&nbsp;        return try {
+<b class="fc">&nbsp;            when {</b>
+<b class="fc">&nbsp;                it.required &amp;&amp; (value == null || value.isEmpty()) -&gt; missingParameterMessage(path, it)</b>
+<b class="fc">&nbsp;                !it.required &amp;&amp; value == null -&gt; null</b>
+<b class="fc">&nbsp;                value != null &amp;&amp; it.pattern.parse(parser, value).let { true } -&gt; null</b>
+<b class="fc">&nbsp;                it.pattern.regex.matches(value.toString()) -&gt; null</b>
+<b class="nc">&nbsp;                else -&gt; invalidParameterMessage(path, it, value)</b>
+<b class="nc">&nbsp;</b>
+&nbsp;            }
+&nbsp;        } catch (e: Exception) {
+<b class="fc">&nbsp;            invalidParameterMessage(path, it, value)</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    operator fun &lt;T : Any, R&gt; get(param: PathParam&lt;T, R&gt;): R =
+&nbsp;        checkParamIsRegistered(param)
+<b class="fc">&nbsp;            .tryParam(param) {</b>
+<b class="fc">&nbsp;                params(param.name)</b>
+<b class="fc">&nbsp;                    .let { param.pattern.parse(parser, listOf(it.orEmpty())) }</b>
+<b class="fc">&nbsp;            }!!</b>
+&nbsp;
+&nbsp;    operator fun &lt;T : Any?, R&gt; get(param: QueryParam&lt;T, R&gt;): R =
+&nbsp;        checkParamIsRegistered(param)
+<b class="fc">&nbsp;            .tryParam(param) {</b>
+<b class="fc">&nbsp;                queryParams(param.name)</b>
+<b class="fc">&nbsp;                    .filterValid(param)</b>
+<b class="fc">&nbsp;                    .let { param.pattern.parse(parser, it.orEmpty()) }</b>
+<b class="fc">&nbsp;            }!!</b>
+&nbsp;
+&nbsp;    operator fun &lt;T : Any?, R&gt; get(param: OptionalQueryParam&lt;T, R&gt;): R =
+&nbsp;        checkParamIsRegistered(param)
+<b class="fc">&nbsp;            .tryParam(param) {</b>
+<b class="fc">&nbsp;                queryParams(param.name)</b>
+<b class="fc">&nbsp;                    .filterValid(param).print()</b>
+<b class="fc">&nbsp;                    ?.let { param.pattern.parse(parser, it).print() }.print()</b>
+<b class="fc">&nbsp;            } ?: param.default</b>
+<b class="fc">&nbsp;</b>
+&nbsp;    operator fun &lt;T : Any?, R&gt; get(param: HeaderParam&lt;T, R&gt;): R =
+&nbsp;        checkParamIsRegistered(param)
+<b class="fc">&nbsp;            .tryParam(param) {</b>
+<b class="fc">&nbsp;                headers(param.name)</b>
+<b class="fc">&nbsp;                    .let { param.pattern.parse(parser, it) }</b>
+<b class="fc">&nbsp;            }!!</b>
+&nbsp;
+&nbsp;
+&nbsp;    operator fun &lt;T : Any?, R&gt; get(param: OptionalHeaderParam&lt;T, R&gt;): R =
+&nbsp;        checkParamIsRegistered(param)
+<b class="fc">&nbsp;            .tryParam(param) {</b>
+<b class="fc">&nbsp;                headers(param.name)</b>
+<b class="fc">&nbsp;                    .filterValid(param)</b>
+<b class="fc">&nbsp;                    ?.let { param.pattern.parse(parser, it) }</b>
+<b class="fc">&nbsp;            } ?: param.default</b>
+<b class="fc">&nbsp;}</b>
+&nbsp;
+&nbsp;private inline fun RequestWrapper.checkParamIsRegistered(param: Parameter&lt;*, *&gt;) =
+&nbsp;    if (!params.contains(param)) throw UnregisteredParamException(param) else this
+&nbsp;
+&nbsp;private inline fun &lt;R&gt; RequestWrapper.tryParam(param: Parameter&lt;*, R&gt;, block: () -&gt; R?): R? = try {
+&nbsp;    block()
+&nbsp;} catch (e: Exception) {
+&nbsp;    if (param is OptionalParam&lt;*&gt;&amp;&amp; param.invalidAsMissing) {
+&nbsp;        null
+&nbsp;    } else throw InvalidParametersException(e, getInvalidParams())
+&nbsp;}
+&nbsp;
+&nbsp;fun Collection&lt;String&gt;.filterValid(param: Parameter&lt;*, *&gt;): Collection&lt;String&gt;? = when {
+&nbsp;    this.isEmpty() -&gt; null
+&nbsp;    param.emptyAsMissing &amp;&amp; this.all { it.isEmpty() } -&gt; null
+&nbsp;    else -&gt; this
+&nbsp;}
+&nbsp;
+&nbsp;fun String?.filterValid(param: Parameter&lt;*, *&gt;): String? = when {
+&nbsp;    this == null -&gt; null
+&nbsp;    param.emptyAsMissing &amp;&amp; this.isEmpty() -&gt; null
+&nbsp;    else -&gt; this
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>

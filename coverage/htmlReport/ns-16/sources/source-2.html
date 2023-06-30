@@ -1,0 +1,253 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ConditionResult</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.service</a>
+</div>
+
+<h1>Coverage Summary for Class: ConditionResult (snitch.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConditionResult</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConditionResult$Failed</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ConditionResult$Successful</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.service
+&nbsp;
+&nbsp;import snitch.documentation.Visibility
+&nbsp;import snitch.parameters.HeaderParameter
+&nbsp;import snitch.parameters.Parameter
+&nbsp;import snitch.parameters.PathParam
+&nbsp;import snitch.parameters.QueryParameter
+&nbsp;import snitch.request.Body
+&nbsp;import snitch.request.RequestWrapper
+&nbsp;import snitch.response.ErrorHttpResponse
+&nbsp;import snitch.response.HttpResponse
+&nbsp;import snitch.router.AfterAction
+&nbsp;import snitch.router.BeforeAction
+&nbsp;import snitch.types.HTTPMethods
+&nbsp;import snitch.types.StatusCodes
+&nbsp;
+&nbsp;data class OpDescription(val description: String)
+&nbsp;
+&nbsp;data class Endpoint&lt;B : Any&gt;(
+&nbsp;    val httpMethod: HTTPMethods,
+&nbsp;    val summary: String?,
+&nbsp;    val description: String?,
+&nbsp;    val path: String,
+&nbsp;    val pathParams: Set&lt;PathParam&lt;out Any, *&gt;&gt;,
+&nbsp;    val queryParams: Set&lt;QueryParameter&lt;*, *&gt;&gt;,
+&nbsp;    val headerParams: Set&lt;HeaderParameter&lt;*, *&gt;&gt;,
+&nbsp;    val body: Body&lt;B&gt;,
+&nbsp;    val tags: List&lt;String&gt;? = emptyList(),
+&nbsp;    val visibility: Visibility = Visibility.PUBLIC,
+&nbsp;    val decorator: DecoratedWrapper.() -&gt; DecoratedWrapper = { this },
+&nbsp;) {
+&nbsp;    infix fun decorated(decoration: DecoratedWrapper.() -&gt; HttpResponse&lt;out Any, StatusCodes&gt;): Endpoint&lt;B&gt; {
+&nbsp;        val previousDecorator = this.decorator
+&nbsp;        return copy(
+&nbsp;            decorator = { DecoratedWrapper({ decoration(previousDecorator(this)) }, wrap) }
+&nbsp;        )
+&nbsp;    }
+&nbsp;
+&nbsp;    infix fun withQuery(queryParameter: QueryParameter&lt;*, *&gt;) = copy(queryParams = queryParams + queryParameter)
+&nbsp;
+&nbsp;    infix fun withHeader(params: HeaderParameter&lt;*, *&gt;) = copy(headerParams = headerParams + params)
+&nbsp;    infix fun &lt;C : Any&gt; with(body: Body&lt;C&gt;) = Endpoint(
+&nbsp;        httpMethod,
+&nbsp;        summary,
+&nbsp;        description,
+&nbsp;        path,
+&nbsp;        pathParams,
+&nbsp;        queryParams,
+&nbsp;        headerParams,
+&nbsp;        body,
+&nbsp;        tags,
+&nbsp;        visibility,
+&nbsp;        decorator,
+&nbsp;    )
+&nbsp;
+&nbsp;    infix fun inSummary(summary: String) = copy(summary = summary)
+&nbsp;
+&nbsp;    infix fun isDescribedAs(description: String) = copy(description = description)
+&nbsp;
+&nbsp;    infix fun with(visibility: Visibility) = copy(visibility = visibility)
+&nbsp;
+&nbsp;    infix fun with(queryParameter: List&lt;Parameter&lt;*, *&gt;&gt;) = let {
+&nbsp;        queryParameter.foldRight(this) { param, endpoint -&gt;
+&nbsp;            when (param) {
+&nbsp;                is HeaderParameter -&gt; endpoint withHeader param
+&nbsp;                is QueryParameter -&gt; endpoint withQuery param
+&nbsp;                else -&gt; throw IllegalArgumentException(param.toString())
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    infix fun doBefore(action: BeforeAction) = decorated {
+&nbsp;        action(wrap)
+&nbsp;        next()
+&nbsp;    }
+&nbsp;
+&nbsp;    infix fun doAfter(action: AfterAction) = decorated {
+&nbsp;        next().also { action(wrap, it) }
+&nbsp;    }
+&nbsp;
+&nbsp;    infix fun onlyIf(condition: Condition) = decorated {
+&nbsp;        when (val result = condition.check(wrap)) {
+&nbsp;            is ConditionResult.Successful -&gt; next()
+&nbsp;            is ConditionResult.Failed -&gt; result.response
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+&nbsp;
+&nbsp;interface Condition {
+&nbsp;    fun check(requestWrapper: RequestWrapper): ConditionResult
+&nbsp;    infix fun or(other: Condition): Condition = OrCondition(this, other)
+&nbsp;}
+&nbsp;
+&nbsp;class OrCondition(private val first: Condition, private val second: Condition) : Condition {
+&nbsp;    override fun check(requestWrapper: RequestWrapper) =
+&nbsp;        when (val result = first.check(requestWrapper)) {
+&nbsp;            is ConditionResult.Successful -&gt; result
+&nbsp;            is ConditionResult.Failed -&gt; second.check(requestWrapper)
+&nbsp;        }
+&nbsp;}
+&nbsp;
+<b class="nc">&nbsp;sealed class ConditionResult {</b>
+<b class="nc">&nbsp;    class Successful : ConditionResult()</b>
+<b class="nc">&nbsp;    data class Failed(val response: ErrorHttpResponse&lt;Any, out Any, StatusCodes.BAD_REQUEST&gt;) : ConditionResult()</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>

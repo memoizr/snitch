@@ -1,0 +1,191 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TokenClaims</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.example.security</a>
+</div>
+
+<h1>Coverage Summary for Class: TokenClaims (snitch.example.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TokenClaims</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.example.security
+&nbsp;
+&nbsp;import io.jsonwebtoken.ExpiredJwtException
+&nbsp;import io.jsonwebtoken.Jwts
+&nbsp;import io.jsonwebtoken.MalformedJwtException
+&nbsp;import io.jsonwebtoken.SignatureAlgorithm
+&nbsp;import snitch.example.ApplicationModule.now
+&nbsp;import snitch.example.security.SecurityModule.privateKey
+&nbsp;import snitch.example.types.UserId
+&nbsp;import java.time.Duration
+&nbsp;import java.util.*
+&nbsp;
+&nbsp;enum class Role {
+&nbsp;    ADMIN,
+&nbsp;    USER
+&nbsp;}
+&nbsp;
+&nbsp;//fun createJWT(userId: UserId, role: Role): String {
+&nbsp;//    val jwt = Jwts.builder()
+&nbsp;//        .setClaims(mapOf(&quot;userId&quot; to userId.value, &quot;role&quot; to role.name))
+&nbsp;//        .setIssuedAt(Date())
+&nbsp;//        .setExpiration(Date(System.currentTimeMillis() + 3600000)) // 1 hour expiration
+&nbsp;//        .signWith(privateKey(), SignatureAlgorithm.RS256)
+&nbsp;//        .compact()
+&nbsp;//
+&nbsp;//    return jwt
+&nbsp;//}
+&nbsp;//
+&nbsp;//fun verifyJWT(jwt: String): Jws&lt;Claims&gt; {
+&nbsp;//    return Jwts.parserBuilder()
+&nbsp;//        .setSigningKey(publicKey())
+&nbsp;//        .build()
+&nbsp;//        .parseClaimsJws(jwt)
+&nbsp;//}
+&nbsp;
+<b class="nc">&nbsp;data class TokenClaims(</b>
+<b class="nc">&nbsp;    val userId: UserId</b>
+&nbsp;)
+&nbsp;
+&nbsp;data class JWTClaims(
+&nbsp;    val userId: UserId,
+&nbsp;    val role: Role
+&nbsp;)
+&nbsp;
+&nbsp;sealed interface Authentication {
+&nbsp;    data class Authenticated(val claims: JWTClaims) : Authentication
+&nbsp;    interface Unauthenticated : Authentication
+&nbsp;    object InvalidToken : Unauthenticated
+&nbsp;    object ExpiredToken : Unauthenticated
+&nbsp;    object MissingToken : Unauthenticated
+&nbsp;    object InvalidClaims : Unauthenticated
+&nbsp;}
+&nbsp;
+&nbsp;class JWTManager {
+&nbsp;    fun newToken(claims: JWTClaims) =
+&nbsp;        Jwts.builder()
+&nbsp;            .setClaims(mapOf(&quot;userId&quot; to claims.userId.value, &quot;role&quot; to claims.role.name))
+&nbsp;            .setIssuedAt(Date(now().toEpochMilli()))
+&nbsp;            .setExpiration(Date(now().toEpochMilli() + Duration.ofMinutes(10).toMillis()))
+&nbsp;            .signWith(privateKey(), SignatureAlgorithm.RS256)
+&nbsp;            .compact()
+&nbsp;
+&nbsp;    fun validate(token: String): Authentication =
+&nbsp;        try {
+&nbsp;            Jwts.parser()
+&nbsp;                .setSigningKey(privateKey())
+&nbsp;                .setClock(io.jsonwebtoken.Clock { Date(now().toEpochMilli()) })
+&nbsp;                .parseClaimsJws(token)
+&nbsp;                .body.let {
+&nbsp;                    Authentication.Authenticated(
+&nbsp;                        try {
+&nbsp;                            JWTClaims(
+&nbsp;                                userId = UserId(it[&quot;userId&quot;] as String),
+&nbsp;                                role = Role.valueOf(it[&quot;role&quot;] as String),
+&nbsp;                            )
+&nbsp;                        } catch (e: Exception) {
+&nbsp;                            return Authentication.InvalidClaims
+&nbsp;                        }
+&nbsp;                    )
+&nbsp;                }
+&nbsp;        } catch (e: MalformedJwtException) {
+&nbsp;            Authentication.InvalidToken
+&nbsp;        } catch (e: ExpiredJwtException) {
+&nbsp;            Authentication.ExpiredToken
+&nbsp;        } catch (e: IllegalArgumentException) {
+&nbsp;            Authentication.MissingToken
+&nbsp;        }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,209 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > OptionalQueryParamDelegate</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.parameters</a>
+</div>
+
+<h1>Coverage Summary for Class: OptionalQueryParamDelegate (snitch.parameters)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OptionalQueryParamDelegate</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95.2%
+  </span>
+  <span class="absValue">
+    (20/21)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.parameters
+&nbsp;
+&nbsp;import snitch.documentation.Visibility
+&nbsp;import snitch.validation.Validator
+&nbsp;import kotlin.reflect.KProperty
+&nbsp;
+&nbsp;sealed class QueryParameter&lt;T, R&gt;(
+&nbsp;    override val type: Class&lt;*&gt;,
+&nbsp;    override val name: String,
+&nbsp;    override val pattern: Validator&lt;T, R&gt;,
+&nbsp;    override val description: String,
+&nbsp;    override val required: Boolean,
+&nbsp;    override val emptyAsMissing: Boolean,
+&nbsp;    override val invalidAsMissing: Boolean,
+&nbsp;    open val visibility: Visibility = Visibility.PUBLIC
+&nbsp;) : Parameter&lt;T, R&gt;(
+&nbsp;    type = type,
+&nbsp;    name = name,
+&nbsp;    pattern = pattern,
+&nbsp;    description = description,
+&nbsp;    required = required,
+&nbsp;    emptyAsMissing = emptyAsMissing,
+&nbsp;    invalidAsMissing = invalidAsMissing,
+&nbsp;)
+&nbsp;
+&nbsp;data class OptionalQueryParam&lt;T, R&gt;(
+&nbsp;    override val type: Class&lt;*&gt;,
+&nbsp;    override val name: String,
+&nbsp;    override val pattern: Validator&lt;T, R&gt;,
+&nbsp;    override val description: String,
+&nbsp;    override val default: R,
+&nbsp;    override val emptyAsMissing: Boolean,
+&nbsp;    override val invalidAsMissing: Boolean,
+&nbsp;    override val visibility: Visibility
+&nbsp;) : QueryParameter&lt;T, R&gt;(
+&nbsp;    type = type,
+&nbsp;    name = name,
+&nbsp;    pattern = pattern,
+&nbsp;    description = description,
+&nbsp;    required = false,
+&nbsp;    emptyAsMissing = emptyAsMissing,
+&nbsp;    invalidAsMissing = invalidAsMissing
+&nbsp;)
+&nbsp;, OptionalParam&lt;R&gt;
+&nbsp;
+&nbsp;data class QueryParam&lt;T, R&gt;(
+&nbsp;    override val type: Class&lt;*&gt;,
+&nbsp;    override val name: String,
+&nbsp;    override val pattern: Validator&lt;T, R&gt;,
+&nbsp;    override val description: String,
+&nbsp;    override val emptyAsMissing: Boolean,
+&nbsp;    override val invalidAsMissing: Boolean,
+&nbsp;    override val visibility: Visibility
+&nbsp;) : QueryParameter&lt;T, R&gt;(type, name, pattern, description, true, emptyAsMissing, invalidAsMissing)
+&nbsp;
+&nbsp;class QueryParamDelegate&lt;T, R&gt;(
+&nbsp;    val type: Class&lt;*&gt;,
+&nbsp;    val name: String,
+&nbsp;    val pattern: Validator&lt;T, R&gt;,
+&nbsp;    val description: String,
+&nbsp;    val emptyAsMissing: Boolean,
+&nbsp;    val invalidAsMissing: Boolean,
+&nbsp;    val visibility: Visibility
+&nbsp;) {
+&nbsp;    private var param: QueryParam&lt;T, R&gt;? = null
+&nbsp;    operator fun getValue(nothing: Nothing?, property: KProperty&lt;*&gt;) = param(property)
+&nbsp;    operator fun getValue(nothing: Any?, property: KProperty&lt;*&gt;) = param(property)
+&nbsp;
+&nbsp;    private fun param(property: KProperty&lt;*&gt;) =
+&nbsp;        param ?: QueryParam(
+&nbsp;            type,
+&nbsp;            name.ifEmpty { property.name },
+&nbsp;            pattern,
+&nbsp;            description,
+&nbsp;            emptyAsMissing,
+&nbsp;            invalidAsMissing,
+&nbsp;            visibility
+&nbsp;        ).also { param = it }
+&nbsp;}
+&nbsp;
+<b class="fc">&nbsp;class OptionalQueryParamDelegate&lt;T, R&gt;(</b>
+<b class="fc">&nbsp;    val type: Class&lt;*&gt;,</b>
+<b class="fc">&nbsp;    val name: String,</b>
+<b class="fc">&nbsp;    val pattern: Validator&lt;T, R&gt;,</b>
+<b class="fc">&nbsp;    val description: String,</b>
+<b class="fc">&nbsp;    val default: R,</b>
+<b class="fc">&nbsp;    val emptyAsMissing: Boolean,</b>
+<b class="fc">&nbsp;    val invalidAsMissing: Boolean,</b>
+<b class="fc">&nbsp;    val visibility: Visibility</b>
+&nbsp;) {
+&nbsp;    private var param: OptionalQueryParam&lt;T, R&gt;? = null
+<b class="fc">&nbsp;    operator fun getValue(nothing: Nothing?, property: KProperty&lt;*&gt;) = param(property)</b>
+<b class="nc">&nbsp;    operator fun getValue(nothing: Any?, property: KProperty&lt;*&gt;) = param(property)</b>
+&nbsp;
+&nbsp;    private fun param(property: KProperty&lt;*&gt;) =
+<b class="fc">&nbsp;        param ?: OptionalQueryParam(</b>
+<b class="fc">&nbsp;            type = type,</b>
+<b class="fc">&nbsp;            name = name.ifEmpty { property.name },</b>
+<b class="fc">&nbsp;            pattern = pattern,</b>
+<b class="fc">&nbsp;            description = description,</b>
+<b class="fc">&nbsp;            default = default,</b>
+<b class="fc">&nbsp;            emptyAsMissing = emptyAsMissing,</b>
+<b class="fc">&nbsp;            invalidAsMissing = invalidAsMissing,</b>
+<b class="fc">&nbsp;            visibility = visibility</b>
+<b class="fc">&nbsp;        ).also { param = it }</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>

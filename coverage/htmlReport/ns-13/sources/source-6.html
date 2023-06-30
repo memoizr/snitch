@@ -1,0 +1,221 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > RequestWrapperKt</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">snitch.request</a>
+</div>
+
+<h1>Coverage Summary for Class: RequestWrapperKt (snitch.request)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RequestWrapperKt</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package snitch.request
+&nbsp;
+&nbsp;import snitch.extensions.print
+&nbsp;import snitch.parameters.*
+&nbsp;import snitch.parsing.Parser
+&nbsp;import snitch.response.CommonResponses
+&nbsp;import snitch.types.HTTPMethods
+&nbsp;import snitch.validation.UnregisteredParamException
+&nbsp;
+&nbsp;interface RequestWrapper : CommonResponses {
+&nbsp;    val body: () -&gt; Any?
+&nbsp;    val params: Set&lt;Parameter&lt;*, *&gt;&gt;
+&nbsp;    val parser: Parser
+&nbsp;    val method: HTTPMethods
+&nbsp;    val path: String
+&nbsp;    val request get() = this
+&nbsp;
+&nbsp;    fun params(name: String): String?
+&nbsp;    fun headers(name: String): Collection&lt;String&gt;
+&nbsp;    fun queryParams(name: String): Collection&lt;String&gt;
+&nbsp;    fun getPathParam(param: PathParam&lt;*, *&gt;): String?
+&nbsp;    fun getQueryParam(param: QueryParameter&lt;*, *&gt;): Collection&lt;String&gt;?
+&nbsp;    fun getHeaderParam(param: HeaderParameter&lt;*, *&gt;): Collection&lt;String&gt;?
+&nbsp;
+&nbsp;    private fun missingParameterMessage(path: String, it: Parameter&lt;*, *&gt;) =
+&nbsp;        &quot;&quot;&quot;Required $path parameter `${it.name}` is missing&quot;&quot;&quot;
+&nbsp;
+&nbsp;    private fun invalidParameterMessage(query: String, it: Parameter&lt;*, *&gt;, value: Collection&lt;String&gt;?) =
+&nbsp;        &quot;&quot;&quot;$query parameter `${it.name}` is invalid, expecting ${it.pattern.description}, got `${value?.joinToString(&quot;,&quot;)}`&quot;&quot;&quot;
+&nbsp;
+&nbsp;    fun getInvalidParams(): List&lt;String&gt; {
+&nbsp;        return params
+&nbsp;            .map {
+&nbsp;                when (it) {
+&nbsp;                    is PathParam&lt;*, *&gt; -&gt; validateParam(it, listOf(getPathParam(it).orEmpty()), &quot;Path&quot;)
+&nbsp;                    is QueryParameter&lt;*, *&gt; -&gt; validateParam(it, getQueryParam(it), &quot;Query&quot;)
+&nbsp;                    is HeaderParameter&lt;*, *&gt; -&gt; validateParam(it, getHeaderParam(it), &quot;Header&quot;)
+&nbsp;                }
+&nbsp;            }.filterNotNull().print()
+&nbsp;    }
+&nbsp;
+&nbsp;    private fun validateParam(it: Parameter&lt;*, *&gt;, value: Collection&lt;String&gt;?, path: String): String? {
+&nbsp;        return try {
+&nbsp;            when {
+&nbsp;                it.required &amp;&amp; (value == null || value.isEmpty()) -&gt; missingParameterMessage(path, it)
+&nbsp;                !it.required &amp;&amp; value == null -&gt; null
+&nbsp;                value != null &amp;&amp; it.pattern.parse(parser, value).let { true } -&gt; null
+&nbsp;                it.pattern.regex.matches(value.toString()) -&gt; null
+&nbsp;                else -&gt; invalidParameterMessage(path, it, value)
+&nbsp;
+&nbsp;            }
+&nbsp;        } catch (e: Exception) {
+&nbsp;            invalidParameterMessage(path, it, value)
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    operator fun &lt;T : Any, R&gt; get(param: PathParam&lt;T, R&gt;): R =
+&nbsp;        checkParamIsRegistered(param)
+&nbsp;            .tryParam(param) {
+&nbsp;                params(param.name)
+&nbsp;                    .let { param.pattern.parse(parser, listOf(it.orEmpty())) }
+&nbsp;            }!!
+&nbsp;
+&nbsp;    operator fun &lt;T : Any?, R&gt; get(param: QueryParam&lt;T, R&gt;): R =
+&nbsp;        checkParamIsRegistered(param)
+&nbsp;            .tryParam(param) {
+&nbsp;                queryParams(param.name)
+&nbsp;                    .filterValid(param)
+&nbsp;                    .let { param.pattern.parse(parser, it.orEmpty()) }
+&nbsp;            }!!
+&nbsp;
+&nbsp;    operator fun &lt;T : Any?, R&gt; get(param: OptionalQueryParam&lt;T, R&gt;): R =
+&nbsp;        checkParamIsRegistered(param)
+&nbsp;            .tryParam(param) {
+&nbsp;                queryParams(param.name)
+&nbsp;                    .filterValid(param).print()
+&nbsp;                    ?.let { param.pattern.parse(parser, it).print() }.print()
+&nbsp;            } ?: param.default
+&nbsp;
+&nbsp;    operator fun &lt;T : Any?, R&gt; get(param: HeaderParam&lt;T, R&gt;): R =
+&nbsp;        checkParamIsRegistered(param)
+&nbsp;            .tryParam(param) {
+&nbsp;                headers(param.name)
+&nbsp;                    .let { param.pattern.parse(parser, it) }
+&nbsp;            }!!
+&nbsp;
+&nbsp;
+&nbsp;    operator fun &lt;T : Any?, R&gt; get(param: OptionalHeaderParam&lt;T, R&gt;): R =
+&nbsp;        checkParamIsRegistered(param)
+&nbsp;            .tryParam(param) {
+&nbsp;                headers(param.name)
+&nbsp;                    .filterValid(param)
+&nbsp;                    ?.let { param.pattern.parse(parser, it) }
+&nbsp;            } ?: param.default
+&nbsp;}
+&nbsp;
+&nbsp;private inline fun RequestWrapper.checkParamIsRegistered(param: Parameter&lt;*, *&gt;) =
+&nbsp;    if (!params.contains(param)) throw UnregisteredParamException(param) else this
+<b class="fc">&nbsp;</b>
+&nbsp;private inline fun &lt;R&gt; RequestWrapper.tryParam(param: Parameter&lt;*, R&gt;, block: () -&gt; R?): R? = try {
+<b class="fc">&nbsp;    block()</b>
+<b class="fc">&nbsp;} catch (e: Exception) {</b>
+<b class="fc">&nbsp;    if (param is OptionalParam&lt;*&gt;&amp;&amp; param.invalidAsMissing) {</b>
+<b class="fc">&nbsp;        null</b>
+<b class="fc">&nbsp;    } else throw InvalidParametersException(e, getInvalidParams())</b>
+<b class="fc">&nbsp;}</b>
+&nbsp;
+&nbsp;fun Collection&lt;String&gt;.filterValid(param: Parameter&lt;*, *&gt;): Collection&lt;String&gt;? = when {
+<b class="fc">&nbsp;    this.isEmpty() -&gt; null</b>
+<b class="fc">&nbsp;    param.emptyAsMissing &amp;&amp; this.all { it.isEmpty() } -&gt; null</b>
+<b class="fc">&nbsp;    else -&gt; this</b>
+<b class="fc">&nbsp;}</b>
+&nbsp;
+&nbsp;fun String?.filterValid(param: Parameter&lt;*, *&gt;): String? = when {
+<b class="fc">&nbsp;    this == null -&gt; null</b>
+<b class="fc">&nbsp;    param.emptyAsMissing &amp;&amp; this.isEmpty() -&gt; null</b>
+<b class="fc">&nbsp;    else -&gt; this</b>
+<b class="fc">&nbsp;}</b>
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-06-30 16:58</div>
+</div>
+</body>
+</html>
