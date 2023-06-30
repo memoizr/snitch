@@ -1,3 +1,5 @@
+![Workflow ci](https://github.com/memoizr/snitch/actions/workflows/ci.yml/badge.svg)
+
 ## Snitch 
 Snitch helps you create a production-grade HTTP layer for your applications and (micro)services with minimal effort. To create ***complete*** documentation for them with ***no*** effort.
 
