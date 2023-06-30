@@ -29,7 +29,7 @@ dependencies {
     testImplementation(project(":tests"))
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "17"
 }
 
