@@ -1,6 +1,5 @@
 package snitch.request
 
-import me.snitch.parameters.*
 import snitch.extensions.print
 import snitch.parameters.*
 import snitch.parsing.Parser
