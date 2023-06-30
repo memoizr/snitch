@@ -1,9 +1,9 @@
 package snitch.example.api
 
-import me.snitch.response.ErrorHttpResponse
-import me.snitch.response.HttpResponse
-import me.snitch.response.SuccessfulHttpResponse
-import me.snitch.types.StatusCodes
+import snitch.response.ErrorHttpResponse
+import snitch.response.HttpResponse
+import snitch.response.SuccessfulHttpResponse
+import snitch.types.StatusCodes
 import snitch.example.database.TransactionResult
 
 

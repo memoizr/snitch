@@ -1,8 +1,8 @@
 package snitch.example
 
-import me.snitch.router.Router
-import me.snitch.router.decorateWith
-import me.snitch.router.routes
+import snitch.router.Router
+import snitch.router.decorateWith
+import snitch.router.routes
 import snitch.example.ApplicationModule.logger
 import snitch.example.api.health.healthController
 import snitch.example.api.users.usersController

@@ -1,6 +1,6 @@
 package snitch.example
 
-import me.snitch.parsers.GsonJsonParser.serialized
+import snitch.parsers.GsonJsonParser.serialized
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

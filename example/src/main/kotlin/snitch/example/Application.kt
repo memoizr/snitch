@@ -4,23 +4,23 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.LoggerContext
 import io.jsonwebtoken.JwtException
-import me.snitch.config.SnitchConfig
-import me.snitch.config.SnitchConfig.Service
-import me.snitch.documentation.generateDocumentation
-import me.snitch.documentation.servePublicDocumenation
+import snitch.config.SnitchConfig
+import snitch.config.SnitchConfig.Service
+import snitch.documentation.generateDocumentation
+import snitch.documentation.servePublicDocumenation
 import snitch.example.ApplicationModule.logger
-import me.snitch.parsers.GsonJsonParser
-import me.snitch.service.RoutedService
-import me.snitch.service.exceptionhandling.handleInvalidParameters
-import me.snitch.service.exceptionhandling.handleParsingException
-import me.snitch.service.exceptionhandling.handleUnregisteredParameters
-import me.snitch.types.ErrorResponse
+import snitch.parsers.GsonJsonParser
+import snitch.service.RoutedService
+import snitch.service.exceptionhandling.handleInvalidParameters
+import snitch.service.exceptionhandling.handleParsingException
+import snitch.service.exceptionhandling.handleUnregisteredParameters
+import snitch.types.ErrorResponse
 import net.logstash.logback.encoder.LogstashEncoder
 import org.slf4j.LoggerFactory
 import snitch.example.database.DBModule.postgresDatabase
 import snitch.example.types.ForbiddenException
 import snitch.example.types.ValidationException
-import undertow.snitch.spark.snitch
+import snitch.undertow.snitch
 
 object Application {
     init {

@@ -1,16 +1,16 @@
 package snitch.example.api.users
 
-import me.snitch.parameters.PathParam
-import me.snitch.request.RequestWrapper
-import me.snitch.request.TypedRequestWrapper
-import me.snitch.request.handling
-import me.snitch.request.parsing
-import me.snitch.router.Router
-import me.snitch.router.decorateWith
-import me.snitch.router.decoration
-import me.snitch.router.routes
-import me.snitch.types.ErrorResponse
-import me.snitch.types.StatusCodes
+import snitch.parameters.PathParam
+import snitch.request.RequestWrapper
+import snitch.request.TypedRequestWrapper
+import snitch.request.handling
+import snitch.request.parsing
+import snitch.router.Router
+import snitch.router.decorateWith
+import snitch.router.decoration
+import snitch.router.routes
+import snitch.types.ErrorResponse
+import snitch.types.StatusCodes
 import org.jetbrains.exposed.sql.transactions.transaction
 import snitch.example.api.*
 import snitch.example.api.Paths.postId

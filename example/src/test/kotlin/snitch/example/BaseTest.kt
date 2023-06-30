@@ -1,6 +1,6 @@
 package snitch.example
 
-import me.snitch.tests.SnitchTest
+import snitch.tests.SnitchTest
 import org.junit.jupiter.api.*
 import ro.kreator.customize
 import snitch.example.database.DBModule

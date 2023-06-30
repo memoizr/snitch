@@ -1,7 +1,7 @@
 package snitch.example
 
-import me.snitch.router.Router
-import me.snitch.router.decorateWith
+import snitch.router.Router
+import snitch.router.decorateWith
 import snitch.example.ApplicationModule.logger
 
 val Router.logged

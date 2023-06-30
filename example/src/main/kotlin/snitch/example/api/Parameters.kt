@@ -1,7 +1,7 @@
 package snitch.example.api
 
-import me.snitch.parameters.header
-import me.snitch.parameters.path
+import snitch.parameters.header
+import snitch.parameters.path
 import snitch.example.api.validation.validAccessToken
 
 object Paths {

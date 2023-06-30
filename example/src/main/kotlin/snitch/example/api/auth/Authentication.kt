@@ -1,13 +1,13 @@
 package snitch.example.api.auth
 
-import me.snitch.parameters.Parameter
-import me.snitch.request.RequestWrapper
-import me.snitch.router.Router
-import me.snitch.router.transformEndpoints
-import me.snitch.service.Condition
-import me.snitch.service.ConditionResult
-import me.snitch.service.ConditionResult.Failed
-import me.snitch.service.ConditionResult.Successful
+import snitch.parameters.Parameter
+import snitch.request.RequestWrapper
+import snitch.router.Router
+import snitch.router.transformEndpoints
+import snitch.service.Condition
+import snitch.service.ConditionResult
+import snitch.service.ConditionResult.Failed
+import snitch.service.ConditionResult.Successful
 import snitch.example.api.Headers.accessToken
 import snitch.example.api.users.FORBIDDEN
 import snitch.example.api.users.UNAUTHORIZED
