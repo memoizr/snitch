@@ -548,3 +548,51 @@ please refer to the `example` module in the repository source code for more in-d
 
 ### intellij integration
 snitch has the best in class intellij integration plugin and it ships by default with the ide: jetbrain's kotlin plugin. that's all that's needed to unleash the full power of snitch and have autocompletion, syntax higlighting and so on. because snitch aims at being plain kotlin only, without reflection or annotation processing or code generation, the kotlin compiler is fully capable of understanding each aspect of the library and its uses. snitch usage errors are more often than not resolved at compile time. one of the leading design principles of snitch is that the user of the library should always be able to use the ide to navigate to middleware definitions, follow the nesting of routes upsream and downstream, and so on. a user should never be in the position of not knowing what some code does. they might not necessarily understand every aspect of how the internals work, but they should at the very least be able to see the internals, and explore them with their ide. the pure kotlin approach makes this easy.
+
+
+### Showcase
+
+#### DSL extension usecase: API versioning
+
+It is often the case that your API will need versioning for backwards compatibility with deployed clients. There are several approaches to versioning. A common and annoying problem is handling relatively minor version differences on only a subset of endpoints. Setting up a whole separate path hierarchy may be an overkill in such cases. E.g you want to have these routes:
+
+```
+GET /v1/hey/there/foo
+GET /v2/hey/there/foo
+GET /v1/hey/all/bar
+```
+
+This is how easy it is to extend Snitch's DSL to support this type of versioning:
+
+```kotlin
+val baseVersion = "v1"
+
+baseVersion / {
+    "hey" / {
+        "there" / {
+            GET("foo") isHandledBy { "this is foo v1".ok }
+            GET("foo").v2 isHandledBy { "this is foo v2".ok }
+        }
+        "all" / {
+            GET("bar") isHandledBy { "this is bar v1".ok }
+        }
+    }
+}
+
+// demo only, use a more robust path editing logic for production
+val <T : Any> Endpoint<T>.v2 get() = copy(path = path.replace("/$baseVersion/", "/v2/"))
+```
+
+And that's it. Endpoints are data classes and can be customized like any other data class in Kotlin.  
+
+This style is also supported, if you prefer:
+```kotlin
+GET("foo") v 2 isHandledBy { "this is foo v2".ok }
+```
+This uses an extension function instead of an extension property.
+```
+// demo only, use a more robust path editing logic for production
+infix fun <T: Any> Endpoint<T>.v(version: Int) = copy(
+    path = path.replace("/$baseVersion/", "/v$version/")
+)
+```
