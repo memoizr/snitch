@@ -15,7 +15,7 @@ data class RoutedService(
 ) {
     fun start(): RoutedService {
         router.endpoints.forEach {
-            val path: String = service.config.service.basePath + it.endpoint.url
+            val path: String = service.config.service.basePath + it.endpoint.path
             service.registerMethod(it, path)
         }
 

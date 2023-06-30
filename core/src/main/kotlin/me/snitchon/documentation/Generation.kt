@@ -20,7 +20,7 @@ fun RoutedService.generateDocumentation(
     val openApi =
         OpenApi(info = Info(documentationConfig.title, "1.0"), servers = listOf(Server(documentationConfig.host)))
     return router.endpoints
-        .groupBy { it.endpoint.url }
+        .groupBy { it.endpoint.path }
         .map { entry ->
             entry.key to entry.value.foldRight(Path()) { bundle: EndpointBundle<*>, path ->
                 path.withOperation(
@@ -118,7 +118,7 @@ fun DocumentedService.servePublicDocumenation(): DocumentedService {
         GET(docPath).isHandledBy {
             documentation.spec.ok.format(Json).serializer { it }
         }
-        endpoints.forEach { service.registerMethod(it, it.endpoint.url) }
+        endpoints.forEach { service.registerMethod(it, it.endpoint.path) }
     }
     return this
 }

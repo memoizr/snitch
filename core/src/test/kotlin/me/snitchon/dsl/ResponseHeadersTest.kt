@@ -8,7 +8,7 @@ class ResponseHeadersTest : InlineSnitchTest() {
     fun `adds headers to response`() {
         given {
             GET() isHandledBy {
-                "".ok.text.header("key" to "value")
+                "".ok.plainText.header("key" to "value")
             }
         } then {
             GET("/")

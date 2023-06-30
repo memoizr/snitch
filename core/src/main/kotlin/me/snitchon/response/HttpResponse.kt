@@ -7,6 +7,7 @@ sealed class HttpResponse<T, out S : StatusCodes> {
     abstract val statusCode: StatusCodes
     abstract val headers: Map<String, String>
     abstract val value: context(Parser) () -> Any?
+    abstract fun header(header: Pair<String, String>): HttpResponse<T, S>
 
     fun map(
         failure: ErrorHttpResponse<T, *, S>.() -> HttpResponse<Any, *> = { this as HttpResponse<Any, *> },
@@ -15,6 +16,4 @@ sealed class HttpResponse<T, out S : StatusCodes> {
         is SuccessfulHttpResponse -> this.success()
         is ErrorHttpResponse<T, *, S> -> this.failure()
     }
-
-    abstract fun header(header: Pair<String, String>): HttpResponse<T, S>
 }
