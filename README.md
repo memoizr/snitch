@@ -1,6 +1,7 @@
 ![Workflow ci](https://github.com/memoizr/snitch/actions/workflows/ci.yml/badge.svg)
 [![](https://jitpack.io/v/memoizr/snitch.svg)](https://jitpack.io/#memoizr/snitch)
-
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Code Coverage](https://img.shields.io/badge/Code%20Coverage-83%25-brightgreen)]()
 
 ## Snitch 
 Snitch helps you create a production-grade HTTP layer for your applications and (micro)services with minimal effort. To create ***complete*** documentation for them with ***no*** effort.
@@ -26,20 +27,19 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.undertow-io:snitch:3.2.7'
+    implementation 'com.github.memoizr.snitch:bootstrap:3.2.3'
 }
 ```
 
 #### Getting started
 
 ```Kotlin
-UndertowSnitchService(GsonJsonParser)
-    .setRoutes {
+snitch(GsonJsonParser)
+    .onRoutes {
         GET("/hello") isHandledBy { "world".ok }
     }
-    .startListening()
-    .generateDocumentation()
-    .servePublicDocumenation()
+    .start()
+    .serveDocumenation()
 ```
 
 ### Features
@@ -88,20 +88,20 @@ val createPost by parsing<CreatePostRequest>() handling {
 #### Expressive and exendable parameter definition, parsing and validation
 ```Kotlin
 val userId by path()
-val postId by path(postIdValidator)
-val accessToken by header(validAccessToken)
+val postId by path(ofPostIdValidator)
+val accessToken by header(ofValidAccessToken)
 
 // Your custom parameter validation and parsing logic
-val validAccessToken = stringValidator("valid jwt") { jwt().validate(it) }
+val ofValidAccessToken = stringValidator("valid jwt") { jwt().validate(it) }
 ```
 
 #### Strongly typed inputs and outputs
 Headers, paths, query parameters and bodies always require validation and mapping to domain types. Snitch makes it easy to do so.
 ```Kotlin 
-val limit by query(nonNegativeInt(max = 30))
-val offset by query(nonNegativeInt())
+val limit by query(ofNonNegativeInt(max = 30))
+val offset by query(ofNonNegativeInt())
 
-val postId by path(postIdValidator)
+val postId by path(ofPostIdValidator)
 ```
 In the example above `limit` and `offset` are validated and mapped to `UInt` values. `postId` is validated and mapped to a `PostId` value object.
 
