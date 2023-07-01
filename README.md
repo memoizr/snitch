@@ -189,7 +189,7 @@ The library is actually very small and a complete detailed overview can be had i
 Please refer to the [example](example) folder for a reference implementation of a simple reddit-like service. The example tries to have production-like qualities such as handling authorization and authentication, database interaction, it shows how it works well and integrates with dependency injection libraries such as Shank. Also, please refer to the [docs](docs/Docs.md) for a more detailed overview of the library as well as tutorials.
 
 #### Community support
-Join us on our [discord server](https://discord.com/channels/1124657007199268885/1124657007199268888) to ask questions, get help, or just to chat. We're a small but growing community but we're friendly and we're always happy to help.
+Join us on our [discord server](https://discord.gg/bG6NW3UyxS) to ask questions, get help, or just to chat. We're a small but growing community but we're friendly and we're always happy to help.
 
 #### Why does it exist
 Because code should be as readable as possible, and it should not require much ceremony to do simple stuff. If you want to do complex stuff it should be simple to extend the framework to do so. Resources are precious, you should not waste them on reflection or huge classpaths for doing basic stuff. Documentation is crucial, it should be generated automatically and be always up to date, and nobody should ever touch OpenAPI YAML or JSON files: we stand for these basic human rights.
@@ -207,7 +207,7 @@ Because code should be as readable as possible, and it should not require much c
 - Kotlin 1.8.20 or higher
 
 #### How to contribute  
-This library evolved over the years, initially as an internat tool deployed in a variety of scenarios, but now released as an open-source project. To contribute, please fork the repository and submit a pull request. We will review it as soon as possible. If you have any question open an issue, and we'll try to address it as soon as possible. Alternatively, join our [discord server](https://discord.com/channels/1124657007199268885/1124657007199268888) to get in touch. We have many beginner-friendly tasks and we can offer plenty of support. This can be a great opportunity to learn some really advanced Kotlin concepts!
+This library evolved over the years, initially as an internat tool deployed in a variety of scenarios, but now released as an open-source project. To contribute, please fork the repository and submit a pull request. We will review it as soon as possible. If you have any question open an issue, and we'll try to address it as soon as possible. Alternatively, join our [discord server](https://discord.gg/bG6NW3UyxS) to get in touch. We have many beginner-friendly tasks and we can offer plenty of support. This can be a great opportunity to learn some really advanced Kotlin concepts!
 
 ### Show Your Support
 If you find this project useful, and you'd like to support our work, please consider giving it a ⭐️ on GitHub! Your support means a lot to us and helps us continue improving the library. 
