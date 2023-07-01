@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.memoizr:snitch-bootstrap:3.2.7")
+    implementation("com.github.memoizr.snitch:bootstrap:3.2.3")
 }
 ```
 That's it, no need for command line tools, gradle plugins. It's just a simple library.

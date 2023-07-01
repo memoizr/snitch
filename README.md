@@ -6,7 +6,7 @@
 ## Snitch 
 Snitch helps you create a production-grade HTTP layer for your applications and (micro)services with minimal effort. To create ***complete*** documentation for them with ***no*** effort.
 
-Snitch is a thin layer built upon long established and well-supported embedded web servers such as Undertow. Thanks to Kotlin's inlining capabilities the performance of Snitch is essentially the same as that of the underlying web server.
+Snitch is a thin layer built upon long-established and well-supported embedded web servers such as Undertow. Thanks to Kotlin's inlining capabilities the performance of Snitch is essentially the same as that of the underlying web server.
 
 Our primary goals are:
 - To create the most readable and maintainable API for creating web services
@@ -16,24 +16,24 @@ Our primary goals are:
 - To be as lightweight and performant as possible
 - To not use any reflection, annotations or code generation for production code
 - To be async by default without sacrificing readability
-- To be small and get out of the way. The HTTP layer is not the most interesting part of your application and it should not be the most complex one either.
+- To be small and get out of the way. The HTTP layer is not the most interesting part of your application, and it should not be the most complex one either.
 - To have a small learning curve despite it being a DSL
 
 #### How to install it
 
-```Groovy
+```kotlin
 repositories {
-    maven { url "https://jitpack.io" }
+    maven(url="https://jitpack.io")
 }
 
 dependencies {
-    implementation 'com.github.memoizr.snitch:bootstrap:3.2.3'
+    implementation("com.github.memoizr.snitch:bootstrap:3.2.3")
 }
 ```
 
 #### Getting started
 
-```Kotlin
+```kotlin
 snitch(GsonJsonParser)
     .onRoutes {
         GET("/hello") isHandledBy { "world".ok }
@@ -97,7 +97,7 @@ val ofValidAccessToken = stringValidator("valid jwt") { jwt().validate(it) }
 
 #### Strongly typed inputs and outputs
 Headers, paths, query parameters and bodies always require validation and mapping to domain types. Snitch makes it easy to do so.
-```Kotlin 
+```kotlin 
 val limit by query(ofNonNegativeInt(max = 30))
 val offset by query(ofNonNegativeInt())
 
@@ -106,7 +106,7 @@ val postId by path(ofPostIdValidator)
 In the example above `limit` and `offset` are validated and mapped to `UInt` values. `postId` is validated and mapped to a `PostId` value object.
 
 Therefore in the handler you can do this:
-```Kotlin
+```kotlin
 val getPosts by handling {
     postsRepository().getPosts(request[userId], request[limit], request[offset]).toResponse.ok }
 ```
@@ -114,7 +114,7 @@ The parameters are validated and safe to use. If they are not valid the request 
 
 #### Middleware
 Here's how you would define a simple logger middleware
-```Kotlin
+```kotlin
 val Router.log get() = using {
         logger().info("Begin Request: ${request.method.name} ${request.path}")
         next().also {
@@ -170,9 +170,9 @@ Adding this line to the service configuration will generate the documentation an
 ```
 This is an example screenshot of the interactive Swagger-UI page that it serves at the `/docs` route:   
 
-![Swagger-UI](https://i.imgur.com/6Z2Z3ZM.png)
+![Swagger-UI](example/docs.png)
 
-Every endpoint can be interacted with, and the documentation is always up to date with the actual behaviour of the API.
+Every endpoint can be interacted with, and the documentation is always up-to-date with the actual behaviour of the API.
 
 #### Performance
 Snitch uses Undertow as the default embedded web server. Undertow was chosen because it's the fastest embedded web server for the JVM for most use cases, and for its async-first approach based on NIO. It's also the most lightweight one, with a small classpath and a small memory footprint. That said, it's possible to use any other web server with Snitch, as it's not tied to Undertow in any way, so if another web server is preferred it can be used instead.
@@ -186,7 +186,7 @@ The application has a small classpath, and the only dependencies are the web ser
 The library is actually very small and a complete detailed overview can be had in a matter of hours. Powerful features such as guards, middleware and others are built on top of a small number of core concepts, and really there isn't any magic involved. The codebase only has a few thousand lines of code. Given a fluency of the Kotlin language it should be one of the easiest frameworks to truly understand how it works. Really it's just a thin wrapper around the embedded web server.
 
 #### Learning resources
-Please refer to the 'example` folder for a reference implementation of a simple reddit-like service. The example tries to have production-like qualities such as handling authorization and authentication, database interaction, it shows how it works well and integrates with dependency injection libraries such as Shank. Also please refer to the wiki for a more detailed overview of the library as well as tutorials.
+Please refer to the [example](example) folder for a reference implementation of a simple reddit-like service. The example tries to have production-like qualities such as handling authorization and authentication, database interaction, it shows how it works well and integrates with dependency injection libraries such as Shank. Also, please refer to the [docs](docs/Docs.md) for a more detailed overview of the library as well as tutorials.
 
 #### Community support
 Join us on our slack channel at https://join.slack.com/t/snitch-f to ask questions, get help, or just to chat. We're a small but growing community but we're friendly and we're always happy to help.
@@ -200,13 +200,16 @@ Because code should be as readable as possible, and it should not require much c
 - For those who'd take a smaller tool over a larger one to do the same job
 - For those who like to control-click on a method to see what it's doing and not end up in a reflection hell
 - For those who like to see their code compile and not have to wait for the runtime to tell them they made a typo 
-- Those who like aspects of Object Oriented as well as Functional Programming and want to use both to their advantage
+- Those who like aspects of Object-Oriented as well as Functional Programming and want to use both to their advantage
    
 #### System requirements
 - Java 17 or higher
 - Kotlin 1.8.20 or higher
 
 #### How to contribute  
-This library evolved over the years, initially as an internat tool deployed in a variety of scenarios, but now released as an open-source project. To contribute, please fork the repository and submit a pull request. We will review it as soon as possible. Alternatively, open an issue and we'll try to address it as soon as possible.
+This library evolved over the years, initially as an internat tool deployed in a variety of scenarios, but now released as an open-source project. To contribute, please fork the repository and submit a pull request. We will review it as soon as possible. Alternatively, open an issue, and we'll try to address it as soon as possible.
    
- 
+### Show Your Support
+If you find this project useful, and you'd like to support our work, please consider giving it a ⭐️ on GitHub! Your support means a lot to us and helps us continue improving the library. 
+
+Click [here](https://github.com/memoizr/snitch/stargazers) to star the repo. Thank you!
