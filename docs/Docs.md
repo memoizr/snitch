@@ -594,3 +594,23 @@ infix fun <T: Any> Endpoint<T>.v(version: Int) = copy(
     path = path.replace("/$baseVersion/", "/v$version/")
 )
 ```
+
+### FAQ
+#### How does Snitch handle concurrency?
+Snitch is a thin layer on top of the underlying HTTP server. By default, that's Undertow, so Snitch will handle concurrency in the samw way Undertow does.
+#### Just how "light" and "fast" is Snitch?
+Snitch is a small library with very little overhead on top of the HTTP server. By default that's Undertow, and multiple benchmarks have put Undertow consistently in the top 3 servers in the JVM for years. Undertow is also one of the lightest embedded HTTP servers. In short, Snitch is in practice as fast and as lightweight as Undertow is.
+#### How does the automatic OpenApi 3 documentation generation work?
+Snitch uses information from the type system to know everything there is to know about an endpoint and its inputs and outputs. 
+#### Why is Snitch typesafe?
+Snitch enforces explicit declarations on any inputs and outputs for each endpoint, and these declarations include type information. This way when the inputs are used inside the handlers, they are already verified and transformed, and any unexpected inputs automatically and consistently dealt with.
+#### How does Snitch handle HTTP sessions and cookies? 
+It doesn't and it won't. Snitch is designed for highly scalable stateless applications. Session management, caching and any other stateful solution, can and should be implemented at the infrastructure layer.
+#### Does Snitch support X database integration?
+Yes it does as long as X has a Java api. The middleware system's flexibility makes it easy to add support for X. No Snitch does not ship with X support by default because your needs are most likely than not unique and you'd rather have an easy way of doing it your way than a default that won't suit you.
+#### How does Snitch handle scalability? 
+Snitch is a low overhead, fast execution framework. It is stateless by default, and it's designed for deployment in clusters. Snitch once containerized and deployed in Kubernetes, ECS or analogous clusters will scale to fit any requirement. Most likely your limiting factor will be your database system.
+#### How does Snitch handle security, particularly in terms of input validation?
+Snitch offers both Validators, Guards and Middleware as powerful tools to implement granular and effective security. Used in combination, these features will greatly enhance the security of your endpoints. Refer to the documentation to learn how to use these features. Do keep in mind security is a multi-layer issue, so do not rely exclusively on application layer security for your critical use cases.
+#### How does Snitch compare to other Kotlin web frameworks like Ktor or Spring Boot in terms of performance and ease of use?
+Snitch was developed keeping a variety of other frameworks in mind, shamelessly taking inspiration from them. As such it is aimed at improving the development experience over those frameworks too. In the case of Spring, we believe that framework is overly complicated for most use cases. The "convention over configuration" approach most often than not shifts the burden from the explicit, to the implicit, greatly aggravating cognitive load. KTor is somewhat better in that regard, but we believe it does not go far enough and does not exploit Kotlin's full potential, despite its pedigree. Snitch is aimed at being the most powerful simple tool you can use while retaining excellent readability qualities and a minimal API.
