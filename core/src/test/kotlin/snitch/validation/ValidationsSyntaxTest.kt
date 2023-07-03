@@ -1,13 +1,13 @@
 package snitch.validation
 
+import org.junit.Test
 import snitch.dsl.InlineSnitchTest
-import snitch.extensions.print
-import snitch.parameters.*
+import snitch.parameters.TestErrorHttpResponse
+import snitch.parameters.optionalHeader
+import snitch.parameters.optionalQuery
+import snitch.parameters.path
 import snitch.parsers.GsonJsonParser.serialized
 import snitch.parsing.Parser
-import org.junit.Test
-import snitch.validation.ofNonNegativeInt
-import snitch.validation.ofStringSet
 
 private val offset by optionalQuery(condition = ofNonNegativeInt, "offset", default = 20, emptyAsMissing = true)
 private val id by path(condition = ofNonNegativeInt)
@@ -51,7 +51,7 @@ class ValidationsSyntaxTest : InlineSnitchTest() {
                 stringSet,
                 userId
             ) with headers(allowInvalidHeader) isHandledBy {
-                request[offset].print()
+                request[offset]
                 request[allowInvalidHeader]
                 request[allowInvalidQuery]
                 request[stringSet]

@@ -59,4 +59,3 @@ class PathParamDelegate<T, R>(
             description,
         ).also { param = it }
 }
-

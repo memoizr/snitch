@@ -1,7 +1,9 @@
-package snitch.syntax
+package snitch.syntax.methods
 
 import snitch.parameters.ParametrizedPath
 import snitch.parameters.PathParam
+import snitch.syntax.MethodSyntax
+import snitch.syntax.method
 import snitch.types.HTTPMethods.OPTIONS
 
 interface OptionsMethodSyntax : MethodSyntax {

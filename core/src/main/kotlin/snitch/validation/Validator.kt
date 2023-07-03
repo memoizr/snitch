@@ -34,10 +34,9 @@ fun <From, To> validatorMulti(
     override val regex = regex
     override val parse: Parser.(Collection<String>) -> To = mapper
 }
+
 fun <To> stringValidatorMulti(
     description: String,
     regex: Regex = """^.+$""".toRegex(RegexOption.DOT_MATCHES_ALL),
     mapper: Parser.(Collection<String>) -> To,
 ) = validatorMulti<String, To>(description, regex, mapper)
-
-class ValidationException(val value: Any, val exception: Exception? = null): Exception()

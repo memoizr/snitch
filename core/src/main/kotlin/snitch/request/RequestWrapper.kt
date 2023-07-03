@@ -1,6 +1,5 @@
 package snitch.request
 
-import snitch.extensions.print
 import snitch.parameters.*
 import snitch.parsing.Parser
 import snitch.response.CommonResponses
@@ -36,7 +35,7 @@ interface RequestWrapper : CommonResponses {
                     is QueryParameter<*, *> -> validateParam(it, getQueryParam(it), "Query")
                     is HeaderParameter<*, *> -> validateParam(it, getHeaderParam(it), "Header")
                 }
-            }.filterNotNull().print()
+            }.filterNotNull()
     }
 
     private fun validateParam(it: Parameter<*, *>, value: Collection<String>?, path: String): String? {
@@ -73,8 +72,8 @@ interface RequestWrapper : CommonResponses {
         checkParamIsRegistered(param)
             .tryParam(param) {
                 queryParams(param.name)
-                    .filterValid(param).print()
-                    ?.let { param.pattern.parse(parser, it).print() }.print()
+                    .filterValid(param)
+                    ?.let { param.pattern.parse(parser, it) }
             } ?: param.default
 
     operator fun <T : Any?, R> get(param: HeaderParam<T, R>): R =
@@ -83,7 +82,6 @@ interface RequestWrapper : CommonResponses {
                 headers(param.name)
                     .let { param.pattern.parse(parser, it) }
             }!!
-
 
     operator fun <T : Any?, R> get(param: OptionalHeaderParam<T, R>): R =
         checkParamIsRegistered(param)

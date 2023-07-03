@@ -1,5 +1,7 @@
 package snitch.syntax
 
+import snitch.syntax.methods.*
+
 interface HttpMethodsSyntax :
     GetMethodSyntax,
     PostMethodSyntax,

@@ -1,8 +1,10 @@
-package snitch.syntax
+package snitch.syntax.methods
 
 import snitch.types.HTTPMethods.PATCH
 import snitch.parameters.ParametrizedPath
 import snitch.parameters.PathParam
+import snitch.syntax.MethodSyntax
+import snitch.syntax.method
 
 interface PatchMethodSyntax: MethodSyntax {
     fun PATCH() = method(PATCH)

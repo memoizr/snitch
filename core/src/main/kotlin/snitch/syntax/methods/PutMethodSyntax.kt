@@ -1,8 +1,10 @@
-package snitch.syntax
+package snitch.syntax.methods
 
-import snitch.types.HTTPMethods.PUT
 import snitch.parameters.ParametrizedPath
 import snitch.parameters.PathParam
+import snitch.syntax.MethodSyntax
+import snitch.syntax.method
+import snitch.types.HTTPMethods.PUT
 
 interface PutMethodSyntax: MethodSyntax {
     fun PUT() = method(PUT)

@@ -1,8 +1,7 @@
 package snitch.parameters
 
-import snitch.validation.ofNonEmptyString
 import snitch.validation.Validator
-
+import snitch.validation.ofNonEmptyString
 
 inline fun <reified T, R> path(condition: Validator<T, R>, name: String = "", description: String = "") =
     PathParamDelegate(

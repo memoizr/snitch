@@ -4,7 +4,6 @@ import com.memoizr.assertk.expect
 import com.memoizr.assertk.of
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
-import snitch.extensions.print
 import org.junit.jupiter.api.Test
 import ro.kreator.aRandom
 import snitch.example.ApplicationModule.clock
@@ -27,7 +26,7 @@ class JWTTest {
     @Test
     fun `encodes and decodes a jwt with token`() {
         val token = jwt.newToken(JWTClaims(userId, Role.USER))
-        jwt.validate(token).print()
+        jwt.validate(token)
     }
 
     @Test
