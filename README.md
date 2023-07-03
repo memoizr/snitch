@@ -19,6 +19,29 @@ Our primary goals are:
 - To be small and get out of the way. The HTTP layer is not the most interesting part of your application, and it should not be the most complex one either.
 - To have a small learning curve despite it being a DSL
 
+<!-- TOC -->
+  * [Snitch](#snitch-)
+      * [How to install it](#how-to-install-it)
+      * [Getting started](#getting-started)
+    * [Features](#features)
+      * [Expressive routing](#expressive-routing)
+      * [Expressive handlers](#expressive-handlers)
+      * [Expressive and exendable parameter definition, parsing and validation](#expressive-and-exendable-parameter-definition-parsing-and-validation)
+      * [Strongly typed inputs and outputs](#strongly-typed-inputs-and-outputs)
+      * [Middleware](#middleware)
+      * [Guards](#guards-)
+      * [Fully automated documentation](#fully-automated-documentation)
+      * [Performance](#performance)
+      * [Small learning curve](#small-learning-curve)
+      * [Learning resources](#learning-resources)
+      * [Community support](#community-support)
+      * [Why does it exist](#why-does-it-exist)
+      * [Who is it for?](#who-is-it-for)
+      * [System requirements](#system-requirements)
+      * [How to contribute](#how-to-contribute-)
+    * [Show Your Support](#show-your-support)
+<!-- TOC -->
+
 #### How to install it
 
 ```kotlin
