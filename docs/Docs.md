@@ -29,46 +29,7 @@
     * [Intellij integration](#intellij-integration)
     * [Showcase](#showcase)
       * [DSL extension usecase: API versioning](#dsl-extension-usecase-api-versioning)
-    * [FAQ](#faq)
-      * [How does Snitch handle concurrency?](#how-does-snitch-handle-concurrency)
-      * [Just how "light" and "fast" is Snitch?](#just-how-light-and-fast-is-snitch)
-      * [How does the automatic OpenApi 3 documentation generation work?](#how-does-the-automatic-openapi-3-documentation-generation-work)
-      * [Why is Snitch typesafe?](#why-is-snitch-typesafe)
-      * [How does Snitch handle HTTP sessions and cookies?](#how-does-snitch-handle-http-sessions-and-cookies-)
-      * [Does Snitch support X database integration?](#does-snitch-support-x-database-integration)
-      * [How does Snitch handle scalability?](#how-does-snitch-handle-scalability-)
-      * [How does Snitch handle security, particularly in terms of input validation?](#how-does-snitch-handle-security-particularly-in-terms-of-input-validation)
-      * [How does Snitch compare to other Kotlin web frameworks like Ktor or Spring Boot in terms of performance and ease of use?](#how-does-snitch-compare-to-other-kotlin-web-frameworks-like-ktor-or-spring-boot-in-terms-of-performance-and-ease-of-use)
-<!-- TOC --><!-- TOC -->
-* [Snitch](#snitch)
-      * [Will snitch on your API. With swagger.](#will-snitch-on-your-api-with-swagger)
-    * [Introduction](#introduction)
-      * [Features](#features)
-    * [Getting started](#getting-started-)
-    * [Router](#router)
-      * [Routing basics](#routing-basics)
-      * [Route Nesting](#route-nesting)
-      * [HTTP input parameters](#http-input-parameters)
-      * [Input parameter validation and transformation](#input-parameter-validation-and-transformation)
-      * [Custom validations](#custom-validations)
-      * [Optional input parameters](#optional-input-parameters)
-      * [Parameter naming](#parameter-naming)
-      * [Unsafe, undocumented parameter parsing](#unsafe-undocumented-parameter-parsing)
-      * [Repeated parameters](#repeated-parameters)
-      * [Body parameter](#body-parameter)
-    * [Middleware](#middleware-)
-      * [Order of execution](#order-of-execution)
-    * [Security and access control](#security-and-access-control)
-    * [Database integration](#database-integration)
-    * [Guards](#guards)
-      * [Composing conditions](#composing-conditions)
-      * [Reusing conditions](#reusing-conditions)
-    * [Error handling](#error-handling)
-      * [Polymorphic error handling](#polymorphic-error-handling)
-    * [Testing](#testing)
-    * [Intellij integration](#intellij-integration)
-    * [Showcase](#showcase)
-      * [DSL extension usecase: API versioning](#dsl-extension-usecase-api-versioning)
+    * [Coroutines](#coroutine-support)
     * [FAQ](#faq)
       * [How does Snitch handle concurrency?](#how-does-snitch-handle-concurrency)
       * [Just how "light" and "fast" is Snitch?](#just-how-light-and-fast-is-snitch)
@@ -110,7 +71,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.memoizr.snitch:bootstrap:3.2.3")
+    implementation("com.github.memoizr.snitch:bootstrap:3.3.1")
 }
 ```
 That's it, no need for command line tools, gradle plugins. It's just a simple library.
@@ -470,6 +431,7 @@ val Router.authenticated
 Snitch is an HTTP focused tool, and as such it abstains from offering solutions to non-HTTP problems such as deeply integrating with databases. We believe it is better to leave that job to specialized tools such as Jooq or Exposed. That said what snitch does offer is an extremely easy way of integrating with such tools. For example, here's how simple it is to declare that endpoints within a given hierarchy should all execute the code within an `Exposed` transaction:
 
 ```kotlin
+
 withTransaction {
     POST() with body<CreateUserRequest>() isHandledBy createUser
     POST("login") with body<LoginRequest>() isHandledBy userLogin
@@ -673,6 +635,24 @@ infix fun <T: Any> Endpoint<T>.v(version: Int) = copy(
     path = path.replace("/$baseVersion/", "/v$version/")
 )
 ```
+
+### Coroutine support
+Snitch is asynchronous by default, and as such it works well with coroutines. You can use your suspend functions just like normal code, just use a `coHandling` or `isCoHandledBy`. 
+
+```kotlin
+val getUsers by coHandling {
+    usersRepository().getUsersAsync().ok
+}
+
+GET("users") isHandledBy getUsers
+GET("posts") isCoHandledBy { postsRepository().getPostsAsync().ok }
+```
+
+Coroutine support are not included by default, so you need to add this to your gradle build file:
+```kotlin
+implementation("com.github.memoizr.snitch:coroutines:3.3.1")
+```
+Depending on usage patterns we might include coroutines as part of the main API and thus remove the need for the `coHandling` and `isCoHandledBy` functions.
 
 ### FAQ
 #### How does Snitch handle concurrency?

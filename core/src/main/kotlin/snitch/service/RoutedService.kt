@@ -1,8 +1,7 @@
 package snitch.service
 
-import snitch.parsing.Parser
-import snitch.response.HttpResponse
 import snitch.request.RequestWrapper
+import snitch.response.HttpResponse
 import snitch.router.Router
 import snitch.types.StatusCodes
 import kotlin.reflect.KClass
@@ -27,12 +26,12 @@ data class RoutedService(
         onStop()
     }
 
-    inline fun <reified T : Throwable, R : HttpResponse<Any, StatusCodes>> handleException(noinline block: context(Parser) RequestWrapper.(T) -> R): RoutedService {
+    inline fun <reified T : Throwable, R : HttpResponse<Any, StatusCodes>> handleException(noinline block: RequestWrapper.(T) -> R): RoutedService {
         service.handleException(T::class, block)
         return this
     }
 
-    fun <T : Throwable, R : HttpResponse<Any, StatusCodes>> handleException(ex: KClass<T>, block: context(Parser) RequestWrapper.(T) -> R): RoutedService {
+    fun <T : Throwable, R : HttpResponse<Any, StatusCodes>> handleException(ex: KClass<T>, block: RequestWrapper.(T) -> R): RoutedService {
         service.handleException(ex, block)
         return this
     }

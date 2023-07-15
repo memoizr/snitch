@@ -1,6 +1,5 @@
 package snitch.service
 
-import snitch.parsing.Parser
 import snitch.request.RequestWrapper
 import snitch.response.HttpResponse
 import snitch.router.Routes
@@ -15,7 +14,7 @@ interface SnitchService {
 
     fun <T : Throwable, R : HttpResponse<*, *>> handleException(
         exceptionClass: KClass<T>,
-        exceptionHandler: context(Parser) RequestWrapper.(T) -> R
+        exceptionHandler: RequestWrapper.(T) -> R
     )
 }
 

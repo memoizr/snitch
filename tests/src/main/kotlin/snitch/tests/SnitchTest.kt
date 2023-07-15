@@ -2,12 +2,12 @@ package snitch.tests
 
 import snitch.parsers.GsonJsonParser
 import snitch.parsers.GsonJsonParser.parse
+import snitch.service.RoutedService
 import snitch.tests.TestMethods.HttpClient.delete
 import snitch.tests.TestMethods.HttpClient.get
 import snitch.tests.TestMethods.HttpClient.patch
 import snitch.tests.TestMethods.HttpClient.post
 import snitch.tests.TestMethods.HttpClient.put
-import snitch.service.RoutedService
 import java.net.BindException
 import java.net.ConnectException
 import java.net.URI
@@ -134,7 +134,13 @@ data class Expectation(
         copy(headers = headers + header)
 
     infix fun expectBody(body: String) = apply {
-        com.memoizr.assertk.expect that response.body() isEqualTo body
+        val actual = response.body()
+        assert(actual == body, {
+            """Body assertion failed.
+                | Expected: $body
+                | But got: $actual
+            """.trimMargin()
+        })
     }
 
     infix fun expectCode(expected: Int) = apply {
