@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.20"
+    kotlin("jvm") version "1.9.0"
     `maven-publish`
     `java-library`
 }
@@ -28,7 +28,6 @@ dependencies {
 
     api("com.github.memoizr:assertk-core:-SNAPSHOT")
     api("org.assertj:assertj-core:3.18.1")
-
     api("ch.qos.logback:logback-classic:1.1.7")
 }
 

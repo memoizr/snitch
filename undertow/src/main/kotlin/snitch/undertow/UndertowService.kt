@@ -6,9 +6,14 @@ import io.undertow.server.RoutingHandler
 import io.undertow.util.HttpString
 import io.undertow.util.Methods.*
 import snitch.parsing.Parser
+import snitch.request.RequestWrapper
+import snitch.response.ErrorHttpResponse
 import snitch.response.HttpResponse
+import snitch.response.SuccessfulHttpResponse
+import snitch.router.Router
 import snitch.router.Routes
 import snitch.service.RoutedService
+import snitch.service.SnitchService
 import snitch.service.exceptionhandling.handleInvalidParameters
 import snitch.service.exceptionhandling.handleParsingException
 import snitch.service.exceptionhandling.handleUnregisteredParameters
@@ -16,11 +21,6 @@ import snitch.types.ContentType
 import snitch.types.EndpointBundle
 import snitch.types.Format
 import snitch.types.HTTPMethods
-import snitch.request.RequestWrapper
-import snitch.response.ErrorHttpResponse
-import snitch.response.SuccessfulHttpResponse
-import snitch.router.Router
-import snitch.service.SnitchService
 import java.nio.ByteBuffer
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
@@ -40,7 +40,7 @@ class UndertowSnitchService(
     private lateinit var service: Undertow
     private val handlers = mutableListOf<RoutingHandler>()
     private val exceptionHandlers =
-        LinkedHashMap<KClass<*>, context(Parser) RequestWrapper.(Throwable) -> HttpResponse<*, *>>()
+        LinkedHashMap<KClass<*>, RequestWrapper.(Throwable) -> HttpResponse<*, *>>()
 
     private val routingHandler = RoutingHandler()
     private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.service.port, "localhost") }
@@ -65,10 +65,10 @@ class UndertowSnitchService(
 
     override fun <T : Throwable, R : HttpResponse<*, *>> handleException(
         exceptionClass: KClass<T>,
-        exceptionHandler: context (Parser) RequestWrapper.(T) -> R
+        exceptionHandler: RequestWrapper.(T) -> R
     ) {
         exceptionHandlers[exceptionClass] =
-            exceptionHandler as context(Parser) RequestWrapper.(Throwable) -> R
+            exceptionHandler as RequestWrapper.(Throwable) -> R
     }
 
     override fun registerMethod(endpointBundle: EndpointBundle<*>, path: String) {
@@ -127,7 +127,6 @@ class UndertowSnitchService(
                 exceptionHandlers.keys
                     .find { ex::class.isSubclassOf(it) }?.let { exceptionHandlers[it] }
                     ?.invoke(
-                        parser,
                         UndertowRequestWrapper(parser, params, exchange) { null },
                         ex,
                     )?.dispatch(exchange)

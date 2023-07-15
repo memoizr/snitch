@@ -32,6 +32,7 @@ Our primary goals are:
       * [Guards](#guards-)
       * [Fully automated documentation](#fully-automated-documentation)
       * [Performance](#performance)
+      * [Coroutines](#coroutines-support)
       * [Small learning curve](#small-learning-curve)
       * [Learning resources](#learning-resources)
       * [Community support](#community-support)
@@ -50,7 +51,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.memoizr.snitch:bootstrap:3.2.3")
+    implementation("com.github.memoizr.snitch:bootstrap:3.3.1")
 }
 ```
 
@@ -204,6 +205,8 @@ Snitch is designed to be only a very thin overlay on top of the embedded webserv
 Reflection is not used at all, and the only reflection that happens is when the documentation is generated, which is an optional step for production code that would occour at most once during startup. This is done only once, and the results are cached, so it does not happen on every request. 
 The application has a small classpath, and the only dependencies are the web server and the JSON library. This means that the application can be deployed as a single jar file, and it's easy to deploy and run it in a containerized environment. A small application complete with documentation can run in as little as 12MB of ram on top of the JVM. This library has been successfuly used in a variety of settings, from resource constrained environments such as Android to high performance environments such as high throughput microservices. 
 
+#### Coroutines support
+Snitch lets you use coroutine code seamlessly. For more information see the [documentation](docs/Docs.md#coroutine-support). 
 
 #### Small learning curve
 The library is actually very small and a complete detailed overview can be had in a matter of hours. Powerful features such as guards, middleware and others are built on top of a small number of core concepts, and really there isn't any magic involved. The codebase only has a few thousand lines of code. Given a fluency of the Kotlin language it should be one of the easiest frameworks to truly understand how it works. Really it's just a thin wrapper around the embedded web server.
@@ -227,10 +230,9 @@ Because code should be as readable as possible, and it should not require much c
    
 #### System requirements
 - Java 17 or higher
-- Kotlin 1.8.20 or higher
 
 #### How to contribute  
-This library evolved over the years, initially as an internat tool deployed in a variety of scenarios, but now released as an open-source project. To contribute, please fork the repository and submit a pull request. We will review it as soon as possible. If you have any question open an issue, and we'll try to address it as soon as possible. Alternatively, join our [discord server](https://discord.gg/bG6NW3UyxS) to get in touch. We have many beginner-friendly tasks and we can offer plenty of support. This can be a great opportunity to learn some really advanced Kotlin concepts!
+This library evolved over the years, initially as an internat tool deployed in a variety of scenarios, but now released as an open-source project. To contribute, please fork the repository and submit a pull request. We will review it as soon as possible. If you have any question open an issue, and we'll try to address it as soon as possible. Alternatively, join our [discord server](https://discord.gg/bG6NW3UyxS) to get in touch. We have many beginner-friendly tasks, and we can offer plenty of support. This can be a great opportunity to learn some really advanced Kotlin concepts!
 
 ### Show Your Support
 If you find this project useful, and you'd like to support our work, please consider giving it a ⭐️ on GitHub! Your support means a lot to us and helps us continue improving the library. 

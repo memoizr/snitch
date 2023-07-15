@@ -33,7 +33,6 @@ class Router(
             decorator(
                 DecoratedWrapper({
                     endpointResponse.handler(
-                        parser,
                         TypedRequestWrapper(request)
                     )
                 }, request)
@@ -46,7 +45,7 @@ class Router(
     ): Endpoint<B> = addEndpoint(handlerResponse)
 
     inline infix fun <B : Any, reified T : Any, reified S : StatusCodes> Endpoint<B>.isHandledBy(
-        noinline handler: context(Parser) TypedRequestWrapper<B>.() -> HttpResponse<T, S>
+        noinline handler: TypedRequestWrapper<B>.() -> HttpResponse<T, S>
     ): Endpoint<B> = addEndpoint(
         HandlerResponse(S::class.starProjectedType, T::class.starProjectedType, handler)
     )
@@ -71,7 +70,6 @@ class Router(
                 endpoint.decorator(
                     DecoratedWrapper({
                         it.handlerResponse.handler(
-                            parser,
                             TypedRequestWrapper(request)
                         )
                     }, request)
