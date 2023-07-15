@@ -650,9 +650,17 @@ GET("posts") isCoHandledBy { postsRepository().getPostsAsync().ok }
 
 Coroutine support are not included by default, so you need to add this to your gradle build file:
 ```kotlin
-implementation("com.github.memoizr.snitch:coroutines:3.3.1")
+dependencies {
+       implementation("com.github.memoizr.snitch:coroutines:3.3.1")
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
+    }
+}
 ```
-Depending on usage patterns we might include coroutines as part of the main API and thus remove the need for the `coHandling` and `isCoHandledBy` functions.
+Depending on usage patterns we might include coroutines as part of the main API and thus remove the need for the `coHandling` and `isCoHandledBy` functions and extra gradle code.
 
 ### FAQ
 #### How does Snitch handle concurrency?
