@@ -24,17 +24,12 @@ inline infix fun <B : Any, reified T : Any, reified S : StatusCodes> Endpoint<B>
     )
 }
 
-//context (Router)
-//inline infix fun <B : Any, reified T : Any, S : StatusCodes> Endpoint<B>.isCoHandledBy(
-//    handlerResponse: HandlerResponse<B, T, S>
-//): Endpoint<B> = addEndpoint(handlerResponse)
-
 fun <T, S : StatusCodes> coHandling(block: suspend TypedRequestWrapper<Nothing>.() -> HttpResponse<T, S>): Handler<Nothing, T, S> {
     val regularHandler: TypedRequestWrapper<Nothing>.() -> HttpResponse<T, S> = {
         val that = this
         runBlocking { block(that) }
     }
-    return Handler<Nothing, T, S>(regularHandler)
+    return Handler(regularHandler)
 }
 
 infix fun <B : Any, T, S : StatusCodes> BodiedHandler<B>.coHandling(block: suspend TypedRequestWrapper<B>.() -> HttpResponse<T, S>): Handler<B, T, S> {
@@ -42,5 +37,5 @@ infix fun <B : Any, T, S : StatusCodes> BodiedHandler<B>.coHandling(block: suspe
         val that = this
         runBlocking { block(that) }
     }
-    return Handler<B, T, S>(regularHandler)
+    return Handler(regularHandler)
 }
