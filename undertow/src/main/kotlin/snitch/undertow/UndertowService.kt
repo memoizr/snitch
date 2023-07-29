@@ -4,7 +4,13 @@ import io.undertow.Undertow
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.RoutingHandler
 import io.undertow.util.HttpString
-import io.undertow.util.Methods.*
+import io.undertow.util.Methods.DELETE
+import io.undertow.util.Methods.GET
+import io.undertow.util.Methods.HEAD
+import io.undertow.util.Methods.OPTIONS
+import io.undertow.util.Methods.PATCH
+import io.undertow.util.Methods.POST
+import io.undertow.util.Methods.PUT
 import snitch.parsing.Parser
 import snitch.request.RequestWrapper
 import snitch.response.ErrorHttpResponse
@@ -43,7 +49,7 @@ class UndertowSnitchService(
         LinkedHashMap<KClass<*>, RequestWrapper.(Throwable) -> HttpResponse<*, *>>()
 
     private val routingHandler = RoutingHandler()
-    private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.service.port, "localhost") }
+    private val serviceBuilder by lazy { Undertow.builder().addHttpListener(config.service.port, config.service.host) }
 
     override fun onRoutes(routerConfiguration: Routes): RoutedService {
         val router = Router(config, this@UndertowSnitchService, emptySet(), parser, "")

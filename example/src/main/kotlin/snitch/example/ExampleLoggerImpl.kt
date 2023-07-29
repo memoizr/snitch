@@ -2,7 +2,6 @@ package snitch.example
 
 import org.slf4j.Logger
 
-
 class ExampleLoggerImpl(private val logger: Logger) : ExampleLogger {
     override fun info(message: String) {
         logger.info(message)

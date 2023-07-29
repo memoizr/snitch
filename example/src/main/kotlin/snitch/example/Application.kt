@@ -4,22 +4,22 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.LoggerContext
 import io.jsonwebtoken.JwtException
+import net.logstash.logback.encoder.LogstashEncoder
+import org.slf4j.LoggerFactory
 import snitch.config.SnitchConfig
 import snitch.config.SnitchConfig.Service
 import snitch.documentation.generateDocumentation
 import snitch.documentation.servePublicDocumenation
 import snitch.example.ApplicationModule.logger
+import snitch.example.database.DBModule.postgresDatabase
+import snitch.example.types.ForbiddenException
+import snitch.example.types.ValidationException
 import snitch.parsers.GsonJsonParser
 import snitch.service.RoutedService
 import snitch.service.exceptionhandling.handleInvalidParameters
 import snitch.service.exceptionhandling.handleParsingException
 import snitch.service.exceptionhandling.handleUnregisteredParameters
 import snitch.types.ErrorResponse
-import net.logstash.logback.encoder.LogstashEncoder
-import org.slf4j.LoggerFactory
-import snitch.example.database.DBModule.postgresDatabase
-import snitch.example.types.ForbiddenException
-import snitch.example.types.ValidationException
 import snitch.undertow.snitch
 
 object Application {
@@ -53,7 +53,7 @@ object Application {
 fun main() {
     postgresDatabase().createSchema()
     postgresDatabase().addMissingColumns()
-    snitch.example.Application.setup(3000)
+    Application.setup(3000)
         .start()
         .generateDocumentation()
         .servePublicDocumenation()

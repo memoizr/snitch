@@ -7,6 +7,7 @@ data class SnitchConfig(var service: snitch.config.SnitchConfig.Service = snitch
 
     data class Service(
         var port: Int = 3000,
+        var host: String = "0.0.0.0",
         var basePath: String = ""
     )
 }
