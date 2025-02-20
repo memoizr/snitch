@@ -5,10 +5,21 @@ import org.junit.jupiter.api.Test
 import ro.kreator.aRandom
 import snitch.example.api.CreateUserRequest
 import snitch.example.api.LoginRequest
+import snitch.example.security.IPasswordHasher
+import snitch.example.security.SecurityModule.hasher
+import snitch.example.types.Hash
 
 class UsersRoutesTest : BaseTest() {
     val createRequest by aRandom<CreateUserRequest> { copy(email = "foo@gmail.com") }
     val otherRequestSameEmail by aRandom<CreateUserRequest> { copy(email = createRequest.email) }
+    init {
+        hasher.override {
+            object : IPasswordHasher {
+                override fun hash(password: String): String = "foo"
+                override fun match(password: String, hash: Hash): Boolean = true
+            }
+        }
+    }
 
     @Test
     fun `when an user with same email does not exist creates user`() {

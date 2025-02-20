@@ -9,19 +9,23 @@ class PostgresDatabase(private val database: Database) {
 
     fun createSchema() {
         transaction(database) {
-            SchemaUtils.create(*dbSchema)
+            SchemaUtils.create(tables=*dbSchema, true)
         }
     }
 
     fun addMissingColumns() {
-        transaction(database) {
-            SchemaUtils.addMissingColumnsStatements(*dbSchema)
+        printTime {
+            transaction(database) {
+                printTime {
+                    SchemaUtils.addMissingColumnsStatements(*dbSchema)
+                }
+            }
         }
     }
 
     fun dropSchema() {
         transaction(database) {
-            SchemaUtils.drop(*dbSchema)
+            SchemaUtils.drop(tables=*dbSchema,true)
         }
     }
 }

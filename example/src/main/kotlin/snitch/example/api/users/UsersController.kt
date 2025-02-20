@@ -1,16 +1,5 @@
 package snitch.example.api.users
 
-import snitch.parameters.PathParam
-import snitch.request.RequestWrapper
-import snitch.request.TypedRequestWrapper
-import snitch.request.handling
-import snitch.request.parsing
-import snitch.router.Router
-import snitch.router.decorateWith
-import snitch.router.decoration
-import snitch.router.routes
-import snitch.types.ErrorResponse
-import snitch.types.StatusCodes
 import org.jetbrains.exposed.sql.transactions.transaction
 import snitch.example.api.*
 import snitch.example.api.Paths.postId
@@ -27,6 +16,17 @@ import snitch.example.security.Role
 import snitch.example.security.SecurityModule.hasher
 import snitch.example.security.SecurityModule.jwt
 import snitch.example.types.*
+import snitch.parameters.PathParam
+import snitch.request.RequestWrapper
+import snitch.request.TypedRequestWrapper
+import snitch.request.handling
+import snitch.request.parsing
+import snitch.router.Router
+import snitch.router.decorateWith
+import snitch.router.decoration
+import snitch.router.routes
+import snitch.types.ErrorResponse
+import snitch.types.StatusCodes
 
 val usersController = routes {
     withTransaction {

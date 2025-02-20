@@ -15,7 +15,7 @@ object SecurityModule : ShankModule {
 
     val privateKey = single { -> keyPair().private as RSAPrivateCrtKey }
     val publicKey = single { -> keyPair().public }
-    val hasher = single { -> PasswordHasher(argon()) }
+    val hasher = single<IPasswordHasher> { -> PasswordHasher(argon()) }
     val argon = single { -> Argon2Factory.create() }
     val jwt = single { -> JWTManager() }
 }

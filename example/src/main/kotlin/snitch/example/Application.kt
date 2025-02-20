@@ -21,6 +21,7 @@ import snitch.service.exceptionhandling.handleParsingException
 import snitch.service.exceptionhandling.handleUnregisteredParameters
 import snitch.types.ErrorResponse
 import snitch.undertow.snitch
+import kotlin.time.measureTimedValue
 
 object Application {
     init {
@@ -81,3 +82,17 @@ fun RoutedService.handleExceptions(): RoutedService =
         .handleException(Throwable::class) {
             ErrorResponse(500, "something went wrong").serverError()
         }
+
+fun <T> printTime(block: () -> T): T {
+    val stacktrace = Thread.currentThread().stackTrace.map {
+        "${it.className}.${it.methodName}(${it.fileName}:${it.lineNumber})"
+    }.drop(2).take(1).joinToString("\n")
+
+    val duration = measureTimedValue {
+        block()
+    }
+
+    val message = "took: ${duration.duration.inWholeMilliseconds}ms at $stacktrace"
+    println(message)
+    return duration.value
+}
