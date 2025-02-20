@@ -1,7 +1,6 @@
-package snitch.parsing
+package snitch.parsers
 
 import com.memoizr.assertk.expect
-import snitch.parsers.GsonJsonParser
 import org.junit.Test
 
 

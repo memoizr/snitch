@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "1.9.21"
     `maven-publish`
     `java-library`
 }
@@ -24,6 +24,7 @@ dependencies {
     api("com.google.code.gson:gson:2.10.1")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.21")
     implementation(project(":core"))
+    api(project(":types"))
 }
 
 tasks.getByName<Test>("test") {

@@ -2,6 +2,7 @@ package snitch.tests
 
 import snitch.parsers.GsonJsonParser
 import snitch.parsers.GsonJsonParser.parse
+import snitch.parsers.GsonJsonParser.serialized
 import snitch.service.RoutedService
 import snitch.tests.TestMethods.HttpClient.delete
 import snitch.tests.TestMethods.HttpClient.get
@@ -75,17 +76,24 @@ interface TestMethods : Ported {
             }
 
         fun get(url: String, headers: Map<String, String>) = call(url, headers) { GET() }
-        fun post(url: String, headers: Map<String, String>, body: String?) =
-            call(url, headers) { POST(HttpRequest.BodyPublishers.ofString(body.orEmpty())) }
 
-        fun put(url: String, headers: Map<String, String>, body: String?) =
-            call(url, headers) { PUT(HttpRequest.BodyPublishers.ofString(body.orEmpty())) }
+        fun post(url: String, headers: Map<String, String>, body: Any?) =
+            call(url, headers) { POST(getBodyPublisher(body)) }
+
+        fun put(url: String, headers: Map<String, String>, body: Any?) =
+            call(url, headers) { PUT(getBodyPublisher(body)) }
+
+        fun patch(url: String, headers: Map<String, String>, body: Any?) =
+            call(url, headers) { method("PATCH", getBodyPublisher(body)) }
 
         fun delete(url: String, headers: Map<String, String>) = call(url, headers) { DELETE() }
-        fun patch(url: String, headers: Map<String, String>, body: String?) =
-            call(url, headers) { method("PATCH", HttpRequest.BodyPublishers.ofString(body.orEmpty())) }
-    }
 
+        private fun getBodyPublisher(body: Any?) = when (body) {
+            is String? -> HttpRequest.BodyPublishers.ofString(body.orEmpty())
+            is ByteArray? -> HttpRequest.BodyPublishers.ofByteArray(body ?: byteArrayOf())
+            else -> HttpRequest.BodyPublishers.ofString(body?.serialized.orEmpty())
+        }
+    }
 
 }
 
@@ -107,19 +115,19 @@ data class Expectation(
                 HttpMethod.PUT -> put(
                     "http://localhost:${port}$endpoint",
                     headers,
-                    if (body is String) body else body?.serialized
+                    body
                 )
 
                 HttpMethod.POST -> post(
                     "http://localhost:${port}$endpoint",
                     headers,
-                    if (body is String) body else body?.serialized
+                    body
                 )
 
                 HttpMethod.DELETE -> delete("http://localhost:${port}$endpoint", headers)
                 HttpMethod.PATCH -> patch(
                     "http://localhost:${port}$endpoint", headers,
-                    if (body is String) body else body?.serialized
+                    body
                 )
             }
         }

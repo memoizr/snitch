@@ -7,7 +7,7 @@ import snitch.parameters.optionalHeader
 import snitch.parameters.optionalQuery
 import snitch.parameters.path
 import snitch.parsers.GsonJsonParser.serialized
-import snitch.parsing.Parser
+import snitch.types.Parser
 
 private val offset by optionalQuery(condition = ofNonNegativeInt, "offset", default = 20, emptyAsMissing = true)
 private val id by path(condition = ofNonNegativeInt)

@@ -3,7 +3,7 @@ package snitch.service.exceptionhandling
 import snitch.parameters.HeaderParameter
 import snitch.parameters.PathParam
 import snitch.parameters.QueryParameter
-import snitch.parsing.ParsingException
+import snitch.parsers.ParsingException
 import snitch.types.ErrorResponse
 import snitch.parameters.InvalidParametersException
 import snitch.service.RoutedService

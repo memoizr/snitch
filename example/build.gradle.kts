@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "1.9.21"
 }
 
 group = "me.user"
@@ -15,7 +15,7 @@ dependencies {
     implementation(project(":undertow"))
     implementation(project(":gsonparser"))
 
-    implementation("org.postgresql:postgresql:42.6.0")
+    implementation("org.postgresql:postgresql:42.7.2")
     implementation("org.jetbrains.exposed:exposed-core:0.41.1")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")
     implementation("org.jetbrains.exposed:exposed-java-time:0.41.1")
@@ -24,14 +24,15 @@ dependencies {
 
     implementation("com.github.memoizr:shank:3.0.0")
     implementation("io.jsonwebtoken:jjwt-api:0.11.2")
-    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("ch.qos.logback:logback-classic:1.4.12")
     implementation("net.logstash.logback:logstash-logback-encoder:6.6")
 
 
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
     runtimeOnly("io.jsonwebtoken:jjwt-gson:0.11.2")
 
-    testImplementation("com.github.memoizr:momster:9b2fa3b998")
+    testImplementation("com.github.memoizr:momster:fac1dae13d")
+
 
     testImplementation(project(":tests"))
     testImplementation(platform("org.junit:junit-bom:5.9.1"))

@@ -3,13 +3,21 @@ package snitch.router
 import snitch.parameters.HeaderParameter
 import snitch.parameters.PathParam
 import snitch.parameters.QueryParameter
-import snitch.parsing.Parser
 import snitch.request.Body
 import snitch.request.TypedRequestWrapper
 import snitch.response.HttpResponse
-import snitch.service.*
+import snitch.service.Condition
+import snitch.service.DecoratedWrapper
+import snitch.service.Endpoint
+import snitch.service.OpDescription
+import snitch.service.SnitchService
 import snitch.syntax.HttpMethodsSyntax
-import snitch.types.*
+import snitch.types.ContentType
+import snitch.types.EndpointBundle
+import snitch.types.EndpointResponse
+import snitch.types.HandlerResponse
+import snitch.types.Parser
+import snitch.types.StatusCodes
 import kotlin.reflect.full.starProjectedType
 
 class Router(
@@ -24,21 +32,22 @@ class Router(
 
     inline fun <B : Any, reified T : Any, S : StatusCodes> Endpoint<B>.addEndpoint(
         endpointResponse: HandlerResponse<B, T, S>
-    ): Endpoint<B> = apply {
-        endpoints += EndpointBundle(
-            this,
-            EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
-            endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
-        ) { request ->
-            decorator(
-                DecoratedWrapper({
-                    endpointResponse.handler(
-                        TypedRequestWrapper(request)
-                    )
-                }, request)
-            ).next()
+    ): Endpoint<B> = applyConditions()
+        .also {
+            endpoints += EndpointBundle(
+                it,
+                EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
+                endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
+            ) { request ->
+                decorator(
+                    DecoratedWrapper({
+                        endpointResponse.handler(
+                            TypedRequestWrapper(request)
+                        )
+                    }, request)
+                ).next()
+            }
         }
-    }
 
     inline infix fun <B : Any, reified T : Any, S : StatusCodes> Endpoint<B>.isHandledBy(
         handlerResponse: HandlerResponse<B, T, S>
@@ -79,12 +88,35 @@ class Router(
     }
 }
 
-fun routes(routes: Routes) = routes
+fun routes(vararg tags: String, routes: Routes): Router.() -> Unit = {
+    val router = Router(config, service, pathParams, parser, path)
+    router.routes()
+    router.endpoints.replaceAll {
+        (it as EndpointBundle<Any>).copy(
+            endpoint = it.endpoint.copy(tags = it.endpoint.tags.orEmpty() + tags.toList())
+        )
+    }
+    endpoints.addAll(router.endpoints)
+
+//    this.endpoints.replaceAll {
+//        (it as EndpointBundle<Any>).copy(
+//            endpoint = it.endpoint
+//                .copy(
+//                    tags = listOf(it.endpoint.path.split("/").drop(3).first()) + (it.endpoint.tags ?: emptyList()),
+//                )
+//        )
+//    }
+}
+//fun routes(routes: Routes): Router.() -> Unit = routes
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/$this" else this
 
-fun Router.decorateWith(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = transformEndpoints { decorated(decoration) }
+fun Router.decorateWith(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) =
+    transformEndpoints { decorated(decoration) }
+
 fun decoration(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = decoration
 fun Router.transformEndpoints(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit =
     { it: Routes -> applyToAll_(it, action) }
+
 fun Router.onlyIf(condition: Condition) = transformEndpoints { onlyIf(condition) }
+

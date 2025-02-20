@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "1.9.21"
     `maven-publish`
     `java-library`
     jacoco
@@ -22,6 +22,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.21")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2")
     implementation("org.yaml:snakeyaml:2.0")
+    implementation(project(":types"))
 
     testImplementation(kotlin("test-junit"))
     testImplementation(project(":undertow"))

@@ -1,4 +1,4 @@
-package snitch.parsing
+package snitch.types
 
 interface Parser {
     val Any.serialized: String

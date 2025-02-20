@@ -6,7 +6,7 @@ import snitch.parameters.HeaderParameter
 import snitch.parameters.Parameter
 import snitch.parameters.PathParam
 import snitch.parameters.QueryParameter
-import snitch.parsing.Parser
+import snitch.types.Parser
 import snitch.request.RequestWrapper
 import snitch.request.filterValid
 import snitch.service.DecoratedWrapper

@@ -1,9 +1,9 @@
 package snitch.request
 
 import snitch.parameters.*
-import snitch.parsing.Parser
 import snitch.response.CommonResponses
 import snitch.types.HTTPMethods
+import snitch.types.Parser
 import snitch.validation.UnregisteredParamException
 
 interface RequestWrapper : CommonResponses {

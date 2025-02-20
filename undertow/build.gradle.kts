@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "1.9.21"
     `maven-publish`
     `java-library`
 }
@@ -14,6 +14,7 @@ repositories {
 dependencies {
     api("io.undertow:undertow-core:2.3.6.Final")
     api(project(":core"))
+    api(project(":types"))
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 }

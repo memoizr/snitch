@@ -14,14 +14,14 @@ internal data class OpenApi(
 )
 
 internal data class Components(
-    val schemas: Map<String, Schemas>,
-    val responses: Map<String, Responses>,
-    val parameters: Map<String, Parameters>,
-    val examples: Map<String, Examples>,
-    val requestBodies: Map<String, RequestBodies>,
-    val headers: Map<String, Headers>,
-    val securitySchemes: Map<String, SecuritySchemes>,
-    val links: Map<String, Links>
+    val securitySchemes: Map<String, SecuritySchemes>? = null,
+    val schemas: Map<String, Schemas>? = null,
+    val responses: Map<String, Responses>? = null,
+    val parameters: Map<String, Parameters>? = null,
+    val examples: Map<String, Examples>? = null,
+    val requestBodies: Map<String, RequestBodies>? = null,
+    val headers: Map<String, Headers>? = null,
+    val links: Map<String, Links>? = null
 )
 
 internal interface Ref {
@@ -294,7 +294,7 @@ internal data class Operation(
     val parameters: List<Parameters>? = null,
     val requestBody: RequestBodies? = null,
     val deprecated: Boolean? = null,
-    val security: Map<String, List<String>>? = null,
+    val security: List<Map<String, List<String>>>? = null,
     val servers: List<Server>? = null,
     val visibility: Visibility?
 )
@@ -336,15 +336,15 @@ internal sealed class SecuritySchemes {
 
     internal data class Reference(override val `$ref`: String) : SecuritySchemes(), Ref
     internal data class SecurityScheme(
-        val type: Type,
+        val type: Type? = null,
+        val scheme: String? = null,
         val description: String? = null,
-        val name: String,
-        val `in`: In,
-        val scheme: String,
-        val bearerFormat: String?,
-        val flows: OAuthFlows,
-        val openIdConnectUrl: String
-    )
+        val name: String? = null,
+        val `in`: In? = null,
+        val bearerFormat: String? = null,
+        val flows: OAuthFlows? = null,
+        val openIdConnectUrl: String? = null
+    ) : SecuritySchemes()
 }
 
 internal data class Info(
@@ -356,7 +356,7 @@ internal data class Info(
     val license: License? = null
 )
 
-@Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.CLASS)
+@Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.CLASS, AnnotationTarget.TYPEALIAS)
 @Retention(AnnotationRetention.RUNTIME)
 @Repeatable()
 annotation class Description(

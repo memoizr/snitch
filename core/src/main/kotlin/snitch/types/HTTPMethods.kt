@@ -5,13 +5,13 @@ enum class HTTPMethods {
 
     companion object {
         fun fromString(method: String) = when (method) {
-            DELETE.name -> DELETE
             GET.name -> GET
             PUT.name -> PUT
             POST.name -> POST
+            PATCH.name -> PATCH
+            DELETE.name -> DELETE
             OPTIONS.name -> OPTIONS
             HEAD.name -> HEAD
-            PATCH.name -> PATCH
             else -> throw IllegalArgumentException(method)
         }
     }

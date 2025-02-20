@@ -1,8 +1,7 @@
-package snitch.parsing
+package snitch.parsers
 
 import com.memoizr.assertk.isEqualTo
 import snitch.types.Sealed
-import snitch.parsers.GsonJsonParser
 import org.junit.Test
 
 class SealedParsingTest {

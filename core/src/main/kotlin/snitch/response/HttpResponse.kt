@@ -1,6 +1,6 @@
 package snitch.response
 
-import snitch.parsing.Parser
+import snitch.types.Parser
 import snitch.types.StatusCodes
 
 sealed class HttpResponse<T, out S : StatusCodes> {

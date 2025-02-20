@@ -1,12 +1,13 @@
 package snitch.documentation
 
-import snitch.types.Format.*
 import snitch.parameters.Parameter
 import snitch.router.Router
+import snitch.service.RoutedService
 import snitch.types.ContentType
 import snitch.types.EndpointBundle
+import snitch.types.Format.Json
+import snitch.types.Format.TextHTML
 import snitch.types.StatusCodes
-import snitch.service.RoutedService
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.jvmErasure
 
@@ -30,7 +31,9 @@ fun RoutedService.generateDocumentation(
                         summary = bundle.endpoint.summary,
                         description = bundle.endpoint.description,
                         responses = emptyMap(),
-                        visibility = bundle.endpoint.visibility
+                        visibility = bundle.endpoint.visibility,
+                        security = bundle.endpoint.security?.let { listOf(mapOf(it to emptyList())) },
+//                        security = mapOf("BearerAuth" to emptyList()),
                     )
                         .withResponse(
                             documentationSerializer,
@@ -99,6 +102,22 @@ fun RoutedService.generateDocumentation(
             }
         }.fold(openApi) { a, b -> a.withPath(b.first, b.second) }
         .let {
+            it.copy(
+                components = Components(
+                    securitySchemes = mapOf(
+                        "bearerAuth" to SecuritySchemes.SecurityScheme(
+                            SecuritySchemes.Type.http,
+                            name = "Authorization",
+                            `in` = SecuritySchemes.In.header,
+                            scheme = "bearer",
+                            bearerFormat = "JWT"
+                        )
+                    )
+                )
+            )
+
+        }
+        .let {
             DocumentedService(this, Spec(with(router.parser) { it.serialized }, router))
         }
 }
@@ -129,15 +148,15 @@ fun RoutedService.serveDocumentation() =
 private fun getDescription(param: Parameter<*, *>) =
     "${param.description} - ${param.pattern.description}${if (param.invalidAsMissing) " - Invalid as Missing" else ""}${if (param.emptyAsMissing) " - Empty as Missing" else ""}"
 
-fun index(docPath: String) = """
+fun index(docPath: String, uiVersion: String = "5.3.1") = """
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8">
     <title>Swagger UI</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/swagger-ui.css">
-    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/favicon-32x32.png" sizes="32x32" />
-    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/favicon-32x32.png" sizes="16x16" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@$uiVersion/swagger-ui.css">
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@$uiVersion/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@$uiVersion/favicon-32x32.png" sizes="16x16" />
     <style>
       html {
         box-sizing: border-box;
@@ -159,8 +178,8 @@ fun index(docPath: String) = """
   <body>
     <div id="swagger-ui"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/swagger-ui-standalone-preset.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.44.0/swagger-ui-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@$uiVersion/swagger-ui-standalone-preset.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@$uiVersion/swagger-ui-bundle.js"></script>
     <script>
     window.onload = function() {
       // Begin Swagger UI call region
@@ -168,6 +187,8 @@ fun index(docPath: String) = """
         url: ".$docPath",
         dom_id: '#swagger-ui',
         deepLinking: true,
+        defaultModelExpandDepth: 10,
+        defaultModelsExpandDepth: 10,
         presets: [
           SwaggerUIBundle.presets.apis,
           SwaggerUIStandalonePreset

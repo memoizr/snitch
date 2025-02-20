@@ -1,7 +1,7 @@
 package snitch.response
 
-import snitch.parsing.Parser
 import snitch.types.Format
+import snitch.types.Parser
 import snitch.types.StatusCodes
 
 data class SuccessfulHttpResponse<T, out S : StatusCodes>(
