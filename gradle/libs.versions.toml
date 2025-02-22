@@ -17,6 +17,8 @@ logstash = "6.6"
 assertj = "3.18.1"
 logback-classic = "1.1.7"
 jacoco = "0.8.8"
+hibernate-validator = "8.0.1.Final"
+jakarta-el = "4.0.2"
 
 [libraries]
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
@@ -52,6 +54,9 @@ logstash-encoder = { group = "net.logstash.logback", name = "logstash-logback-en
 assertj-core = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
 assertk-core = { group = "com.github.memoizr", name = "assertk-core", version = "-SNAPSHOT" }
 momster = { group = "com.github.memoizr", name = "momster", version = "fac1dae13d" }
+
+hibernate-validator = { group = "org.hibernate.validator", name = "hibernate-validator", version.ref = "hibernate-validator" }
+jakarta-el = { group = "org.glassfish", name = "jakarta.el", version.ref = "jakarta-el" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" } 
