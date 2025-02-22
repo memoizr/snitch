@@ -17,15 +17,10 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
-
 publishing {
     publications {
-        create<MavenPublication>("maven") {
-            groupId = "snitch"
+        named<MavenPublication>("maven") {
             artifactId = "undertow"
-            version = "1.0"
-
-            from(components["java"])
         }
     }
 }

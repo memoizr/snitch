@@ -28,4 +28,16 @@ subprojects {
             freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
         }
     }
+
+    // Add common publishing configuration
+    publishing {
+        publications {
+            create<MavenPublication>("maven") {
+                groupId = "snitch"
+                version = "1.0"
+                // artifactId will be set by each subproject
+                from(components["java"])
+            }
+        }
+    }
 }
