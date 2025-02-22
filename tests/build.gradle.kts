@@ -1,8 +1,7 @@
 dependencies {
-    implementation(libs.kotlin.reflect)
-
     implementation(project(":core"))
     implementation(project(":gsonparser"))
+    implementation(libs.kotlin.reflect)
 
     api(libs.assertk.core)
     api(libs.assertj.core)

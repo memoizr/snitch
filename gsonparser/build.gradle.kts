@@ -1,8 +1,9 @@
 dependencies {
-    api(libs.gson)
-    implementation(libs.kotlin.reflect)
-    implementation(project(":core"))
     api(project(":types"))
+    api(libs.gson)
+
+    implementation(project(":core"))
+    implementation(libs.kotlin.reflect)
 }
 
 publishing {
