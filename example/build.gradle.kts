@@ -1,10 +1,3 @@
-plugins {
-    kotlin("jvm") version "1.9.21"
-}
-
-group = "me.user"
-version = "1.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
     maven(url = "https://jitpack.io")

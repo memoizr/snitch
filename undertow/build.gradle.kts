@@ -1,12 +1,3 @@
-plugins {
-    kotlin("jvm") version "1.9.21"
-    `maven-publish`
-    `java-library`
-}
-
-group = "com.snitch.spark"
-version = "1.0.0"
-
 repositories {
     mavenCentral()
 }
