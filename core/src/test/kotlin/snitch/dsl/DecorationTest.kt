@@ -3,7 +3,7 @@ package snitch.dsl
 import snitch.router.Router
 import snitch.router.routes
 import snitch.router.decorateWith
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import snitch.router.routes
 
 class DecorationTest : InlineSnitchTest() {

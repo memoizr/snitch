@@ -29,7 +29,10 @@ subprojects {
         }
     }
 
-    // Add common publishing configuration
+    tasks.getByName<Test>("test") {
+        useJUnitPlatform()
+    }
+
     publishing {
         publications {
             create<MavenPublication>("maven") {

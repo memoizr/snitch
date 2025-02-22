@@ -2,7 +2,7 @@ package snitch.parsers
 
 import com.memoizr.assertk.isEqualTo
 import snitch.types.Sealed
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class SealedParsingTest {
     @Test

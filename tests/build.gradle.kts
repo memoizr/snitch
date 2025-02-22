@@ -22,10 +22,6 @@ dependencies {
     api(libs.logback.classic)
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
 publishing {
     publications {
         named<MavenPublication>("maven") {

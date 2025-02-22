@@ -10,10 +10,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
 publishing {
     publications {
         named<MavenPublication>("maven") {

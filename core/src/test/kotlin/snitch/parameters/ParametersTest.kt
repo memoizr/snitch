@@ -1,6 +1,6 @@
 package snitch.parameters
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import snitch.documentation.Visibility
 import snitch.dsl.InlineSnitchTest
 import snitch.parsers.GsonJsonParser.serialized

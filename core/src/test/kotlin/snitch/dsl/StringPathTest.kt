@@ -7,7 +7,7 @@ import snitch.tests.TestMethods
 import java.util.*
 import snitch.service.RoutedService
 import snitch.testRoutes
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 abstract class InlineSnitchTest : Ported, TestMethods {
     override open val port = Random().nextInt(5000) + 2000

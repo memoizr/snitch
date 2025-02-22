@@ -4,7 +4,7 @@ import com.memoizr.assertk.expect
 import snitch.dsl.InlineSnitchTest
 import snitch.types.Format.ImageJpeg
 import snitch.types.Format.VideoMP4
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class FormatTest : InlineSnitchTest() {

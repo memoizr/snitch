@@ -2,7 +2,7 @@ package snitch.errors
 
 import snitch.dsl.InlineSnitchTest
 import snitch.parsers.GsonJsonParser.serialized
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 private data class ErrorBody(val message: String, val float: Float)
 private class CustomException : Exception()

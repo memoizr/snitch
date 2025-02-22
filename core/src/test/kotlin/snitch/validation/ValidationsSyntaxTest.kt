@@ -1,6 +1,6 @@
 package snitch.validation
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import snitch.dsl.InlineSnitchTest
 import snitch.parameters.TestErrorHttpResponse
 import snitch.parameters.optionalHeader

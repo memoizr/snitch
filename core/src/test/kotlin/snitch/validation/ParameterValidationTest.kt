@@ -3,7 +3,7 @@ package snitch.validation
 import snitch.validation.ofStringSet
 import snitch.dsl.InlineSnitchTest
 import snitch.parameters.query
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class ParameterValidationTest : InlineSnitchTest() {
     @Test

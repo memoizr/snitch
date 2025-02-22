@@ -1,19 +1,21 @@
 package snitch
 
-import snitch.tests.SnitchTest
-import org.junit.After
-import org.junit.Before
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.TestInstance
 import snitch.service.RoutedService
+import snitch.tests.SnitchTest
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class BaseTest(service: (Int) -> RoutedService) : SnitchTest(service) {
 
-    @Before
-    override fun before() {
+    @BeforeAll
+    fun beforeAll() {
         super.before()
     }
 
-    @After
-    override fun after() {
+    @AfterAll
+    fun afterAll() {
         super.after()
     }
 }

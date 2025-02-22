@@ -2,7 +2,7 @@ package snitch
 
 import snitch.dsl.InlineSnitchTest
 import snitch.service.Endpoint
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class ExtensionsTest: InlineSnitchTest() {
     @Test

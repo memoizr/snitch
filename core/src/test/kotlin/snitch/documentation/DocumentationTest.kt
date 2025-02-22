@@ -1,8 +1,8 @@
 package snitch.documentation
 
 import com.memoizr.assertk.expect
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import snitch.dsl.InlineSnitchTest
 import snitch.parameters.header
 import snitch.parameters.optionalHeader
@@ -37,7 +37,7 @@ class DocumentationTest : InlineSnitchTest() {
     }
 
     @Test
-    @Ignore
+    @Disabled
     fun `deals with parameter types`() {
         val path by path()
         val header by header()

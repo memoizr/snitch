@@ -10,10 +10,6 @@ dependencies {
     api(project(":types"))
 }
 
-tasks.getByName<Test>("test") {
-    useJUnitPlatform()
-}
-
 publishing {
     publications {
         named<MavenPublication>("maven") {

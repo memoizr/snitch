@@ -16,10 +16,6 @@ dependencies {
     testImplementation(project(":gsonparser"))
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
 publishing {
     publications {
         named<MavenPublication>("maven") {

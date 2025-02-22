@@ -3,7 +3,7 @@ package snitch.middleware
 import com.memoizr.assertk.expect
 import snitch.dsl.InlineSnitchTest
 import snitch.parameters.query
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 
 class BeforeAndAfterActionsTest : InlineSnitchTest() {

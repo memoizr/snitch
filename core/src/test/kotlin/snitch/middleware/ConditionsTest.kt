@@ -1,7 +1,7 @@
 package snitch.middleware
 
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import snitch.dsl.InlineSnitchTest
 import snitch.parameters.path
 import snitch.parameters.query
@@ -11,8 +11,9 @@ import snitch.service.condition
 class ConditionsTest: InlineSnitchTest() {
     val q by query()
     val p by path()
+
     @Test
-    @Ignore
+    @Disabled
     fun `supports conditions`() {
         given {
             GET("foo"/p)

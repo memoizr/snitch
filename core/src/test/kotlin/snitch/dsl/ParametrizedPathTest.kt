@@ -1,7 +1,7 @@
 package snitch.dsl
 
 import snitch.parameters.path
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class ParametrizedPathTest : InlineSnitchTest() {
     val param by path()

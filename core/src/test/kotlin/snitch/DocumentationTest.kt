@@ -12,7 +12,7 @@ import snitch.parsers.GsonJsonParser.parse
 import snitch.request.Handler
 import snitch.tests.SnitchTest
 import snitch.types.Format
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 private val listHandler by Handler<Nothing, _, _> {
     listOf(SampleClass("hey", listOf())).ok
