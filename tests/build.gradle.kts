@@ -12,14 +12,14 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.21")
+    implementation(libs.kotlin.reflect)
 
     implementation(project(":core"))
     implementation(project(":gsonparser"))
 
-    api("com.github.memoizr:assertk-core:-SNAPSHOT")
-    api("org.assertj:assertj-core:3.18.1")
-    api("ch.qos.logback:logback-classic:1.1.7")
+    api(libs.assertk.core)
+    api(libs.assertj.core)
+    api(libs.logback.classic)
 }
 
 tasks.test {

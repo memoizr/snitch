@@ -1,0 +1,57 @@
+[versions]
+kotlin = "1.9.21"
+coroutines = "1.7.2"
+kotlin-reflect = "1.8.21"
+junit = "5.9.1"
+gson = "2.10.1"
+undertow = "2.3.6.Final"
+snakeyaml = "2.0"
+postgresql = "42.7.2"
+exposed = "0.41.1"
+argon2 = "2.10"
+mockk = "1.12.0"
+shank = "3.0.0"
+jwt = "0.11.2"
+logback = "1.4.12"
+logstash = "6.6"
+assertj = "3.18.1"
+logback-classic = "1.1.7"
+jacoco = "0.8.8"
+
+[libraries]
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+kotlin-stdlib-jdk8 = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin-reflect" }
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit" }
+
+coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+
+junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
+
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+undertow-core = { group = "io.undertow", name = "undertow-core", version.ref = "undertow" }
+snakeyaml = { group = "org.yaml", name = "snakeyaml", version.ref = "snakeyaml" }
+
+postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
+exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
+exposed-java-time = { group = "org.jetbrains.exposed", name = "exposed-java-time", version.ref = "exposed" }
+
+argon2 = { group = "de.mkammerer", name = "argon2-jvm", version.ref = "argon2" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+shank = { group = "com.github.memoizr", name = "shank", version = "3.0.0" }
+
+jwt-api = { group = "io.jsonwebtoken", name = "jjwt-api", version.ref = "jwt" }
+jwt-impl = { group = "io.jsonwebtoken", name = "jjwt-impl", version.ref = "jwt" }
+jwt-gson = { group = "io.jsonwebtoken", name = "jjwt-gson", version.ref = "jwt" }
+
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+logstash-encoder = { group = "net.logstash.logback", name = "logstash-logback-encoder", version.ref = "logstash" }
+
+assertj-core = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
+assertk-core = { group = "com.github.memoizr", name = "assertk-core", version = "-SNAPSHOT" }
+momster = { group = "com.github.memoizr", name = "momster", version = "fac1dae13d" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" } 

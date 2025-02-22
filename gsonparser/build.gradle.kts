@@ -12,8 +12,8 @@ tasks.withType<KotlinCompile> {
 }
 
 dependencies {
-    api("com.google.code.gson:gson:2.10.1")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.21")
+    api(libs.gson)
+    implementation(libs.kotlin.reflect)
     implementation(project(":core"))
     api(project(":types"))
 }

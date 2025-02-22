@@ -13,15 +13,15 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.21")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2")
-    implementation("org.yaml:snakeyaml:2.0")
+    implementation(libs.kotlin.reflect)
+    implementation(libs.coroutines.core)
+    implementation(libs.snakeyaml)
     implementation(project(":types"))
 
-    testImplementation(kotlin("test-junit"))
+    testImplementation(libs.kotlin.test.junit)
     testImplementation(project(":undertow"))
     testImplementation(project(":gsonparser"))
-    testImplementation("com.github.memoizr:assertk-core:-SNAPSHOT")
+    testImplementation(libs.assertk.core)
     testImplementation(project(":tests"))
 }
 
@@ -50,7 +50,7 @@ tasks.jacocoTestReport {
     dependsOn(tasks.test) // tests are required to run before generating the report
 }
 jacoco {
-    toolVersion = "0.8.8"
+    toolVersion = libs.versions.jacoco.get()
     reportsDirectory.set(layout.buildDirectory.dir("customJacocoReportDir"))
 }
 tasks.jacocoTestReport {

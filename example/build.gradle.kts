@@ -8,28 +8,25 @@ dependencies {
     implementation(project(":undertow"))
     implementation(project(":gsonparser"))
 
-    implementation("org.postgresql:postgresql:42.7.2")
-    implementation("org.jetbrains.exposed:exposed-core:0.41.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")
-    implementation("org.jetbrains.exposed:exposed-java-time:0.41.1")
-    implementation("de.mkammerer:argon2-jvm:2.10")
-    implementation("io.mockk:mockk:1.12.0")
+    implementation(libs.postgresql)
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.java.time)
+    implementation(libs.argon2)
+    implementation(libs.mockk)
 
-    implementation("com.github.memoizr:shank:3.0.0")
-    implementation("io.jsonwebtoken:jjwt-api:0.11.2")
-    implementation("ch.qos.logback:logback-classic:1.4.12")
-    implementation("net.logstash.logback:logstash-logback-encoder:6.6")
+    implementation(libs.shank)
+    implementation(libs.jwt.api)
+    implementation(libs.logback.classic)
+    implementation(libs.logstash.encoder)
 
+    runtimeOnly(libs.jwt.impl)
+    runtimeOnly(libs.jwt.gson)
 
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
-    runtimeOnly("io.jsonwebtoken:jjwt-gson:0.11.2")
-
-    testImplementation("com.github.memoizr:momster:fac1dae13d")
-
-
+    testImplementation(libs.momster)
     testImplementation(project(":tests"))
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
 }
 
 tasks.test {

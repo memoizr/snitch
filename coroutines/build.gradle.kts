@@ -7,12 +7,12 @@ repositories {
 
 dependencies {
     implementation(project(":core"))
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(libs.kotlin.stdlib.jdk8)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.21")
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    implementation(libs.coroutines.core)
+    implementation(libs.kotlin.reflect)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
     testImplementation(project(":tests"))
     testImplementation(project(":undertow"))
     testImplementation(project(":gsonparser"))
