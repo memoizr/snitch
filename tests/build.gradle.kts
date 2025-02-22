@@ -1,16 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
-    }
-}
-
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-}
-
 dependencies {
     implementation(libs.kotlin.reflect)
 

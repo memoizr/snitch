@@ -1,8 +1,3 @@
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-}
-
 dependencies {
     api(libs.gson)
     implementation(libs.kotlin.reflect)

@@ -1,7 +1,3 @@
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api(libs.undertow.core)
     api(project(":core"))

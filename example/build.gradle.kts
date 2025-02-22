@@ -1,8 +1,3 @@
-repositories {
-    mavenCentral()
-    maven(url = "https://jitpack.io")
-}
-
 dependencies {
     implementation(project(":core"))
     implementation(project(":undertow"))

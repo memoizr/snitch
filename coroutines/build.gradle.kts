@@ -1,8 +1,3 @@
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-}
-
 dependencies {
     implementation(project(":core"))
     implementation(libs.kotlin.stdlib.jdk8)
