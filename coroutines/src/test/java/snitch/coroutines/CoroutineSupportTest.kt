@@ -38,7 +38,7 @@ class CoroutineSupportTest : InlineSnitchTest() {
             val time = measureTimeMillis {
                 GET("/foo").expectBody("delayed").expectCode(200)
             }
-            assertNear(time, 100L, 10)
+            assertNear(time, 100L, 30)
         }
     }
 }

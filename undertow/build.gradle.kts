@@ -10,13 +10,6 @@ dependencies {
     implementation(libs.kotlin.reflect)
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
-        jvmTarget = "17"
-    }
-}
-
 publishing {
     publications {
         named<MavenPublication>("maven") {

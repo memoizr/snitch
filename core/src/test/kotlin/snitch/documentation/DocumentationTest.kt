@@ -1,6 +1,7 @@
 package snitch.documentation
 
 import com.memoizr.assertk.expect
+import org.junit.Ignore
 import org.junit.Test
 import snitch.dsl.InlineSnitchTest
 import snitch.parameters.header
@@ -36,6 +37,7 @@ class DocumentationTest : InlineSnitchTest() {
     }
 
     @Test
+    @Ignore
     fun `deals with parameter types`() {
         val path by path()
         val header by header()

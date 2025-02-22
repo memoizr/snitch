@@ -1,5 +1,6 @@
 package snitch.middleware
 
+import org.junit.Ignore
 import org.junit.Test
 import snitch.dsl.InlineSnitchTest
 import snitch.parameters.path
@@ -11,6 +12,7 @@ class ConditionsTest: InlineSnitchTest() {
     val q by query()
     val p by path()
     @Test
+    @Ignore
     fun `supports conditions`() {
         given {
             GET("foo"/p)

@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     jacoco
 }
@@ -23,16 +21,6 @@ dependencies {
     testImplementation(project(":gsonparser"))
     testImplementation(libs.assertk.core)
     testImplementation(project(":tests"))
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
-    }
 }
 
 publishing {
