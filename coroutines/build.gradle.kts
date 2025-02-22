@@ -10,11 +10,3 @@ dependencies {
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
 }
-
-publishing {
-    publications {
-        named<MavenPublication>("maven") {
-            artifactId = "coroutines"
-        }
-    }
-}

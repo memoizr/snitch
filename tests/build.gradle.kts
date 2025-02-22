@@ -7,11 +7,3 @@ dependencies {
     api(libs.assertj.core)
     api(libs.logback.classic)
 }
-
-publishing {
-    publications {
-        named<MavenPublication>("maven") {
-            artifactId = "tests"
-        }
-    }
-}

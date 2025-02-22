@@ -6,11 +6,3 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
 }
-
-publishing {
-    publications {
-        named<MavenPublication>("maven") {
-            artifactId = "undertow"
-        }
-    }
-}

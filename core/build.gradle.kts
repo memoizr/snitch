@@ -13,11 +13,3 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.assertk.core)
 }
-
-publishing {
-    publications {
-        named<MavenPublication>("maven") {
-            artifactId = "core"
-        }
-    }
-}

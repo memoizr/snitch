@@ -6,10 +6,3 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
-publishing {
-    publications {
-        named<MavenPublication>("maven") {
-            artifactId = "bootstrap"
-        }
-    }
-}
