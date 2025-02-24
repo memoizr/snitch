@@ -1,8 +1,8 @@
 package snitch.example
 
+import snitch.example.ApplicationModule.logger
 import snitch.router.Router
 import snitch.router.decorateWith
-import snitch.example.ApplicationModule.logger
 
 val Router.logged
     get() = decorateWith {
@@ -12,3 +12,4 @@ val Router.logged
             logger().info("End Request: $method $path ${it.statusCode.code} ${it.value(parser)}")
         }
     }
+

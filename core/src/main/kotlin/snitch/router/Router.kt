@@ -111,7 +111,7 @@ fun routes(vararg tags: String, routes: Routes): Router.() -> Unit = {
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/$this" else this
 
-fun Router.decorateWith(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) =
+fun Router.decorateWith(decoration: DecoratedWrapper.() -> HttpResponse<out Any,  StatusCodes>) =
     transformEndpoints { decorated(decoration) }
 
 fun decoration(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = decoration
