@@ -65,7 +65,7 @@ class Router(
     inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) =
         Body(T::class, contentType)
 
-    internal fun applyToAll_(routerConfig: Routes, action: Endpoint<*>.() -> Endpoint<*>) {
+    internal fun applyToAll_(routerConfig: Routes, action: Endpoint<*>.() -> Endpoint<*>): Router {
         val router = Router(config, service, pathParams, parser, path)
         router.routerConfig()
 
@@ -85,6 +85,7 @@ class Router(
                 ).next()
             }
         }
+        return router
     }
 }
 
@@ -111,12 +112,17 @@ fun routes(vararg tags: String, routes: Routes): Router.() -> Unit = {
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/$this" else this
 
-fun Router.decorateWith(decoration: DecoratedWrapper.() -> HttpResponse<out Any,  StatusCodes>) =
+fun decorateWith(decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>): Router.(Router.() -> Unit) -> Router =
     transformEndpoints { decorated(decoration) }
 
 fun decoration(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = decoration
-fun Router.transformEndpoints(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit =
-    { it: Routes -> applyToAll_(it, action) }
+fun transformEndpoints(action: Endpoint<*>.() -> Endpoint<*>): Router.(Routes) -> Router =
+    { it: Routes -> this.applyToAll_(it, action) }
 
 fun Router.onlyIf(condition: Condition) = transformEndpoints { onlyIf(condition) }
 
+operator fun (Router.(Router.() -> Unit) -> Router).plus(
+    other: Router.(Router.() -> Unit) -> Router
+): Router.(Router.() -> Unit) -> Router = {
+    this@plus({other(it)})
+}
