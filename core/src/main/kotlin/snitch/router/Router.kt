@@ -39,7 +39,7 @@ class Router(
                 EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
                 endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
             ) { request ->
-                decorator(
+                it.decorator(
                     DecoratedWrapper({
                         endpointResponse.handler(
                             TypedRequestWrapper(request)

@@ -1,6 +1,5 @@
 package snitch.middleware
 
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import snitch.dsl.InlineSnitchTest
 import snitch.parameters.path
@@ -13,13 +12,12 @@ class ConditionsTest: InlineSnitchTest() {
     val p by path()
 
     @Test
-    @Disabled
     fun `supports conditions`() {
         given {
             GET("foo"/p)
                 .with(listOf(q))
                 .onlyIf(myCond)
-                .isHandledBy { "".ok}
+                .isHandledBy {"".ok}
         } then {
             GET("/foo/y?q=true").expectCode(200)
             GET("/foo/x?q=false").expectCode(403)
