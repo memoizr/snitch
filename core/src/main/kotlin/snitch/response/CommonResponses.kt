@@ -26,6 +26,8 @@ interface CommonResponses {
 
     fun <T, E, S: StatusCodes> E.badRequest() = ErrorHttpResponse<T, _, S>(StatusCodes.BAD_REQUEST, this)
 
+    fun <T, E, S: StatusCodes> E.error(statusCodes: StatusCodes) = ErrorHttpResponse<T, _, S>(statusCodes, this)
+
     fun <T, E, S: StatusCodes> E.unauthorized() = ErrorHttpResponse<T, _,S>(StatusCodes.UNAUTHORIZED, this)
 
     fun <T, E, S: StatusCodes> E.forbidden() = ErrorHttpResponse<T, _, S>(StatusCodes.FORBIDDEN, this)

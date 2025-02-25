@@ -117,6 +117,7 @@ interface Condition {
     fun check(requestWrapper: RequestWrapper): ConditionResult
     infix fun or(other: Condition): Condition = OrCondition(this, other)
     infix fun and(other: Condition): Condition = AndCondition(this, other)
+    operator fun not(): Condition = NotCondition(this)
 }
 
 class OrCondition(private val first: Condition, private val second: Condition) : Condition {
@@ -143,6 +144,22 @@ class AndCondition(private val first: Condition, private val second: Condition) 
         when (val result = first.check(requestWrapper)) {
             is ConditionResult.Successful -> second.check(requestWrapper)
             is ConditionResult.Failed -> result
+        }
+}
+
+class NotCondition(private val condition: Condition) : Condition {
+    override val transform: Endpoint<*>.() -> Endpoint<*>
+        get() = condition.transform
+        
+    override val description: String
+        get() = "not ${condition.description}"
+        
+    override fun check(requestWrapper: RequestWrapper): ConditionResult =
+        when (val result = condition.check(requestWrapper)) {
+            is ConditionResult.Successful -> ConditionResult.Failed(
+                ErrorHttpResponse(StatusCodes.BAD_REQUEST, "condition: ${condition.description} negated")
+            )
+            is ConditionResult.Failed -> ConditionResult.Successful
         }
 }
 
