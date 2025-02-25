@@ -5,6 +5,7 @@ import snitch.dsl.InlineSnitchTest
 import snitch.parameters.optionalQuery
 import snitch.parameters.path
 import snitch.parameters.query
+import snitch.router.only
 import snitch.service.ConditionResult
 import snitch.service.condition
 import snitch.types.StatusCodes
@@ -14,8 +15,11 @@ class ConditionsTest : InlineSnitchTest() {
     val q by query()
     val p by path()
     val optional by optionalQuery()
+    val age by query()
+    val resourceId by path()
+    val role by query()
 
-    // Conditions
+    // Basic Conditions
     val hasQueryTrue = condition("hasQueryTrue") {
         when (request[q]) {
             "true" -> ConditionResult.Successful
@@ -45,6 +49,31 @@ class ConditionsTest : InlineSnitchTest() {
     val optionalParamExists = condition("optionalParamExists") {
         if (request[optional] != null) ConditionResult.Successful
         else ConditionResult.Failed("Optional param missing".forbidden())
+    }
+
+    // Parameterized condition (from tutorial)
+    fun hasMinimumAge(minAge: Int) = condition("hasMinimumAge($minAge)") {
+        val userAge = request[age]?.toIntOrNull() ?: 0
+
+        if (userAge >= minAge) {
+            ConditionResult.Successful
+        } else {
+            ConditionResult.Failed("User must be at least $minAge years old".forbidden())
+        }
+    }
+
+    // Role-based condition (from tutorial)
+    val hasAdminRole = condition("hasAdminRole") {
+        when (request[role]) {
+            "ADMIN" -> ConditionResult.Successful
+            else -> ConditionResult.Failed("Admin role required".forbidden())
+        }
+    }
+
+    // Resource ownership condition (from tutorial)
+    val isResourceOwner = condition("isResourceOwner") {
+        if (request[resourceId] == "owned") ConditionResult.Successful
+        else ConditionResult.Failed("Not the resource owner".forbidden())
     }
 
     @Test
@@ -155,6 +184,110 @@ class ConditionsTest : InlineSnitchTest() {
         } then {
             GET("/short-circuit").expectCode(403)
             assert(!secondConditionEvaluated) { "Second condition should not have been evaluated" }
+        }
+    }
+
+    @Test
+    fun `supports parameterized conditions`() {
+        given {
+            GET("age-check")
+                .with(listOf(age))
+                .onlyIf(hasMinimumAge(18))
+                .isHandledBy { "".ok }
+        } then {
+            GET("/age-check?age=20").expectCode(200)  // Above minimum age
+            GET("/age-check?age=18").expectCode(200)  // Exactly minimum age
+            GET("/age-check?age=16").expectCode(403)  // Below minimum age
+            GET("/age-check?age=invalid").expectCode(403)  // Invalid age
+        }
+    }
+
+    @Test
+    fun `supports condition hierarchies`() {
+        given {
+            GET("healthBefore").isHandledBy { "ok".ok }
+            // Outer condition
+            only(hasAdminRole) {
+                GET("admin"/ "dashboard")
+                    .with(listOf(role))
+                    .isHandledBy { "admin dashboard".ok }
+
+                // Inner condition
+                only(isResourceOwner) {
+                    GET("admin"/ "resources" / resourceId)
+                        .with(listOf(role))
+                        .isHandledBy { "admin resource".ok }
+                }
+            }
+            GET("healthAfter").isHandledBy { "ok".ok }
+        } then {
+            // Admin can access dashboard
+            GET("/healthBefore").expectCode(200)
+            GET("/healthAfter").expectCode(200)
+            GET("/admin/dashboard?role=ADMIN").expectCode(200)
+
+            // Non-admin cannot access dashboard
+            GET("/admin/dashboard?role=USER").expectCode(403)
+
+            // Admin who owns the resource can access it
+            GET("/admin/resources/owned?role=ADMIN").expectCode(200)
+
+            // Admin who doesn't own the resource cannot access it
+            GET("/admin/resources/not-owned?role=ADMIN").expectCode(403)
+
+            // Non-admin cannot access resources regardless of ownership
+            GET("/admin/resources/owned?role=USER").expectCode(403)
+        }
+    }
+
+    @Test
+    fun `supports complex authorization scenarios`() {
+        given {
+            GET("resource" / resourceId)
+                .with(listOf(role))
+                .onlyIf(isResourceOwner or hasAdminRole)
+                .isHandledBy { "resource".ok }
+        } then {
+            // Resource owner can access
+            GET("/resource/owned?role=USER").expectCode(200)
+
+            // Admin can access even if not the owner
+            GET("/resource/not-owned?role=ADMIN").expectCode(200)
+
+            // Non-admin who doesn't own the resource cannot access
+            GET("/resource/not-owned?role=USER").expectCode(403)
+        }
+    }
+
+    @Test
+    fun `supports condition negation in complex scenarios`() {
+        val isResourceLocked = condition("isResourceLocked") {
+            when (request[resourceId]) {
+                "locked" -> ConditionResult.Successful
+                else -> ConditionResult.Failed("Resource is not locked".forbidden())
+            }
+        }
+
+        given {
+            PUT("resource" / resourceId)
+                .with(listOf(role))
+                .onlyIf((isResourceOwner or hasAdminRole) and !isResourceLocked)
+                .isHandledBy { "updated resource".ok }
+        } then {
+            // Owner can update unlocked resource
+            PUT("/resource/owned?role=USER").expectCode(200)
+
+            // Admin can update unlocked resource
+            PUT("/resource/not-owned?role=ADMIN").expectCode(200)
+
+            // Owner cannot update locked resource
+            PUT("/resource/locked?role=USER").expectCode(403)
+
+            // Admin cannot update locked resource
+            PUT("/resource/locked?role=ADMIN").expectCode(400)
+
+            // Non-owner, non-admin cannot update any resource
+            PUT("/resource/not-owned?role=USER").expectCode(403)
         }
     }
 }

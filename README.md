@@ -29,7 +29,7 @@ Our primary goals are:
       * [Expressive and exendable parameter definition, parsing and validation](#expressive-and-exendable-parameter-definition-parsing-and-validation)
       * [Strongly typed inputs and outputs](#strongly-typed-inputs-and-outputs)
       * [Middleware](#middleware)
-      * [Guards](#guards-)
+      * [Guards and Conditions](#guards-and-conditions)
       * [Fully automated documentation](#fully-automated-documentation)
       * [Performance](#performance)
       * [Coroutines](#coroutines-support)
@@ -154,34 +154,51 @@ val rootRouter = routes {
 }
 ```
 
-#### Guards 
-Endpoints can be configured with `onlyIf` and a condition or a condition expression to restrict access to the endpoint. 
-```Kotlin
-val usersController = routes {
-    ...
+#### Guards and Conditions
+Snitch provides a powerful conditions system that allows you to control access to your endpoints with a clean, expressive syntax.
 
-    userId / "posts" / {
-        authenticated {
-            ...
-            DELETE(postId) onlyIf (principalEquals(userId) or hasAdminRole) isHandledBy deletePost
-        }
-    }
-}
-```
-Here `authenticated` is a guard that checks if the user is authenticated. `principalEquals` and `hasAdminRole` are defined as such in the user's codebase:
-```Kotlin
-val hasAdminRole = condition {
+Conditions are boolean expressions that determine whether a request should proceed or be rejected. They can be applied to individual endpoints or entire route hierarchies.
+
+```kotlin
+// Define conditions
+val hasAdminRole = condition("hasAdminRole") {
     when (role) {
-        ADMIN -> Successful()
-        else -> Failed(FORBIDDEN())
+        ADMIN -> ConditionResult.Successful
+        else -> ConditionResult.Failed("Not an admin".forbidden())
     }
 }
 
-fun principalEquals(param: Parameter<out Any, *>) = condition {
-    if (principal.value == params(param.name)) Successful()
-    else Failed(FORBIDDEN())
+val isResourceOwner = condition("isResourceOwner") {
+    if (principal.id == request[resourceId]) ConditionResult.Successful
+    else ConditionResult.Failed("Not the resource owner".forbidden())
+}
+
+// Apply conditions to endpoints
+GET("resource" / resourceId) onlyIf isResourceOwner isHandledBy { getResource() }
+DELETE("resource" / resourceId) onlyIf (isResourceOwner or hasAdminRole) isHandledBy { deleteResource() }
+```
+
+Conditions support logical operators for complex access rules:
+- `and` - Both conditions must be true
+- `or` - At least one condition must be true
+- `not` (using `!` operator) - Inverts the condition
+
+```kotlin
+// Complex condition example
+PUT("resource" / resourceId) onlyIf (isResourceOwner and !isResourceLocked) isHandledBy { updateResource() }
+```
+
+You can also apply conditions to entire route hierarchies:
+
+```kotlin
+onlyIf(hasAdminRole) {
+    GET("admin/dashboard") isHandledBy { getDashboard() }
+    GET("admin/users") isHandledBy { getUsers() }
+    POST("admin/settings") isHandledBy { updateSettings() }
 }
 ```
+
+For more details, check out our [Mastering Snitch Conditions](tutorials/Mastering-Snitch-Conditions.md) tutorial.
 
 #### Fully automated documentation
 Snitch outputs OpenAPI 3.0 docs. Absolutely any of the inputs and any of the outputs are documented automatically, even response codes. No work or setup is required from the user to achieve this. Snitch allows the user to specify whether to serve the documentation on a given route. This is an interactive page based on Swagger-UI that allows a viewer to interact with the API, authenticate, and make any request and see the responses. You can optionally annotate individual fields of requests, responses or parameters to add additional descriptions or provide example values so that it'd be straightforward to use the API through the documentation page, as requests would be pre-populated with such example values. Documentation can either be served on the same service, or given to a doc aggregator that allows to provide a unified API for multiple services. Request, Response and parameter types are automatically generated exclusively from type information from the Kotlin language, hence they always represent the actual behaviour of the API.
@@ -213,6 +230,9 @@ The library is actually very small and a complete detailed overview can be had i
 
 #### Learning resources
 Please refer to the [example](example) folder for a reference implementation of a simple reddit-like service. The example tries to have production-like qualities such as handling authorization and authentication, database interaction, it shows how it works well and integrates with dependency injection libraries such as Shank. Also, please refer to the [docs](docs/Docs.md) for a more detailed overview of the library as well as tutorials.
+
+Check out our tutorials:
+- [Mastering Snitch Conditions](tutorials/Mastering-Snitch-Conditions.md) - Learn how to use conditions effectively
 
 #### Community support
 Join us on our [discord server](https://discord.gg/bG6NW3UyxS) to ask questions, get help, or just to chat. We're a small but growing community but we're friendly and we're always happy to help.

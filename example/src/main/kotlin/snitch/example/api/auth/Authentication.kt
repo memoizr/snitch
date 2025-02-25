@@ -8,7 +8,6 @@ import snitch.example.security.Role
 import snitch.example.types.UserId
 import snitch.parameters.Parameter
 import snitch.request.RequestWrapper
-import snitch.router.Router
 import snitch.router.transformEndpoints
 import snitch.service.ConditionResult.Failed
 import snitch.service.ConditionResult.Successful
@@ -19,8 +18,7 @@ import snitch.service.condition
 val RequestWrapper.principal: UserId get() = (request[accessToken] as Authentication.Authenticated).claims.userId
 val RequestWrapper.role: Role get() = (request[accessToken] as Authentication.Authenticated).claims.role
 
-val Router.authenticated
-    get() = transformEndpoints {
+val authenticated = transformEndpoints {
         with(listOf(accessToken)).decorated {
             when (request[accessToken]) {
                 is Authentication.Authenticated -> next()

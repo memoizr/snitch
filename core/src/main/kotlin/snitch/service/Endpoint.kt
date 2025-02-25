@@ -39,6 +39,11 @@ data class Endpoint<B : Any>(
         )
     }
 
+    infix fun decoratedPost(decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>): Endpoint<B> {
+        val previousDecorator = this.decorator
+        return copy(decorator = { previousDecorator(DecoratedWrapper({ decoration(this@copy) }, wrap)) })
+    }
+
     infix fun withQuery(queryParameter: QueryParameter<*, *>) = copy(queryParams = queryParams + queryParameter)
 
     infix fun withHeader(params: HeaderParameter<*, *>) = copy(headerParams = headerParams + params)
@@ -71,7 +76,7 @@ data class Endpoint<B : Any>(
             }
         }.let {
             if (it.conditions.isNotEmpty()) {
-                it.decorated {
+                it.decoratedPost {
                     val condition = conditions.reduce { condition, next ->
                         condition and next
                     }
@@ -150,15 +155,16 @@ class AndCondition(private val first: Condition, private val second: Condition) 
 class NotCondition(private val condition: Condition) : Condition {
     override val transform: Endpoint<*>.() -> Endpoint<*>
         get() = condition.transform
-        
+
     override val description: String
         get() = "not ${condition.description}"
-        
+
     override fun check(requestWrapper: RequestWrapper): ConditionResult =
         when (val result = condition.check(requestWrapper)) {
             is ConditionResult.Successful -> ConditionResult.Failed(
                 ErrorHttpResponse(StatusCodes.BAD_REQUEST, "condition: ${condition.description} negated")
             )
+
             is ConditionResult.Failed -> ConditionResult.Successful
         }
 }

@@ -10,7 +10,6 @@ import snitch.types.ValidatedDataClass
 val Router.validated
     get() = decorateWith {
         val validationResult = ValidatorModule.validator().validate(body())
-        println("${body()}, $validationResult")
         when (validationResult) {
             is ValidatedDataClass.Valid<*> -> next()
             is ValidatedDataClass.Invalid -> ErrorResponse(400, validationResult.errors).badRequest<Any, Any, StatusCodes>()

@@ -32,8 +32,7 @@ class Router(
 
     inline fun <B : Any, reified T : Any, S : StatusCodes> Endpoint<B>.addEndpoint(
         endpointResponse: HandlerResponse<B, T, S>
-    ): Endpoint<B> = applyConditions()
-        .also {
+    ): Endpoint<B> = applyConditions().also {
             endpoints += EndpointBundle(
                 it,
                 EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
@@ -68,9 +67,8 @@ class Router(
     internal fun applyToAll_(routerConfig: Routes, action: Endpoint<*>.() -> Endpoint<*>): Router {
         val router = Router(config, service, pathParams, parser, path)
         router.routerConfig()
-
         endpoints += router.endpoints.map {
-            val endpoint = it.endpoint.action()
+            val endpoint = it.endpoint.action().applyConditions()
             EndpointBundle(
                 endpoint,
                 EndpointResponse(it.handlerResponse.statusCodes, it.handlerResponse.type),
@@ -119,10 +117,12 @@ fun decoration(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = de
 fun transformEndpoints(action: Endpoint<*>.() -> Endpoint<*>): Router.(Routes) -> Router =
     { it: Routes -> this.applyToAll_(it, action) }
 
-fun Router.onlyIf(condition: Condition) = transformEndpoints { onlyIf(condition) }
+fun Router.only(condition: Condition, routes: Routes) = transformEndpoints {
+    onlyIf(condition)
+}(routes)
 
 operator fun (Router.(Router.() -> Unit) -> Router).plus(
     other: Router.(Router.() -> Unit) -> Router
 ): Router.(Router.() -> Unit) -> Router = {
-    this@plus({other(it)})
+    this@plus({ other(it) })
 }
