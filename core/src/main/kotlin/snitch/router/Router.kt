@@ -33,20 +33,15 @@ class Router(
     inline fun <B : Any, reified T : Any, S : StatusCodes> Endpoint<B>.addEndpoint(
         endpointResponse: HandlerResponse<B, T, S>
     ): Endpoint<B> = applyConditions().also {
-            endpoints += EndpointBundle(
-                it,
-                EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
-                endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
-            ) { request ->
-                it.decorator(
-                    DecoratedWrapper({
-                        endpointResponse.handler(
-                            TypedRequestWrapper(request)
-                        )
-                    }, request)
-                ).next()
-            }
+        endpoints += EndpointBundle(
+            it,
+            EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
+            endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
+        ) { request ->
+            it.decorator(DecoratedWrapper({ endpointResponse.handler(TypedRequestWrapper(request)) }, request))
+                .next()
         }
+    }
 
     inline infix fun <B : Any, reified T : Any, S : StatusCodes> Endpoint<B>.isHandledBy(
         handlerResponse: HandlerResponse<B, T, S>
@@ -74,13 +69,9 @@ class Router(
                 EndpointResponse(it.handlerResponse.statusCodes, it.handlerResponse.type),
                 it.handlerResponse,
             ) { request ->
-                endpoint.decorator(
-                    DecoratedWrapper({
-                        it.handlerResponse.handler(
-                            TypedRequestWrapper(request)
-                        )
-                    }, request)
-                ).next()
+                endpoint
+                    .decorator(DecoratedWrapper({ it.handlerResponse.handler(TypedRequestWrapper(request)) }, request))
+                    .next()
             }
         }
         return router
@@ -97,16 +88,7 @@ fun routes(vararg tags: String, routes: Routes): Router.() -> Unit = {
     }
     endpoints.addAll(router.endpoints)
 
-//    this.endpoints.replaceAll {
-//        (it as EndpointBundle<Any>).copy(
-//            endpoint = it.endpoint
-//                .copy(
-//                    tags = listOf(it.endpoint.path.split("/").drop(3).first()) + (it.endpoint.tags ?: emptyList()),
-//                )
-//        )
-//    }
 }
-//fun routes(routes: Routes): Router.() -> Unit = routes
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/$this" else this
 
