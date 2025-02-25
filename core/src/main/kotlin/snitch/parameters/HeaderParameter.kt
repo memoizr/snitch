@@ -26,7 +26,7 @@ sealed class HeaderParameter<T, R>(
 data class HeaderParam<T, R>(
     override val type: Class<*>,
     override val name: String,
-    override inline val pattern: Validator<T, R>,
+    override val pattern: Validator<T, R>,
     override val description: String,
     override val emptyAsMissing: Boolean,
     override val invalidAsMissing: Boolean,
@@ -43,7 +43,7 @@ data class HeaderParam<T, R>(
 
 data class OptionalHeaderParam<T, R>(
     override val type: Class<*>,
-    override inline val name: String,
+    override val name: String,
     override val pattern: Validator<T, R>,
     override val description: String,
     override val default: R,

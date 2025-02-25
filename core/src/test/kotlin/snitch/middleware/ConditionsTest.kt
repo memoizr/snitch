@@ -14,20 +14,27 @@ class ConditionsTest: InlineSnitchTest() {
     @Test
     fun `supports conditions`() {
         given {
-            GET("foo"/p)
-                .with(listOf(q))
-                .onlyIf(myCond)
-                .isHandledBy {"".ok}
+                    GET("foo" / p)
+                        .with(listOf(q))
+                        .onlyIf(myCond and otherCond)
+                        .isHandledBy { "".ok }
         } then {
             GET("/foo/y?q=true").expectCode(200)
             GET("/foo/x?q=false").expectCode(403)
+            GET("/foo/y?q=false").expectCode(403)
+            GET("/foo/x?q=true").expectCode(403)
         }
     }
 
     val myCond = condition("myCond") {
-        val x = if (request[q] == "true" && request[p] == "y") ConditionResult.Successful
+        val x = if (request[q] == "true") ConditionResult.Successful
         else ConditionResult.Failed("".forbidden())
-        println(x)
+        x
+    }
+
+    val otherCond = condition("othercond") {
+        val x = if (request[p] == "y") ConditionResult.Successful
+        else ConditionResult.Failed("".forbidden())
         x
     }
 }

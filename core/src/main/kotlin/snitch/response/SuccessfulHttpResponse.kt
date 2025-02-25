@@ -8,7 +8,7 @@ data class SuccessfulHttpResponse<T, out S : StatusCodes>(
     override val statusCode: S,
     val body: T,
     val _format: Format = Format.Json,
-    override inline val value: context(Parser) () -> Any? = {
+    override val value: context(Parser) () -> Any? = {
         when (_format) {
             Format.Json -> body?.serialized
             Format.TextHTML -> body
