@@ -4,8 +4,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import snitch.parameters.header
+import snitch.response.RawHttpResponse
 import snitch.router.decorateWith
 import snitch.router.plus
+import snitch.types.StatusCodes
+import snitch.types.StatusCodes.TOO_MANY_REQUESTS
+import snitch.undertow.undertow
+import java.time.Duration
 
 /**
  * This test class validates the examples from the "Mastering Snitch Decorations" tutorial.
@@ -403,96 +408,101 @@ class DecorationTutorialTest : InlineSnitchTest() {
     }
 
     // Mock rate limiter
-//    object RateLimiter {
-//        fun getRequestCount(clientIp: String, timeWindow: Duration): Int {
-//            return requestCounts.getOrDefault(clientIp, 0)
-//        }
-//
-//        fun incrementRequestCount(clientIp: String) {
-//            requestCounts[clientIp] = getRequestCount(clientIp, Duration.ZERO) + 1
-//        }
-//    }
+    object RateLimiter {
+        val requestCounts = mutableMapOf<String, Int>()
+        fun getRequestCount(clientIp: String, timeWindow: Duration): Int {
+            return requestCounts.getOrDefault(clientIp, 0)
+        }
 
-//    @Test
-//    fun `rate limiting decoration`() {
-//        val requestCounts = mutableMapOf<String, Int>()
-//
-//        fun rateLimit(maxRequests: Int, perTimeWindow: Duration) = decorateWith {
-//            val clientIp = request.remoteAddress
-//            val requestCount = RateLimiter.getRequestCount(clientIp, perTimeWindow)
-//
-//            if (requestCount >= maxRequests) {
-//                return@decorateWith "Rate limit exceeded. Try again later.".error(429)
-//            }
-//
-//            RateLimiter.incrementRequestCount(clientIp)
-//            next()
-//        }
-//
-//        given {
-//            rateLimit(2, Duration.ofMinutes(1))() {
-//                GET("api/messages").isHandledBy { "Messages".ok }
-//            }
-//        } then {
-//            // First request - should succeed
-//            GET("/api/messages").expectBody(""""Messages"""")
-//
-//            // Second request - should succeed
-//            GET("/api/messages").expectBody(""""Messages"""")
-//
-//            // Third request - should be rate limited
-//            GET("/api/messages")
-//                .expectCode(429)
-//                .expectBody(""""Rate limit exceeded. Try again later."""")
-//        }
-//    }
+        fun incrementRequestCount(clientIp: String) {
+            requestCounts[clientIp] = getRequestCount(clientIp, Duration.ZERO) + 1
+        }
+    }
+
+    @Test
+    fun `rate limiting decoration`() {
+
+        fun rateLimit(maxRequests: Int, perTimeWindow: Duration) = decorateWith {
+            val clientIp = request.undertow.exchange.sourceAddress.address.hostAddress
+            val requestCount = RateLimiter.getRequestCount(clientIp, perTimeWindow)
+
+            if (requestCount >= maxRequests) {
+                return@decorateWith "Rate limit exceeded. Try again later.".error(TOO_MANY_REQUESTS)
+            }
+
+            RateLimiter.incrementRequestCount(clientIp)
+            next()
+        }
+
+        given {
+            rateLimit(2, Duration.ofMinutes(1))() {
+                GET("api/messages").isHandledBy { "Messages".ok }
+            }
+        } then {
+            // First request - should succeed
+            GET("/api/messages").expectBody(""""Messages"""")
+
+            // Second request - should succeed
+            GET("/api/messages").expectBody(""""Messages"""")
+
+            // Third request - should be rate limited
+            GET("/api/messages")
+                .expectCode(429)
+                .expectBody(""""Rate limit exceeded. Try again later."""")
+        }
+    }
 
     // Mock cache service
-//    object CacheService {
-//        fun get(key: String): String? = cache[key]
-//
-//        fun put(key: String, value: String, ttl: Duration) {
-//            cache[key] = value
-//        }
-//    }
+    private object CacheService {
+        private val cache = mutableMapOf<String, Any>()
+        
+        fun get(key: String): Any? = cache[key]
+        
+        fun put(key: String, value: String, ttl: Duration) {
+            cache[key] = value
+        }
+        
+        fun clear() {
+            cache.clear()
+        }
+    }
 
-//    @Test
-//    fun `caching decoration`() {
-//        val cache = mutableMapOf<String, String>()
-//        var handlerCallCount = 0
-//
-//
-//        fun cache(ttl: Duration) = decorateWith {
-//            val cacheKey = "${request.method.name}-${request.path}"
-//            val cachedResponse = CacheService.get(cacheKey)
-//
-//            if (cachedResponse != null) {
-//                return@decorateWith cachedResponse.ok
-//            }
-//
-//            val response = next()
-//            CacheService.put(cacheKey, response.value(), ttl)
-//            response
-//        }
-//
-//        given {
-//            cache(Duration.ofMinutes(5))() {
-//                GET("api/products").isHandledBy {
-//                    handlerCallCount++
-//                    "Products ${handlerCallCount}".ok
-//                }
-//            }
-//        } then {
-//            // First request - should call handler
-//            GET("/api/products").expectBody(""""Products 1"""")
-//
-//            // Second request - should use cache
-//            GET("/api/products").expectBody(""""Products 1"""")
-//
-//            // Verify handler was only called once
-//            assertEquals(1, handlerCallCount)
-//        }
-//    }
+    @Test
+    fun `caching decoration`() {
+        CacheService.clear()
+        var handlerCallCount = 0
+
+        fun cache(ttl: Duration) = decorateWith {
+            val cacheKey = "${request.method.name}-${request.path}"
+            val cachedResponse = CacheService.get(cacheKey)
+
+            if (cachedResponse != null) {
+                return@decorateWith RawHttpResponse(StatusCodes.OK, cachedResponse)
+            }
+
+            val response = next()
+            CacheService.put(cacheKey, response.value(parser) as String, ttl)
+            response
+        }
+
+        given {
+            cache(Duration.ofMinutes(5))() {
+                GET("api/products").isHandledBy {
+                    handlerCallCount++
+                    "Products ${handlerCallCount}".ok
+                }
+            }
+        } then {
+            // First request - should call handler
+            GET("/api/products").expectBody(""""Products 1"""")
+
+            // Second request - should use cache
+            GET("/api/products").expectBody(""""Products 1"""")
+
+            // Verify handler was only called once
+            assertEquals(1, handlerCallCount)
+        }
+    }
 
     @Test
     fun `real-world example - logging with transaction management`() {

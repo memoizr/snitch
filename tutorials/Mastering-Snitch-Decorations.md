@@ -33,10 +33,11 @@ The simplest way to use decorations is to apply them to a route or route hierarc
 
 ```kotlin
 val logged = decorateWith {
-    val method = method.name
-    logger().info("Begin Request: $method $path")
+    val method = request.method.name
+    val path = request.path
+    Logger.info("Begin Request: $method $path")
     next().also {
-        logger().info("End Request: $method $path ${it.statusCode.code} ${it.value(parser)}")
+        Logger.info("End Request: $method $path ${it.statusCode.code}")
     }
 }
 
@@ -88,12 +89,12 @@ withMetricLabel("user-service") {
 One of the most powerful features of Snitch decorations is their composability. You can combine multiple decorations using the `+` operator:
 
 ```kotlin
-val combinedDecoration = logged + withTransaction
+val combinedDecoration = withTransaction + logged
 
-// Usage
-combinedDecoration {
-    GET("users").isHandledBy { getUsers() }
-}
+// Execution order:
+// 1. withTransaction (applied first)
+// 2. logged (applied second)
+// 3. handler
 ```
 
 When decorations are composed, they are applied from right to left. In the example above, the execution order would be:
@@ -192,10 +193,11 @@ This approach is particularly useful for authentication and authorization, where
 
 ```kotlin
 val logged = decorateWith {
-    val method = method.name
-    logger().info("Begin Request: $method $path")
+    val method = request.method.name
+    val path = request.path
+    Logger.info("Begin Request: $method $path")
     next().also {
-        logger().info("End Request: $method $path ${it.statusCode.code} ${it.value(parser)}")
+        Logger.info("End Request: $method $path ${it.statusCode.code}")
     }
 }
 ```
@@ -203,12 +205,36 @@ val logged = decorateWith {
 ### Authentication
 
 ```kotlin
-val authenticated = transformEndpoints {
-    with(listOf(accessToken)).decorated {
-        when (request[accessToken]) {
-            is Authentication.Authenticated -> next()
-            is Authentication.Unauthenticated -> UNAUTHORIZED()
-        }
+// Define auth token parameter
+val authToken by header("X-Auth-Token")
+
+// Authentication decoration
+val authenticated = decorateWith(authToken) {
+    when (request[authToken]) {
+        "user-token" -> next()
+        null -> "Unauthorized".unauthorized()
+        else -> "Unauthorized".unauthorized()
+    }
+}
+
+// Role-based authorization
+val requireAdmin = decorateWith(authToken) {
+    val token = request[authToken]
+    if (token == "admin-token") {
+        next()
+    } else {
+        "Forbidden - Admin access required".forbidden()
+    }
+}
+
+// Usage
+authenticated {
+    // Public endpoint - just needs authentication
+    GET("profile").isHandledBy { "User profile".ok }
+
+    // Admin endpoint - needs both authentication and admin role
+    requireAdmin {
+        GET("admin/dashboard").isHandledBy { "Admin dashboard".ok }
     }
 }
 ```
@@ -230,7 +256,7 @@ val handleErrors = decorateWith {
     try {
         next()
     } catch (e: Exception) {
-        logger.error("Error handling request", e)
+        logger.error("Error handling request: ${e.message}")
         "Internal server error".serverError()
     }
 }
@@ -381,11 +407,11 @@ val routes = routes {
 
 ```kotlin
 fun rateLimit(maxRequests: Int, perTimeWindow: Duration) = decorateWith {
-    val clientIp = request.remoteAddress
+    val clientIp = request.undertow.exchange.sourceAddress.address.hostAddress
     val requestCount = rateLimiter.getRequestCount(clientIp, perTimeWindow)
     
     if (requestCount >= maxRequests) {
-        return@decorateWith "Rate limit exceeded. Try again later.".error(429)
+        return@decorateWith "Rate limit exceeded. Try again later.".error(TOO_MANY_REQUESTS)
     }
     
     rateLimiter.incrementRequestCount(clientIp)
@@ -393,8 +419,8 @@ fun rateLimit(maxRequests: Int, perTimeWindow: Duration) = decorateWith {
 }
 
 // Usage
-rateLimit(100, Duration.ofMinutes(1)) {
-    POST("api/messages").isHandledBy { sendMessage() }
+rateLimit(2, Duration.ofMinutes(1)) {
+    GET("api/messages").isHandledBy { "Messages".ok }
 }
 ```
 
@@ -404,13 +430,13 @@ rateLimit(100, Duration.ofMinutes(1)) {
 fun cache(ttl: Duration) = decorateWith {
     val cacheKey = "${request.method.name}-${request.path}"
     val cachedResponse = cacheService.get(cacheKey)
-    
+
     if (cachedResponse != null) {
-        return@decorateWith cachedResponse
+        return@decorateWith RawHttpResponse(StatusCodes.OK, cachedResponse)
     }
-    
+
     val response = next()
-    cacheService.put(cacheKey, response, ttl)
+    cacheService.put(cacheKey, response.value(parser) as String, ttl)
     response
 }
 

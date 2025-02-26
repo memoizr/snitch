@@ -1,6 +1,6 @@
 package snitch.types
 
-sealed class StatusCodes(val code: Int = 200) {
+abstract class StatusCodes(val code: Int = 200) {
     object CONTINUE : StatusCodes(100)
     object SWITCHING_PROTOCOLS : StatusCodes(101)
     object OK : StatusCodes(200)
@@ -36,6 +36,7 @@ sealed class StatusCodes(val code: Int = 200) {
     object REQUESTED_RANGE_NOT_SATISFIABLE : StatusCodes(416)
     object EXPECTATION_FAILED : StatusCodes(417)
     object IMA_TEAPOT : StatusCodes(418)
+    object TOO_MANY_REQUESTS : StatusCodes(429)
     object INTERNAL_SERVER_ERROR : StatusCodes(500)
     object NOT_IMPLEMENTED : StatusCodes(501)
     object BAD_GATEWAY : StatusCodes(502)

@@ -15,5 +15,6 @@ sealed class HttpResponse<T, out S : StatusCodes> {
     ): HttpResponse<Any, *> = when (this) {
         is SuccessfulHttpResponse -> this.success()
         is ErrorHttpResponse<T, *, S> -> this.failure()
+        is RawHttpResponse -> throw UnsupportedOperationException()
     }
 }
