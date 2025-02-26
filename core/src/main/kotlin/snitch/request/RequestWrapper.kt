@@ -1,6 +1,15 @@
 package snitch.request
 
-import snitch.parameters.*
+import snitch.parameters.HeaderParam
+import snitch.parameters.HeaderParameter
+import snitch.parameters.InvalidParametersException
+import snitch.parameters.OptionalHeaderParam
+import snitch.parameters.OptionalParam
+import snitch.parameters.OptionalQueryParam
+import snitch.parameters.Parameter
+import snitch.parameters.PathParam
+import snitch.parameters.QueryParam
+import snitch.parameters.QueryParameter
 import snitch.response.CommonResponses
 import snitch.types.HTTPMethods
 import snitch.types.Parser

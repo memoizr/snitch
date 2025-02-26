@@ -6,8 +6,6 @@ import snitch.parameters.Parameter
 import snitch.parameters.PathParam
 import snitch.parameters.QueryParameter
 import snitch.request.Body
-import snitch.request.RequestWrapper
-import snitch.response.ErrorHttpResponse
 import snitch.response.HttpResponse
 import snitch.router.AfterAction
 import snitch.router.BeforeAction
@@ -115,4 +113,3 @@ data class Endpoint<B : Any>(
 
     infix fun onlyIf(condition: Condition) = copy(conditions = conditions + condition)
 }
-

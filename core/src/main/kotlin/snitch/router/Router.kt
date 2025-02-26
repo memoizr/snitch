@@ -1,6 +1,7 @@
 package snitch.router
 
 import snitch.parameters.HeaderParameter
+import snitch.parameters.Parameter
 import snitch.parameters.PathParam
 import snitch.parameters.QueryParameter
 import snitch.request.Body
@@ -87,24 +88,23 @@ fun routes(vararg tags: String, routes: Routes): Router.() -> Unit = {
         )
     }
     endpoints.addAll(router.endpoints)
-
 }
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/$this" else this
 
-fun decorateWith(decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>): Router.(Router.() -> Unit) -> Router =
-    transformEndpoints { decorated(decoration) }
+fun decorateWith(
+    vararg params: Parameter<*,*>,
+    decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>): Router.(Router.() -> Unit) -> Router =
+    transformEndpoints {
+        with(params.asList()).
+        decorated(decoration) }
 
 fun decoration(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = decoration
 fun transformEndpoints(action: Endpoint<*>.() -> Endpoint<*>): Router.(Routes) -> Router =
     { it: Routes -> this.applyToAll_(it, action) }
 
-fun Router.only(condition: Condition, routes: Routes) = transformEndpoints {
-    onlyIf(condition)
-}(routes)
+fun Router.only(condition: Condition, routes: Routes) = transformEndpoints { onlyIf(condition) }(routes)
 
 operator fun (Router.(Router.() -> Unit) -> Router).plus(
     other: Router.(Router.() -> Unit) -> Router
-): Router.(Router.() -> Unit) -> Router = {
-    this@plus({ other(it) })
-}
+): Router.(Router.() -> Unit) -> Router = { this@plus({ other(it) }) }
