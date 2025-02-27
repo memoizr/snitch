@@ -10,6 +10,7 @@ dependencies {
     testImplementation(project(":undertow"))
     testImplementation(project(":gsonparser"))
     testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.mockk)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.assertk.core)
 }
