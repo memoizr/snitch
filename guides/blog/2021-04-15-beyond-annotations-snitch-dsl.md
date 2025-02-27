@@ -144,7 +144,9 @@ Kotlin's infix functions are a key enabler of Snitch's readable DSL:
 GET("users" / userId) withQueries (limit, offset) onlyIf hasAdminRole isHandledBy getUser
 ```
 
-This reads almost like English - "GET users/{userId} with queries limit and offset, only if user has admin role, is handled by getUser function."
+This reads almost like English - 
+
+ `GET users/{userId} with queries limit and offset, only if user has admin role, is handled by getUser function.`
 
 The infix approach creates a clear flow from HTTP method to path to conditions to handler, making the intent immediately clear even to developers new to the codebase.
 
