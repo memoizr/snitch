@@ -1,15 +1,15 @@
 package snitch.dsl
 
+import org.junit.jupiter.api.Test
 import snitch.parameters.path
 import snitch.router.Routes
+import snitch.service.RoutedService
+import snitch.testRoutes
 import snitch.tests.Ported
 import snitch.tests.TestMethods
 import java.util.*
-import snitch.service.RoutedService
-import snitch.testRoutes
-import org.junit.jupiter.api.Test
 
-abstract class InlineSnitchTest : Ported, TestMethods {
+abstract class InlineSnitchTest(private val transform: RoutedService.() -> RoutedService = {this}) : Ported, TestMethods {
     override open val port = Random().nextInt(5000) + 2000
 
     data class RoutedTest(val routedService: RoutedService) {
@@ -32,7 +32,7 @@ abstract class InlineSnitchTest : Ported, TestMethods {
         }
     }
 
-    fun given(routes: Routes) = testRoutes("", routes)(port)
+    fun given(routes: Routes) = testRoutes("", transform, routes)(port)
 }
 
 class StringPathTest : InlineSnitchTest() {

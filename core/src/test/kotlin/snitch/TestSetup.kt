@@ -1,12 +1,16 @@
 package snitch
 
-import snitch.undertow.UndertowSnitchService
-import snitch.parsers.GsonJsonParser
-import snitch.service.RoutedService
 import snitch.config.SnitchConfig
+import snitch.parsers.GsonJsonParser
 import snitch.router.Routes
+import snitch.service.RoutedService
+import snitch.undertow.UndertowSnitchService
 
-fun testRoutes(basePath: String = "", router: Routes): (Int) -> RoutedService = { port ->
+fun testRoutes(
+    basePath: String = "",
+    transform: RoutedService.() -> RoutedService = { this },
+    router: Routes,
+): (Int) -> RoutedService = { port ->
     UndertowSnitchService(
         GsonJsonParser,
         SnitchConfig(
@@ -16,4 +20,5 @@ fun testRoutes(basePath: String = "", router: Routes): (Int) -> RoutedService = 
             )
         )
     ).onRoutes(router)
+        .transform()
 }
