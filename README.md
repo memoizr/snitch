@@ -198,7 +198,7 @@ onlyIf(hasAdminRole) {
 }
 ```
 
-For more details, check out our [Mastering Snitch Conditions](tutorials/Mastering-Snitch-Conditions.md) tutorial.
+For more details, check out our [Mastering Snitch Conditions](guides/docs/tutorials/Mastering-Snitch-Conditions.md) tutorial.
 
 #### Fully automated documentation
 Snitch outputs OpenAPI 3.0 docs. Absolutely any of the inputs and any of the outputs are documented automatically, even response codes. No work or setup is required from the user to achieve this. Snitch allows the user to specify whether to serve the documentation on a given route. This is an interactive page based on Swagger-UI that allows a viewer to interact with the API, authenticate, and make any request and see the responses. You can optionally annotate individual fields of requests, responses or parameters to add additional descriptions or provide example values so that it'd be straightforward to use the API through the documentation page, as requests would be pre-populated with such example values. Documentation can either be served on the same service, or given to a doc aggregator that allows to provide a unified API for multiple services. Request, Response and parameter types are automatically generated exclusively from type information from the Kotlin language, hence they always represent the actual behaviour of the API.
@@ -232,7 +232,7 @@ The library is actually very small and a complete detailed overview can be had i
 Please refer to the [example](example) folder for a reference implementation of a simple reddit-like service. The example tries to have production-like qualities such as handling authorization and authentication, database interaction, it shows how it works well and integrates with dependency injection libraries such as Shank. Also, please refer to the [docs](docs/Docs.md) for a more detailed overview of the library as well as tutorials.
 
 Check out our tutorials:
-- [Mastering Snitch Conditions](tutorials/Mastering-Snitch-Conditions.md) - Learn how to use conditions effectively
+- [Mastering Snitch Conditions](guides/docs/tutorials/Mastering-Snitch-Conditions.md) - Learn how to use conditions effectively
 
 #### Community support
 Join us on our [discord server](https://discord.gg/bG6NW3UyxS) to ask questions, get help, or just to chat. We're a small but growing community but we're friendly and we're always happy to help.
