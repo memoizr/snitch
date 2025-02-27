@@ -42,3 +42,88 @@ dsl:
   label: DSL
   permalink: /dsl
   description: Articles about Domain Specific Languages and their applications
+
+microservices:
+  label: Microservices
+  permalink: /microservices
+  description: Content about microservice architecture and implementation
+
+performance:
+  label: Performance
+  permalink: /performance
+  description: Articles focusing on application performance and optimization
+
+deployment:
+  label: Deployment
+  permalink: /deployment
+  description: Content about deploying and managing applications
+
+code-quality:
+  label: Code Quality
+  permalink: /code-quality
+  description: Articles about improving code readability, maintainability, and quality
+
+inspiration:
+  label: Inspiration
+  permalink: /inspiration
+  description: Posts discussing inspiration and influences in software design
+
+frameworks:
+  label: Frameworks
+  permalink: /frameworks
+  description: Content comparing and discussing various software frameworks
+
+spring-boot:
+  label: Spring Boot
+  permalink: /spring-boot
+  description: Articles related to the Spring Boot framework
+
+migration:
+  label: Migration
+  permalink: /migration
+  description: Content about migrating between different frameworks or technologies
+
+expressivity:
+  label: Expressivity
+  permalink: /expressivity
+  description: Articles about expressive code and API design
+
+scaling:
+  label: Scaling
+  permalink: /scaling
+  description: Content about scaling applications and architecture
+
+type-safety:
+  label: Type Safety
+  permalink: /type-safety
+  description: Articles about type systems and compile-time safety
+
+validation:
+  label: Validation
+  permalink: /validation
+  description: Content about data validation and input processing
+
+comparison:
+  label: Comparison
+  permalink: /comparison
+  description: Posts comparing different technologies or approaches
+
+java:
+  label: Java
+  permalink: /java
+  description: Articles related to Java programming language and ecosystem
+
+documentation:
+  label: Documentation
+  permalink: /documentation
+  description: Content about API documentation and technical writing
+
+openapi:
+  label: OpenAPI
+  permalink: /openapi
+  description: Articles related to OpenAPI specification and tools
+
+developer-experience:
+  label: Developer Experience
+  permalink: /developer-experience
+  description: Content about improving the experience for developers
