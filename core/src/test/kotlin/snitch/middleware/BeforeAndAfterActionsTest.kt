@@ -188,10 +188,6 @@ class BeforeAndAfterActionsTest : InlineSnitchTest() {
             }
         }
     }
-//
-//    private object ExceptionWrapper {
-//        var executionSequence: MutableList<String> = mutableListOf()
-//    }
 
     @Nested
     @DisplayName("Error handling")
