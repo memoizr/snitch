@@ -17,3 +17,28 @@ hola:
   label: Hola
   permalink: /hola
   description: Hola tag description
+  
+snitch:
+  label: Snitch
+  permalink: /snitch
+  description: Posts about the Snitch HTTP framework for Kotlin
+  
+web-development:
+  label: Web Development
+  permalink: /web-development
+  description: Articles related to web development technologies and approaches
+  
+kotlin:
+  label: Kotlin
+  permalink: /kotlin
+  description: Posts about the Kotlin programming language and its ecosystem
+  
+apis:
+  label: APIs
+  permalink: /apis
+  description: Content discussing API design, implementation, and best practices
+  
+dsl:
+  label: DSL
+  permalink: /dsl
+  description: Articles about Domain Specific Languages and their applications
