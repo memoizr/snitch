@@ -2,19 +2,6 @@
 
 Decorations are a powerful feature in Snitch that allow you to modify request handling behavior across multiple routes. They provide a clean, composable way to implement cross-cutting concerns like logging, authentication, transaction management, and more. This tutorial will guide you through everything you need to know about decorations, from basic usage to advanced patterns.
 
-## Table of Contents
-
-- [Understanding Decorations](#understanding-decorations)
-- [Basic Decoration Usage](#basic-decoration-usage)
-- [Creating Custom Decorations](#creating-custom-decorations)
-- [Decoration Composition](#decoration-composition)
-- [Nesting Decorations](#nesting-decorations)
-- [Decoration Order and Execution Flow](#decoration-order-and-execution-flow)
-- [Integration with Conditions](#integration-with-conditions)
-- [Common Use Cases](#common-use-cases)
-- [Best Practices](#best-practices)
-- [Real-World Examples](#real-world-examples)
-
 ## Understanding Decorations
 
 In Snitch, a decoration is a higher-order function that wraps around route handlers to modify their behavior. Decorations can:

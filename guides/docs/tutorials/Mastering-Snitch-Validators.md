@@ -2,16 +2,6 @@
 
 Validators are a core feature of Snitch that ensure your HTTP inputs are properly validated, transformed, and documented. This guide will walk you through everything you need to know about validators, from basic usage to advanced customization.
 
-## Table of Contents
-
-- [Introduction to Validators](#introduction-to-validators)
-- [Built-in Validators](#built-in-validators)
-- [Using Validators with Parameters](#using-validators-with-parameters)
-- [Creating Custom Validators](#creating-custom-validators)
-- [Advanced Validator Patterns](#advanced-validator-patterns)
-- [Handling Collections and Optional Values](#handling-collections-and-optional-values)
-- [Best Practices](#best-practices)
-
 ## Introduction to Validators
 
 In HTTP applications, inputs from requests (path parameters, query parameters, headers, body) are always strings or collections of strings. However, your business logic typically requires strongly-typed values with guaranteed validity. Validators are the bridge that transforms these raw inputs into safe, typed values.

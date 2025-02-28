@@ -2,16 +2,6 @@
 
 The Before and After action mechanism in Snitch provides a powerful way to run code around your route handlers. It allows you to execute logic before a request is processed and after a response is generated, which is useful for cross-cutting concerns such as logging, authentication, authorization, and performance monitoring.
 
-## Table of Contents
-
-- [Understanding Before and After Actions](#understanding-before-and-after-actions)
-- [Route-Level Actions](#route-level-actions)
-- [Global Actions](#global-actions)
-- [Execution Order](#execution-order)
-- [Error Handling](#error-handling)
-- [Common Use Cases](#common-use-cases)
-- [Best Practices](#best-practices)
-
 ## Understanding Before and After Actions
 
 Before and After actions are similar to middleware in other frameworks. They allow you to:

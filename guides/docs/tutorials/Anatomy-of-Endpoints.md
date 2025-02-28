@@ -2,26 +2,6 @@
 
 Endpoints are the fundamental building blocks of your API in Snitch. This guide explores the internal structure of the Endpoint DSL, explaining how endpoints are defined, configured, and composed to create expressive, type-safe APIs.
 
-## Table of Contents
-
-- [The Endpoint Data Class](#the-endpoint-data-class)
-- [Creating Endpoints](#creating-endpoints)
-  - [HTTP Method Functions](#http-method-functions)
-  - [Path Construction](#path-construction)
-  - [Route Nesting](#route-nesting)
-- [Configuring Endpoints](#configuring-endpoints)
-  - [Parameters](#parameters)
-  - [Conditions](#conditions)
-  - [Decorations](#decorations)
-  - [Before and After Actions](#before-and-after-actions)
-- [Endpoint Handlers](#endpoint-handlers)
-- [The Router Interface](#the-router-interface)
-- [Extension and Customization](#extension-and-customization)
-  - [Extending Endpoint with New Capabilities](#extending-endpoint-with-new-capabilities)
-  - [Creating DSL Extensions](#creating-dsl-extensions)
-- [Type Safety Aspects](#type-safety-aspects)
-- [Best Practices](#best-practices)
-
 ## The Endpoint Data Class
 
 At the core of Snitch's routing system is the `Endpoint` data class:

@@ -2,25 +2,6 @@
 
 Handlers are the core of your API's business logic in Snitch. They process incoming requests, execute application code, and produce responses. This guide explores the inner workings of Snitch's Handler DSL, explaining how handlers are defined, composed, and integrated with the rest of the framework.
 
-## Table of Contents
-
-- [Handler Fundamentals](#handler-fundamentals)
-- [The RequestWrapper](#the-requestwrapper)
-- [Response Creation](#response-creation)
-  - [Response Extensions](#response-extensions)
-  - [Status Codes](#status-codes)
-- [Handler Definition Approaches](#handler-definition-approaches)
-  - [Inline Handlers](#inline-handlers)
-  - [Named Handlers](#named-handlers)
-  - [Reusable Handlers](#reusable-handlers)
-- [Type-Safe Parameter Access](#type-safe-parameter-access)
-- [Body Handling](#body-handling)
-- [Error Handling in Handlers](#error-handling-in-handlers)
-- [Asynchronous Handlers](#asynchronous-handlers)
-- [The Handler Execution Pipeline](#the-handler-execution-pipeline)
-- [Testing Handlers](#testing-handlers)
-- [Best Practices](#best-practices)
-
 ## Handler Fundamentals
 
 At its core, a handler in Snitch is simply a function that:

@@ -2,18 +2,6 @@
 
 Conditions are one of Snitch's most powerful features, allowing you to implement sophisticated access control and request validation with minimal code. This tutorial will guide you through everything you need to know about conditions, from basic usage to advanced patterns.
 
-## Table of Contents
-
-- [Understanding Conditions](#understanding-conditions)
-- [Basic Condition Usage](#basic-condition-usage)
-- [Creating Custom Conditions](#creating-custom-conditions)
-- [Logical Operators](#logical-operators)
-- [Applying Conditions to Route Hierarchies](#applying-conditions-to-route-hierarchies)
-- [Short-Circuit Evaluation](#short-circuit-evaluation)
-- [Error Handling and Custom Responses](#error-handling-and-custom-responses)
-- [Best Practices](#best-practices)
-- [Real-World Examples](#real-world-examples)
-
 ## Understanding Conditions
 
 In Snitch, a condition is a predicate that evaluates a request and determines whether it should proceed or be rejected. Conditions are represented by the `Condition` interface, which has three key components:

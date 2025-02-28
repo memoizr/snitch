@@ -4,21 +4,6 @@ Parameters are a fundamental part of HTTP communication, allowing clients to sen
 
 This tutorial will guide you through the complete parameter system in Snitch, from basic usage to advanced validation and transformation techniques.
 
-## Table of Contents
-
-- [Basic Parameter Types](#basic-parameter-types)
-- [Path Parameters](#path-parameters)
-- [Query Parameters](#query-parameters)
-- [Header Parameters](#header-parameters)
-- [Request Body](#request-body)
-- [Parameter Validation and Transformation](#parameter-validation-and-transformation)
-- [Optional Parameters](#optional-parameters)
-- [Custom Validators](#custom-validators)
-- [Domain Type Conversion](#domain-type-conversion)
-- [Parameter Naming](#parameter-naming)
-- [Advanced Parameter Handling](#advanced-parameter-handling)
-- [Best Practices](#best-practices)
-
 ## Basic Parameter Types
 
 Snitch supports all common HTTP parameter types:

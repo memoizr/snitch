@@ -2,22 +2,6 @@
 
 Validators are a cornerstone of Snitch's design, ensuring that HTTP inputs are properly validated and transformed into domain types. This guide explores the internal workings of the validator DSL, explaining each component and how they fit together.
 
-## Table of Contents
-
-- [The Validator Interface](#the-validator-interface)
-- [Creating Validators](#creating-validators)
-  - [The `validator` Function](#the-validator-function)
-  - [The `stringValidator` Function](#the-stringvalidator-function)
-  - [The `validatorMulti` Function](#the-validatormulti-function)
-  - [The `stringValidatorMulti` Function](#the-stringvalidatormulti-function)
-- [How Validators Work](#how-validators-work)
-  - [Regex Validation](#regex-validation)
-  - [Transformation Logic](#transformation-logic)
-  - [Error Handling](#error-handling)
-- [The Parser's Role](#the-parsers-role)
-- [Custom Validators](#custom-validators)
-- [Best Practices](#best-practices)
-
 ## The Validator Interface
 
 At the heart of the validation system is the `Validator` interface:
