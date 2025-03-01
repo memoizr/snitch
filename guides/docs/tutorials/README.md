@@ -4,6 +4,7 @@ Welcome to the Snitch tutorials! This section contains step-by-step guides to he
 
 ## Getting Started
 - [Quick Start Guide](../QuickStart.md) - Set up a basic Snitch application in minutes
+- [Artifacts Overview](../Artifacts.md) - Learn about all the modules in the Snitch ecosystem
 
 ## Core Concepts
 - [Anatomy of Endpoints](Anatomy-of-Endpoints.md) - Understanding the structure of endpoints in Snitch
