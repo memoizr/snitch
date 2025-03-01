@@ -3,6 +3,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":undertow"))
     implementation(project(":gsonparser"))
+    implementation(project(":shank"))
 
     // Database
     implementation(libs.postgresql)
@@ -13,7 +14,7 @@ dependencies {
     // Security & Utils
     implementation(libs.argon2)
     implementation(libs.mockk)
-    implementation(libs.shank)
+//    implementation(libs.shank)
 
     // JWT
     implementation(libs.jwt.api)
