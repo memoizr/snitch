@@ -27,9 +27,10 @@
 @media (max-width: 768px) {
   .codecontainer {
     padding: 1.5rem;
+    margin: 50px 0;
   }
   
   .codeblock {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 }
