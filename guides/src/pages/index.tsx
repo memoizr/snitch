@@ -5,6 +5,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import SnitchesHeader from '@site/src/components/SnitchesHeader';
+import CodeSnippet from '@site/src/components/CodeSnippet';
 import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
@@ -35,6 +36,7 @@ export default function Home(): ReactNode {
       description="Create a production-grade HTTP layer for your applications and (micro)services with minimal effort, and generate complete documentation with no effort.">
       <HomepageHeader />
       <SnitchesHeader />
+      <CodeSnippet />
       <main>
         <HomepageFeatures />
       </main>
