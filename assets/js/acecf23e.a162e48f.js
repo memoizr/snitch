@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkguides=self.webpackChunkguides||[]).push([[1903],{1912:s=>{s.exports=JSON.parse('{"blogBasePath":"/snitch/blog","blogTitle":"Blog","authorsListPath":"/snitch/blog/authors"}')}}]);
