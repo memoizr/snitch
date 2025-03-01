@@ -7,7 +7,7 @@ const CallToAction: React.FC = () => {
     <div className={styles.container}>
       <h2 className={styles.heading}>GET SNITCHED</h2>
       <Link
-        to="/docs/Docs"
+        to="/docs/QuickStart"
         className={styles.button}
       >
         DISCOVER HOW

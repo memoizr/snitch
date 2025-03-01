@@ -66,12 +66,8 @@ fun main() {
 ### Getting started 
 
 ```Kotlin
-repositories {
-    maven(url = "https://jitpack.io")
-}
-
 dependencies {
-    implementation("com.github.memoizr.snitch:bootstrap:3.3.1")
+    implementation("io.github.memoizr:snitch-bootstrap:1.0.0")
 }
 ```
 That's it, no need for command line tools, gradle plugins. It's just a simple library.
@@ -651,7 +647,7 @@ GET("posts") isCoHandledBy { postsRepository().getPostsAsync().ok }
 Coroutine support are not included by default, so you need to add this to your gradle build file:
 ```kotlin
 dependencies {
-       implementation("com.github.memoizr.snitch:coroutines:3.3.1")
+    implementation("io.github.memoizr:snitch-coroutines:1.0.0")
 }
 
 tasks.withType<KotlinCompile> {

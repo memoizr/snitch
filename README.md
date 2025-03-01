@@ -1,5 +1,5 @@
 ![Workflow ci](https://github.com/memoizr/snitch/actions/workflows/ci.yml/badge.svg)
-[![](https://jitpack.io/v/memoizr/snitch.svg)](https://jitpack.io/#memoizr/snitch)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.memoizr/snitch-bootstrap.svg)](https://central.sonatype.com/artifact/io.github.memoizr/snitch-bootstrap)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Code Coverage](https://img.shields.io/badge/Code%20Coverage-83%25-brightgreen)]()
 
@@ -46,12 +46,8 @@ Our primary goals are:
 #### How to install it
 
 ```kotlin
-repositories {
-    maven(url="https://jitpack.io")
-}
-
 dependencies {
-    implementation("com.github.memoizr.snitch:bootstrap:3.3.1")
+    implementation("io.github.memoizr:snitch-bootstrap:1.0.0")
 }
 ```
 
@@ -229,10 +225,16 @@ Snitch lets you use coroutine code seamlessly. For more information see the [doc
 The library is actually very small and a complete detailed overview can be had in a matter of hours. Powerful features such as guards, middleware and others are built on top of a small number of core concepts, and really there isn't any magic involved. The codebase only has a few thousand lines of code. Given a fluency of the Kotlin language it should be one of the easiest frameworks to truly understand how it works. Really it's just a thin wrapper around the embedded web server.
 
 #### Learning resources
-Please refer to the [example](example) folder for a reference implementation of a simple reddit-like service. The example tries to have production-like qualities such as handling authorization and authentication, database interaction, it shows how it works well and integrates with dependency injection libraries such as Shank. Also, please refer to the [docs](docs/Docs.md) for a more detailed overview of the library as well as tutorials.
-
-Check out our tutorials:
-- [Mastering Snitch Conditions](guides/docs/tutorials/Mastering-Snitch-Conditions.md) - Learn how to use conditions effectively
+- [Quick Start Guide](guides/docs/QuickStart.md) - Get up and running in minutes
+- [Documentation](guides/docs/Docs.md) - Full library documentation
+- [Tutorials](guides/docs/tutorials/README.md) - Step-by-step guides
+- [Example Project](example) - A complete reference implementation of a Reddit-like service
+  
+The example project demonstrates production-like qualities such as:
+- Authorization and authentication flow
+- Database interaction
+- Integration with dependency injection (Shank)
+- Testing strategies
 
 #### Community support
 Join us on our [discord server](https://discord.gg/bG6NW3UyxS) to ask questions, get help, or just to chat. We're a small but growing community but we're friendly and we're always happy to help.
