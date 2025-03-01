@@ -13,42 +13,29 @@ const SnitchesHeader: React.FC<SnitchesHeaderProps> = ({ className }) => {
   useEffect(() => {
     const calculateProportionalFontSize = () => {
       if (topTextRef.current && bottomTextRef.current) {
-        // Get the exact width of the top text after font is loaded
-        const topTextWidth = topTextRef.current.getBoundingClientRect().width;
-        const bottomTextNaturalWidth = bottomTextRef.current.getBoundingClientRect().width;
-        
-        // Get the base font size of both texts
+        // Constants - using fixed-width font, so we can calculate based on character count
+        const topText = 'SNITCHES';
+        const bottomText = 'ON YOUR API';
+
+        // Get the ratio of character counts (with fixed-width font, this corresponds to width)
+        const charRatio = bottomText.length / topText.length;
+
+        // Get the base font size of the top text
         const topFontSize = parseFloat(window.getComputedStyle(topTextRef.current).fontSize);
-        const bottomFontSize = parseFloat(window.getComputedStyle(bottomTextRef.current).fontSize);
-        
-        // Calculate scale factor to make bottom text the same width as top text
-        const scaleFactor = topTextWidth / bottomTextNaturalWidth;
-        
+
+        // Calculate the bottom text font size to make it the same width
+        // In a monospace font, we scale inversely proportional to character count
+        const bottomFontSize = topFontSize / charRatio;
+
         // Apply the calculated font size
-        const newBottomFontSize = bottomFontSize * scaleFactor;
-        bottomTextRef.current.style.fontSize = `${newBottomFontSize}px`;
+        bottomTextRef.current.style.fontSize = `${bottomFontSize}px`;
       }
     };
 
-    // Font loading can take time, so we need to wait for it
-    const fontLoader = () => {
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(() => {
-          // Once fonts are loaded, calculate sizes
-          calculateProportionalFontSize();
-          
-          // Also add a slight delay to ensure rendering is complete
-          setTimeout(calculateProportionalFontSize, 100);
-        });
-      } else {
-        // Fallback if document.fonts is not available
-        setTimeout(calculateProportionalFontSize, 500);
-      }
-    };
-
-    fontLoader();
+    // Run on mount and window resize
+    calculateProportionalFontSize();
     window.addEventListener('resize', calculateProportionalFontSize);
-    
+
     return () => {
       window.removeEventListener('resize', calculateProportionalFontSize);
     };

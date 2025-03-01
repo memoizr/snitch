@@ -39,8 +39,9 @@
 }
 
 .titleBottom {
-  font-size: 5rem; /* Will be calculated proportionally */
+  font-size: 5rem; /* Starting size - will be adjusted by JavaScript */
   line-height: 1;
+  transition: font-size 0.1s ease; /* Smooth transition when size changes */
 }
 
 @media (max-width: 768px) {
