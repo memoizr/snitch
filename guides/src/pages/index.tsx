@@ -11,18 +11,15 @@ import styles from './index.module.css';
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
+    <header className={clsx(styles.heroBanner)}>
       <div className="container">
-        <Heading as="h1" className="hero__title">
-          {siteConfig.title}
-        </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <img 
+          src={require('@site/static/img/snitchmain.png').default} 
+          alt="Snitch Logo" 
+          className="titleLogo" 
+          style={{maxHeight: '500px', width: 'auto'}}
+        />
         <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="docs/Docs">
-            Get Started with Snitch
-          </Link>
         </div>
       </div>
     </header>
@@ -37,6 +34,9 @@ export default function Home(): ReactNode {
       description="Create a production-grade HTTP layer for your applications and (micro)services with minimal effort, and generate complete documentation with no effort.">
       <HomepageHeader />
       <main>
+        <div className="container">
+          <p className={styles.heroSubtitle}>{siteConfig.tagline}</p>
+        </div>
         <HomepageFeatures />
       </main>
     </Layout>
