@@ -1,0 +1,54 @@
+.container {
+  padding: 5rem 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 3rem 0;
+}
+
+.heading {
+  font-family: "JMH", monospace;
+  max-width: 1000px;
+  font-size: 10rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+}
+
+.button {
+  display: inline-block;
+  background-image: linear-gradient(to right, rgba(255,170,238,1), rgba(113,55,200,1));
+  color: white;
+  font-family: "JMH", monospace;
+  font-weight: bold;
+  font-size: 1.5rem;
+  padding: 1rem 3rem;
+  border-radius: 50px; /* Pill style */
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+
+.button:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .heading {
+    font-size: 3rem;
+  }
+  
+  .button {
+    font-size: 1.2rem;
+    padding: 0.8rem 2rem;
+  }
+}

@@ -8,11 +8,11 @@
 }
 
 .bar {
-  height: 32px;
-  background-color: var(--ifm-color-secondary-contrast-foreground);
+  height: 48px;
+  background-color: var(--ifm-font-color-base);
   flex-grow: 1;
   margin: 64px;
-  border-radius: 32px;
+  border-radius: 48px;
 }
 
 .textContainer {
@@ -51,7 +51,7 @@
   }
   
   .titleTop {
-    font-size: 1.8rem;
+    font-size: 6rem;
   }
   
   .titleBottom {

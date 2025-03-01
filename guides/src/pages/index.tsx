@@ -6,6 +6,7 @@ import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import SnitchesHeader from '@site/src/components/SnitchesHeader';
 import CodeSnippet from '@site/src/components/CodeSnippet';
+import CallToAction from '@site/src/components/CallToAction';
 import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
@@ -39,6 +40,7 @@ export default function Home(): ReactNode {
       <CodeSnippet />
       <main>
         <HomepageFeatures />
+        <CallToAction />
       </main>
     </Layout>
   );
