@@ -11,3 +11,13 @@
   max-height: 200px;
   object-fit: contain;
 }
+
+.featureTitle {
+  font-family: "JMH", monospace;
+  white-space: pre-line;
+  font-weight: bold;
+  font-size: 5rem;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}

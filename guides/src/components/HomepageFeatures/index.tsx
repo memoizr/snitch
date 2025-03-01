@@ -11,7 +11,7 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Expressive and Type-Safe',
+    title: 'TYPE\nSAFE',
     image: require('@site/static/img/shield.png').default,
     description: (
       <>
@@ -22,7 +22,7 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
-    title: 'Automated Documentation',
+    title: 'AUTO\nDOCS',
     image: require('@site/static/img/book.png').default,
     description: (
       <>
@@ -32,7 +32,7 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
-    title: 'Lightweight and Performant',
+    title: 'MEGA\nFAST',
     image: require('@site/static/img/falcon.png').default,
     description: (
       <>
@@ -48,10 +48,9 @@ function Feature({title, image, description}: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
-        <img className={styles.featureSvg} src={image} role="img" alt={title} />
+        <h3 className={styles.featureTitle}>{title}</h3>
       </div>
       <div className="text--center padding-horiz--md">
-        <Heading as="h3">{title}</Heading>
         <p>{description}</p>
       </div>
     </div>
