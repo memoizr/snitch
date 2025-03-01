@@ -1,0 +1,63 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 5rem 0;
+  font-family: monospace;
+}
+
+.bar {
+  height: 32px;
+  background-color: var(--ifm-color-secondary-contrast-foreground);
+  flex-grow: 1;
+  margin: 64px;
+  border-radius: 32px;
+}
+
+.textContainer {
+  margin: 0 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.titleTop, .titleBottom {
+  margin: 0;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  letter-spacing: 0;
+  font-family: "Courier New", monospace; /* Fixed-width font */
+}
+
+.titleTop {
+  font-size: 8.5rem;
+  line-height: 1;
+}
+
+.titleBottom {
+  font-size: 5rem; /* Will be calculated proportionally */
+  line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .textContainer {
+    width: 90%;
+    max-width: 600px;
+  }
+  
+  .titleTop {
+    font-size: 1.8rem;
+  }
+  
+  .titleBottom {
+    font-size: 1.2rem;
+  }
+  
+  .bar {
+    height: 6px;
+  }
+}
