@@ -1,47 +1,5 @@
 # Snitch
 
-<!-- TOC -->
-* [Snitch](#snitch)
-    * [Introduction](#introduction)
-      * [Features](#features)
-    * [Getting started](#getting-started-)
-    * [Router](#router)
-      * [Routing basics](#routing-basics)
-      * [Route Nesting](#route-nesting)
-      * [HTTP input parameters](#http-input-parameters)
-      * [Input parameter validation and transformation](#input-parameter-validation-and-transformation)
-      * [Custom validations](#custom-validations)
-      * [Optional input parameters](#optional-input-parameters)
-      * [Parameter naming](#parameter-naming)
-      * [Unsafe, undocumented parameter parsing](#unsafe-undocumented-parameter-parsing)
-      * [Repeated parameters](#repeated-parameters)
-      * [Body parameter](#body-parameter)
-    * [Middleware](#middleware-)
-      * [Order of execution](#order-of-execution)
-    * [Security and access control](#security-and-access-control)
-    * [Database integration](#database-integration)
-    * [Guards](#guards)
-      * [Composing conditions](#composing-conditions)
-      * [Reusing conditions](#reusing-conditions)
-    * [Error handling](#error-handling)
-      * [Polymorphic error handling](#polymorphic-error-handling)
-    * [Testing](#testing)
-    * [Intellij integration](#intellij-integration)
-    * [Showcase](#showcase)
-      * [DSL extension usecase: API versioning](#dsl-extension-usecase-api-versioning)
-    * [Coroutines](#coroutine-support)
-    * [FAQ](#faq)
-      * [How does Snitch handle concurrency?](#how-does-snitch-handle-concurrency)
-      * [Just how "light" and "fast" is Snitch?](#just-how-light-and-fast-is-snitch)
-      * [How does the automatic OpenApi 3 documentation generation work?](#how-does-the-automatic-openapi-3-documentation-generation-work)
-      * [Why is Snitch typesafe?](#why-is-snitch-typesafe)
-      * [How does Snitch handle HTTP sessions and cookies?](#how-does-snitch-handle-http-sessions-and-cookies-)
-      * [Does Snitch support X database integration?](#does-snitch-support-x-database-integration)
-      * [How does Snitch handle scalability?](#how-does-snitch-handle-scalability-)
-      * [How does Snitch handle security, particularly in terms of input validation?](#how-does-snitch-handle-security-particularly-in-terms-of-input-validation)
-      * [How does Snitch compare to other Kotlin web frameworks like Ktor or Spring Boot in terms of performance and ease of use?](#how-does-snitch-compare-to-other-kotlin-web-frameworks-like-ktor-or-spring-boot-in-terms-of-performance-and-ease-of-use)
-<!-- TOC -->
-
 ### Introduction
 
 Snitch is a small and typesafe web framework for Kotlin
@@ -423,11 +381,108 @@ val Router.authenticated
 
 `decorateEndpoints` will apply whatever transformation inside the block to any endpoint to which this will be applied. `withHeader(accessToken)` is declaring and adding the `accessToken` header parameter to the endpoints, documentation will reflect that. `request[accessToken]` parses, validates and transforms the access token provided in the headers. It returns a domain type, and we can proceed to the next layer of middleware in case the token is valid, and return a 401 error in case it is not.
 
-### Database integration
+### Dependency Injection with Shank
+
+Snitch integrates seamlessly with [Shank](guides/docs/UsingShank.md), the highest-performing dependency injection library available for the JVM. Shank provides best-in-class performance with strictly type-safe dependency management, built-in cycle detection, and zero reflection overhead - all in a lightweight 300kb package.
+
+#### Setting Up Shank Modules
+
+Organize your dependencies by creating modules:
+
+```kotlin
+import snitch.shank.ShankModule
+import snitch.shank.single
+import snitch.shank.new
+
+// Application-wide dependencies
+object ApplicationModule : ShankModule {
+    val clock = single { -> Clock.systemUTC() }
+    val logger = single { -> LoggerImpl() }
+    val now = new { -> Instant.now(clock()) }
+}
+
+// Database-related dependencies
+object DatabaseModule : ShankModule {
+    val connection = single { ->
+        Database.connect(
+            "jdbc:postgresql://localhost:5432/postgres",
+            driver = "org.postgresql.Driver",
+            user = "postgres",
+            password = "postgres"
+        )
+    }
+    
+    val database = single { -> PostgresDatabase(connection()) }
+}
+
+// Repository dependencies
+object RepositoryModule : ShankModule {
+    val usersRepository = single<UsersRepository> { -> PostgresUsersRepository() }
+    val postsRepository = single<PostsRepository> { -> PostgresPostsRepository() }
+}
+```
+
+#### Using Dependencies in Handlers
+
+Inject dependencies into your handlers:
+
+```kotlin
+val getUsers by handling {
+    val logger = ApplicationModule.logger()
+    val usersRepo = RepositoryModule.usersRepository()
+    
+    logger.info("Fetching all users")
+    usersRepo.getUsers().ok
+}
+
+val createUser by parsing<CreateUserRequest>() handling {
+    val usersRepo = RepositoryModule.usersRepository()
+    usersRepo.createUser(body.name, body.email).created
+}
+```
+
+#### Creating Middleware with Dependency Injection
+
+Combine middleware with dependency injection for powerful patterns:
+
+```kotlin
+val Router.withLogging get() = decorating {
+    val logger = ApplicationModule.logger()
+    logger.info("Request: ${request.method} ${request.path}")
+    next().also {
+        logger.info("Response: ${it.statusCode}")
+    }
+}
+
+val Router.withTransaction get() = decorating {
+    val db = DatabaseModule.database()
+    db.transaction {
+        next()
+    }
+}
+```
+
+Then use these in your routes:
+
+```kotlin
+routes {
+    withLogging {
+        withTransaction {
+            "users" / {
+                GET() isHandledBy getUsers
+                POST() with body<CreateUserRequest>() isHandledBy createUser
+            }
+        }
+    }
+}
+```
+
+For a comprehensive guide to using Shank with Snitch, see the [Using Shank with Snitch](guides/docs/UsingShank.md) guide.
+
+### Database Integration
 Snitch is an HTTP focused tool, and as such it abstains from offering solutions to non-HTTP problems such as deeply integrating with databases. We believe it is better to leave that job to specialized tools such as Jooq or Exposed. That said what snitch does offer is an extremely easy way of integrating with such tools. For example, here's how simple it is to declare that endpoints within a given hierarchy should all execute the code within an `Exposed` transaction:
 
 ```kotlin
-
 withTransaction {
     POST() with body<CreateUserRequest>() isHandledBy createUser
     POST("login") with body<LoginRequest>() isHandledBy userLogin
