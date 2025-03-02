@@ -1,4 +1,4 @@
-package snitch.authorization
+package snitch.auth
 
 data class JWTClaims(
     val userId: String,

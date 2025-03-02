@@ -1,4 +1,4 @@
-package snitch.authorization
+package snitch.auth
 
 enum class Role {
     ADMIN,

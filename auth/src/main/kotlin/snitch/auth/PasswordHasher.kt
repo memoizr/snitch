@@ -1,4 +1,4 @@
-package snitch.authorization
+package snitch.auth
 
 import de.mkammerer.argon2.Argon2
 

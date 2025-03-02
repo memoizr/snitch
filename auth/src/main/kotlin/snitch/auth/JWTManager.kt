@@ -1,4 +1,4 @@
-package snitch.authorization
+package snitch.auth
 
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts

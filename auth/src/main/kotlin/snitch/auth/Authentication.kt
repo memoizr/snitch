@@ -1,4 +1,4 @@
-package snitch.authorization
+package snitch.auth
 
 sealed interface Authentication {
     data class Authenticated(val claims: JWTClaims) : Authentication

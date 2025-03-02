@@ -1,4 +1,4 @@
-package snitch.authorization
+package snitch.auth
 
 import com.memoizr.assertk.expect
 import org.junit.jupiter.api.Test

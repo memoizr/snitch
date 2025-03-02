@@ -1,6 +1,6 @@
-package snitch.authorization
+package snitch.auth
 
-import snitch.authorization.ValidationHeaders.accessToken
+import snitch.auth.ValidationHeaders.accessToken
 import snitch.parameters.Parameter
 import snitch.request.RequestWrapper
 import snitch.router.decorateWith
