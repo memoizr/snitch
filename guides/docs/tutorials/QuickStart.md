@@ -256,4 +256,4 @@ Now that you have a basic understanding of Snitch, explore:
 
 For more details, check out:
 - [Snitch Documentation](../Docs.md)
-- [Tutorials](tutorials/)
+- [In Depth Guides](../in%20depth/)

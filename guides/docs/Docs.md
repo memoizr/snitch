@@ -383,7 +383,7 @@ val Router.authenticated
 
 ### Dependency Injection with Shank
 
-Snitch integrates seamlessly with [Shank](guides/docs/UsingShank.md), the highest-performing dependency injection library available for the JVM. Shank provides best-in-class performance with strictly type-safe dependency management, built-in cycle detection, and zero reflection overhead - all in a lightweight 300kb package.
+Snitch integrates seamlessly with [Shank](/tutorials/UsingShank.md), the highest-performing dependency injection library available for the JVM. Shank provides best-in-class performance with strictly type-safe dependency management, built-in cycle detection, and zero reflection overhead - all in a lightweight 300kb package.
 
 #### Setting Up Shank Modules
 
@@ -477,7 +477,7 @@ routes {
 }
 ```
 
-For a comprehensive guide to using Shank with Snitch, see the [Using Shank with Snitch](guides/docs/UsingShank.md) guide.
+For a comprehensive guide to using Shank with Snitch, see the [Using Shank with Snitch](/tutorials/UsingShank.md) guide.
 
 ### Database Integration
 Snitch is an HTTP focused tool, and as such it abstains from offering solutions to non-HTTP problems such as deeply integrating with databases. We believe it is better to leave that job to specialized tools such as Jooq or Exposed. That said what snitch does offer is an extremely easy way of integrating with such tools. For example, here's how simple it is to declare that endpoints within a given hierarchy should all execute the code within an `Exposed` transaction:

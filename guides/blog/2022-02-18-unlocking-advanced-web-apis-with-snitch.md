@@ -187,4 +187,4 @@ Snitch achieves this by providing powerful abstractions that are composable and 
 
 If you're building HTTP APIs in Kotlin and value both expressiveness and type safety, Snitch deserves a serious look. Its combination of a readable DSL, sophisticated features like validators and conditions, and exceptional performance makes it a compelling choice for professional API development.
 
-To get started with Snitch, check out the [comprehensive tutorials](/docs/tutorials/Mastering-Snitch-Parameters) in our documentation section, or dive right into the [example application](https://github.com/memoizr/snitch/tree/master/example) on GitHub.
+To get started with Snitch, check out the [comprehensive tutorials](/docs/in%20depth/Mastering-Snitch-Parameters) in our documentation section, or dive right into the [example application](https://github.com/memoizr/snitch/tree/master/example) on GitHub.

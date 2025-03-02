@@ -90,7 +90,7 @@ const config: Config = {
             },
             {
               label: 'Tutorials',
-              to: '/docs/tutorials/Mastering-Snitch-Conditions',
+              to: '/docs/tutorials',
             },
           ],
         },
