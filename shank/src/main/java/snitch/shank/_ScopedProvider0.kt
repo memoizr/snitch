@@ -1,4 +1,4 @@
-package life.shank
+package snitch.shank
 
 class _ScopedProvider0<T> : ScopedProvider0<T> {
     @Synchronized
@@ -35,7 +35,7 @@ interface ScopedProvider2<A, B, T> : Provider<T, (A, B) -> T> {
     operator fun invoke(scope: Scope, a: A, b: B): T
 }
 
-interface ScopedProvider3<A, B, C, T> : Provider<T, (A,B,C) -> T> {
+interface ScopedProvider3<A, B, C, T> : Provider<T, (A, B, C) -> T> {
     //    infix fun override(f: ((Scope, A, B, C) -> T)?): ScopedProvider3<A, B, C, T>
     operator fun invoke(scope: Scope, a: A, b: B, c: C): T
 }

@@ -1,4 +1,4 @@
-package life.shank
+package snitch.shank
 
 object Module1 : ShankModule {
     val fib1 = new { -> Fib1() }

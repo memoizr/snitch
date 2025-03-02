@@ -1,4 +1,4 @@
-package life.shank
+package snitch.shank
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async

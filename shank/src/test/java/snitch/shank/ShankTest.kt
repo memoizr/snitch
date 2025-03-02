@@ -1,10 +1,10 @@
-package life.shank
+package snitch.shank
 
-import life.shank.MyModule.listOfInts
-import life.shank.MyModule.listOfStrings
-import life.shank.MyModule.newFoo
-import life.shank.MyModule.otherScopeSingleton
-import life.shank.MyModule.scopedSingleton
+import snitch.shank.MyModule.listOfInts
+import snitch.shank.MyModule.listOfStrings
+import snitch.shank.MyModule.newFoo
+import snitch.shank.MyModule.otherScopeSingleton
+import snitch.shank.MyModule.scopedSingleton
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import shouldBeEqualTo

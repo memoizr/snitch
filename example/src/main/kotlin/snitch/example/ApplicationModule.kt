@@ -1,8 +1,8 @@
 package snitch.example
 
-import life.shank.ShankModule
-import life.shank.new
-import life.shank.single
+import snitch.shank.ShankModule
+import snitch.shank.new
+import snitch.shank.single
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Instant

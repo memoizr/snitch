@@ -1,4 +1,4 @@
-package life.shank
+package snitch.shank
 
 interface Fib {
     val fib: Fib?

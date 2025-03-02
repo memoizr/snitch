@@ -1,11 +1,11 @@
-package life.shank
+package snitch.shank
 
-import life.shank.ParameterNewModule.fiveParamNew
-import life.shank.ParameterNewModule.fourParamNew
-import life.shank.ParameterNewModule.noParamNew
-import life.shank.ParameterNewModule.oneParamNew
-import life.shank.ParameterNewModule.threeParamNew
-import life.shank.ParameterNewModule.twoParamNew
+import snitch.shank.ParameterNewModule.fiveParamNew
+import snitch.shank.ParameterNewModule.fourParamNew
+import snitch.shank.ParameterNewModule.noParamNew
+import snitch.shank.ParameterNewModule.oneParamNew
+import snitch.shank.ParameterNewModule.threeParamNew
+import snitch.shank.ParameterNewModule.twoParamNew
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import shouldBeEqualTo

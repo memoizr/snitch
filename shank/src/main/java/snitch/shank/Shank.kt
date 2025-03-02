@@ -1,7 +1,7 @@
-package life.shank
+package snitch.shank
 
-import life.shank.ShankScopedCache.globalScope
-import life.shank.ShankScopedCache.scopedCache
+import snitch.shank.ShankScopedCache.globalScope
+import snitch.shank.ShankScopedCache.scopedCache
 import java.util.concurrent.ConcurrentHashMap
 
 object _cache {

@@ -1,7 +1,7 @@
 package snitch.example.database
 
-import life.shank.ShankModule
-import life.shank.single
+import snitch.shank.ShankModule
+import snitch.shank.single
 import org.jetbrains.exposed.sql.Database
 import snitch.example.PostgresDatabase
 

@@ -1,4 +1,4 @@
-package life.shank
+package snitch.shank
 
 interface SingleProvider0<T> : Provider0<T> {
     infix fun override(f: (() -> T)?): SingleProvider0<T>

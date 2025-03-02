@@ -1,8 +1,8 @@
 package snitch.example.security
 
 import de.mkammerer.argon2.Argon2Factory
-import life.shank.ShankModule
-import life.shank.single
+import snitch.shank.ShankModule
+import snitch.shank.single
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateCrtKey
 

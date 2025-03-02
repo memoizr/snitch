@@ -1,9 +1,9 @@
-package life.shank
+package snitch.shank
 
-import life.shank.Caster.cast
-import life.shank.ShankGlobalCache.globalCache
-import life.shank.ShankScopedCache.scopedCache
-import life.shank._cache.factories
+import snitch.shank.Caster.cast
+import snitch.shank.ShankGlobalCache.globalCache
+import snitch.shank.ShankScopedCache.scopedCache
+import snitch.shank._cache.factories
 
 internal fun <T, F : Function<T>> Provider<*, F>.factory(): F = cast<F>(factories.get(this.hashCode()))
 fun <T, F : Function<T>> Provider<*, F>.restore() = also { factories.put(this.hashCode(), factory()) }

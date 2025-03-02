@@ -1,13 +1,13 @@
-package life.shank
+package snitch.shank
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import life.shank.ParameterSingletonModule.noParam
-import life.shank.ParameterSingletonModule.oneParam
-import life.shank.ParameterSingletonModule.threeParam
-import life.shank.ParameterSingletonModule.twoParam
-import life.shank.SingletonTests.ConcurrentSingleton.nanotime0
-import life.shank.SingletonTests.ConcurrentSingleton.nanotime1
+import snitch.shank.ParameterSingletonModule.noParam
+import snitch.shank.ParameterSingletonModule.oneParam
+import snitch.shank.ParameterSingletonModule.threeParam
+import snitch.shank.ParameterSingletonModule.twoParam
+import snitch.shank.SingletonTests.ConcurrentSingleton.nanotime0
+import snitch.shank.SingletonTests.ConcurrentSingleton.nanotime1
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import shouldBeEqualTo

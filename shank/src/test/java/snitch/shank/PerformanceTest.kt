@@ -1,4 +1,4 @@
-package life.shank
+package snitch.shank
 
 import org.junit.jupiter.api.Test
 

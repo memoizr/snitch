@@ -1,8 +1,8 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package life.shank
+package snitch.shank
 
-import life.shank._cache.factories
+import snitch.shank._cache.factories
 
 interface ShankModule
 

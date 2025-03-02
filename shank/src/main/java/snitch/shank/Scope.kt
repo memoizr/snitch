@@ -1,4 +1,4 @@
-package life.shank
+package snitch.shank
 
 import java.io.Serializable
 

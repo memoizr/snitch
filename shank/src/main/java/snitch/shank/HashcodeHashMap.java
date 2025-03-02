@@ -1,4 +1,4 @@
-package life.shank;
+package snitch.shank;
 
 
 public class HashcodeHashMap<V> {
