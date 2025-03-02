@@ -45,7 +45,7 @@ object ApplicationModule : ShankModule {
 
 Shank offers three main scopes for dependencies:
 
-1. **Singleton** (`single`) - A single instance for the entire application
+1. **Singleton** (`single`) - A single instance for the entire application's lifecycle
 2. **Factory** (`new`) - Creates a new instance each time
 3. **Scoped** (`scoped`) - Instances are scoped to a specific context
 
@@ -215,7 +215,7 @@ fun tearDown() {
 You can create middleware that injects dependencies:
 
 ```kotlin
-val Router.withTransaction get() = decorating {
+val Router.withTransaction get() = decorateWith {
     val database = DBModule.postgresDatabase()
     database.transaction {
         next()

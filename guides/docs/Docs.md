@@ -293,17 +293,10 @@ Binary path can also be supported inituitively by: `with(body<ByteArray>())`
 Snitch supports a very powerful and flexible middleware mechanism that can be used to implement a wide variety of features. Let's see how you can use it to create a simple logging behaviour applied to a route hierarchy:
 
 ```kotlin
-val Router.log get() = decorating {
+val Router.log get() = decorateWith {
     logger().info("Begin Request: ${request.method.name} ${request.path}")
     next().also {
         logger().info("End Request: ${request.method.name} ${request.path} ${it.statusCode.code} ${it.value(parser)}")
-    }
-}
-
-val rootRouter = routes {
-    log {
-        "health" / healthController
-        "users" / usersController
     }
 }
 ```
@@ -446,7 +439,7 @@ val createUser by parsing<CreateUserRequest>() handling {
 Combine middleware with dependency injection for powerful patterns:
 
 ```kotlin
-val Router.withLogging get() = decorating {
+val Router.withLogging get() = decorateWith {
     val logger = ApplicationModule.logger()
     logger.info("Request: ${request.method} ${request.path}")
     next().also {
@@ -454,7 +447,7 @@ val Router.withLogging get() = decorating {
     }
 }
 
-val Router.withTransaction get() = decorating {
+val Router.withTransaction get() = decorateWith {
     val db = DatabaseModule.database()
     db.transaction {
         next()

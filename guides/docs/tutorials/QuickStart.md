@@ -141,7 +141,8 @@ val ofEmail = stringValidator("valid email") {
 Implement a simple logging middleware:
 
 ```kotlin
-val Router.log get() = decorating {
+// Simple logging middleware that doesn't require parameters
+val Router.log get() = decorateWith {
     println("➡️ ${request.method} ${request.path} - Request started")
     val response = next()
     println("⬅️ ${request.method} ${request.path} - Response: ${response.statusCode}")
@@ -165,20 +166,55 @@ routes {
 Implement a basic authentication system:
 
 ```kotlin
-// Authentication middleware
-val Router.authenticated get() = decorating {
-    val authHeader = request.headerParams("Authorization")
-    if (authHeader != null && authHeader.startsWith("Bearer ")) {
-        val token = authHeader.substring(7)
-        if (isValidToken(token)) {
-            next() // Proceed to the handler
+// Define the header parameter for authentication
+val accessToken by header(
+    condition = validAccessToken,
+    name = "Authorization",
+    description = "Bearer token for authentication"
+)
+
+// Validator for access token
+val validAccessToken = stringValidator { token ->
+    if (token.startsWith("Bearer ")) {
+        val actualToken = token.substring(7)
+        if (isValidToken(actualToken)) {
+            Authentication.Authenticated(JWTClaims(getUserId(actualToken), getRole(actualToken)))
         } else {
-            "Invalid token".unauthorized()
+            Authentication.InvalidToken
         }
     } else {
-        "Authentication required".unauthorized()
+        Authentication.MissingToken
     }
 }
+
+// Authentication result model
+sealed interface Authentication {
+    data class Authenticated(val claims: JWTClaims) : Authentication
+    interface Unauthenticated : Authentication
+    object InvalidToken : Unauthenticated
+    object MissingToken : Unauthenticated
+}
+
+// Data class for JWT claims
+data class JWTClaims(val userId: UserId, val role: Role)
+data class UserId(val value: String)
+enum class Role { USER, ADMIN }
+
+// Authentication middleware with proper parameter declaration
+val Router.authenticated get() = decorateWith(accessToken) {
+    when (val auth = request[accessToken]) {
+        is Authentication.Authenticated -> {
+            next() // Proceed to the handler
+        }
+        is Authentication.Unauthenticated -> "Authentication required".unauthorized()
+    }
+}
+
+// Extension properties to access authentication data
+val RequestWrapper.principal: UserId get() = 
+    (request[accessToken] as Authentication.Authenticated).claims.userId
+val RequestWrapper.role: Role get() = 
+    (request[accessToken] as Authentication.Authenticated).claims.role
 
 // Apply to protected routes
 routes {
@@ -190,7 +226,20 @@ routes {
         authenticated {
             // Protected endpoints...
             "profile" / {
-                GET() isHandledBy { getCurrentUser().ok }
+                GET() isHandledBy { 
+                    getUserProfile(request.principal).ok 
+                }
+            }
+            
+            // Example of using principal in a handler
+            "posts" / {
+                GET() isHandledBy { 
+                    getPostsByUser(request.principal).ok 
+                }
+                
+                POST() with body<CreatePostRequest>() isHandledBy {
+                    createPost(request.principal, body.title, body.content).created
+                }
             }
         }
     }
@@ -204,19 +253,99 @@ Implement access control with conditions:
 ```kotlin
 // Define conditions
 val isAdmin = condition("isAdmin") {
-    val user = getCurrentUser()
-    if (user.role == "ADMIN") {
+    if (request.role == Role.ADMIN) {
         ConditionResult.Successful
     } else {
         ConditionResult.Failed("Admin access required".forbidden())
     }
 }
 
+// Condition to check if the user is the owner of a resource
+fun isOwner(resourceIdParam: Parameter<String, *>) = condition("isOwner") {
+    val resourceId = request[resourceIdParam]
+    val resource = getResourceById(resourceId)
+    
+    if (resource?.ownerId == request.principal.value) {
+        ConditionResult.Successful
+    } else {
+        ConditionResult.Failed("You don't have permission to access this resource".forbidden())
+    }
+}
+
 // Apply conditions to endpoints
-"admin" / {
-    // This endpoint requires admin privileges
-    GET("dashboard") onlyIf isAdmin isHandledBy { 
-        getAdminDashboard().ok 
+routes {
+    authenticated {
+        // Admin-only endpoint
+        "admin" / {
+            GET("dashboard") onlyIf isAdmin isHandledBy { 
+                getAdminDashboard().ok 
+            }
+        }
+        
+        // User can only access their own posts
+        "posts" / postId / {
+            GET() onlyIf isOwner(postId) isHandledBy { getPost() }
+            PUT() onlyIf isOwner(postId) with body<UpdatePostRequest>() isHandledBy { updatePost() }
+            DELETE() onlyIf isOwner(postId) isHandledBy { deletePost() }
+        }
+    }
+}
+```
+
+## Handler Functions
+
+Snitch provides a clean way to define handler functions that can access the request context:
+
+```kotlin
+// Define a path parameter
+val postId by path()
+
+// Handler for getting a post
+private val getPost by handling {
+    postsRepository().getPost(PostId(request[postId]))
+        ?.toResponse?.ok
+        ?: "Post not found".notFound()
+}
+
+// Handler for deleting a post
+private val deletePost by handling {
+    postsRepository().deletePost(request.principal, PostId(request[postId]))
+        .noContent
+}
+
+// Handler for getting all posts for the current user
+private val getPosts by handling {
+    postsRepository().getPosts(request.principal)
+        .toResponse.ok
+}
+
+// Handler with request body parsing
+private val createPost by parsing<CreatePostRequest>() handling {
+    postsRepository().putPost(
+        CreatePostAction(
+            request.principal,
+            PostTitle(body.title),
+            PostContent(body.content),
+        )
+    ).mapSuccess {
+        SuccessfulCreation(value).created
+    }.mapFailure {
+        FailedCreation().badRequest()
+    }
+}
+
+// Usage in routes
+routes {
+    authenticated {
+        "posts" / {
+            GET() isHandledBy getPosts
+            POST() with body<CreatePostRequest>() isHandledBy createPost
+            
+            postId / {
+                GET() isHandledBy getPost
+                DELETE() isHandledBy deletePost
+            }
+        }
     }
 }
 ```

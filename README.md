@@ -135,7 +135,7 @@ The parameters are validated and safe to use. If they are not valid the request 
 #### Middleware
 Here's how you would define a simple logger middleware
 ```kotlin
-val Router.log get() = using {
+val Router.log get() = decorateWith {
         logger().info("Begin Request: ${request.method.name} ${request.path}")
         next().also {
             logger().info("End Request: ${request.method.name} ${request.path}")

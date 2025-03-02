@@ -202,6 +202,7 @@ val authenticated = decorateWith(authToken) {
         null -> "Unauthorized".unauthorized()
         else -> "Unauthorized".unauthorized()
     }
+
 }
 
 // Role-based authorization
@@ -433,4 +434,4 @@ cache(Duration.ofMinutes(5)) {
 }
 ```
 
-By mastering Snitch's decoration system, you can implement sophisticated middleware chains with minimal code, keeping your routes clean and focused on business logic. Decorations provide a powerful, composable way to handle cross-cutting concerns in your application. 
+By mastering Snitch's decoration system, you can implement sophisticated middleware chains with minimal code, keeping your routes clean and focused on business logic. Decorations provide a powerful, composable way to handle cross-cutting concerns in your application. By mastering Snitch's decoration system, you can implement sophisticated middleware chains with minimal code, keeping your routes clean and focused on business logic. Decorations provide a powerful, composable way to handle cross-cutting concerns in your application. 
