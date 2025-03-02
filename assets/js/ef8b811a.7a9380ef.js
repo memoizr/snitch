@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkguides=self.webpackChunkguides||[]).push([[8947],{4219:e=>{e.exports=JSON.parse('{"authors":[{"name":"Snitch Team","title":"Snitch Framework Maintainers","url":"https://github.com/memoizr/snitch","page":{"permalink":"/blog/authors/snitch-team"},"imageURL":"https://github.com/memoizr.png","key":"snitch-team","count":10}]}')}}]);
