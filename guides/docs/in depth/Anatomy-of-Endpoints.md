@@ -1,4 +1,4 @@
-# Anatomy of the Snitch Endpoint DSL
+# Endpoint DSL
 
 Endpoints are the fundamental building blocks of your API in Snitch. This guide explores the internal structure of the Endpoint DSL, explaining how endpoints are defined, configured, and composed to create expressive, type-safe APIs.
 

@@ -255,5 +255,5 @@ Now that you have a basic understanding of Snitch, explore:
 4. **Coroutines**: Use Kotlin coroutines for asynchronous operations
 
 For more details, check out:
-- [Snitch Documentation](Docs.md)
+- [Snitch Documentation](../Docs.md)
 - [Tutorials](tutorials/)

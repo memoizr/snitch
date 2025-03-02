@@ -194,7 +194,7 @@ onlyIf(hasAdminRole) {
 }
 ```
 
-For more details, check out our [Mastering Snitch Conditions](guides/docs/tutorials/Mastering-Snitch-Conditions.md) tutorial.
+For more details, check out our [Mastering Snitch Conditions](guides/docs/in depth/Mastering-Snitch-Conditions.md) tutorial.
 
 #### Fully automated documentation
 Snitch outputs OpenAPI 3.0 docs. Absolutely any of the inputs and any of the outputs are documented automatically, even response codes. No work or setup is required from the user to achieve this. Snitch allows the user to specify whether to serve the documentation on a given route. This is an interactive page based on Swagger-UI that allows a viewer to interact with the API, authenticate, and make any request and see the responses. You can optionally annotate individual fields of requests, responses or parameters to add additional descriptions or provide example values so that it'd be straightforward to use the API through the documentation page, as requests would be pre-populated with such example values. Documentation can either be served on the same service, or given to a doc aggregator that allows to provide a unified API for multiple services. Request, Response and parameter types are automatically generated exclusively from type information from the Kotlin language, hence they always represent the actual behaviour of the API.
@@ -225,12 +225,12 @@ Snitch lets you use coroutine code seamlessly. For more information see the [doc
 The library is actually very small and a complete detailed overview can be had in a matter of hours. Powerful features such as guards, middleware and others are built on top of a small number of core concepts, and really there isn't any magic involved. The codebase only has a few thousand lines of code. Given a fluency of the Kotlin language it should be one of the easiest frameworks to truly understand how it works. Really it's just a thin wrapper around the embedded web server.
 
 #### Learning resources
-- [Quick Start Guide](guides/docs/QuickStart.md) - Get up and running in minutes
-- [Artifacts Overview](guides/docs/Artifacts.md) - Learn about all Snitch modules
-- [Using Shank](guides/docs/UsingShank.md) - Dependency injection guide
-- [Advanced Shank Patterns](guides/docs/ShankPatterns.md) - Design patterns for Shank
+- [Quick Start Guide](guides/docs/tutorials/QuickStart.md) - Get up and running in minutes
+- [Artifacts Overview](guides/docs/resources/Artifacts.md) - Learn about all Snitch modules
+- [Using Shank](guides/docs/tutorials/UsingShank.md) - Dependency injection guide
+- [Advanced Shank Patterns](guides/docs/tutorials/ShankPatterns.md) - Design patterns for Shank
 - [Documentation](guides/docs/Docs.md) - Full library documentation
-- [Tutorials](guides/docs/tutorials/README.md) - Step-by-step guides
+- [Tutorials](guides/docs/in depth/README.md) - Step-by-step guides
 - [Example Project](example) - A complete reference implementation of a Reddit-like service
   
 The example project demonstrates production-like qualities such as:

@@ -1,4 +1,4 @@
-# Anatomy of the Snitch Handler DSL
+# Handler DSL
 
 Handlers are the core of your API's business logic in Snitch. They process incoming requests, execute application code, and produce responses. This guide explores the inner workings of Snitch's Handler DSL, explaining how handlers are defined, composed, and integrated with the rest of the framework.
 

@@ -1,4 +1,4 @@
-# Mastering Snitch Conditions
+# Conditions
 
 Conditions are one of Snitch's most powerful features, allowing you to implement sophisticated access control and request validation with minimal code. This tutorial will guide you through everything you need to know about conditions, from basic usage to advanced patterns.
 

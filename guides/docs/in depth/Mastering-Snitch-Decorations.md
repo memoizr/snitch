@@ -1,4 +1,4 @@
-# Mastering Snitch Decorations
+# Decorations
 
 Decorations are a powerful feature in Snitch that allow you to modify request handling behavior across multiple routes. They provide a clean, composable way to implement cross-cutting concerns like logging, authentication, transaction management, and more. This tutorial will guide you through everything you need to know about decorations, from basic usage to advanced patterns.
 

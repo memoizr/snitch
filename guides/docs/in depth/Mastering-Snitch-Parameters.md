@@ -1,4 +1,4 @@
-# Mastering Snitch Parameters
+# Parameters
 
 Parameters are a fundamental part of HTTP communication, allowing clients to send data to your server. Snitch provides an expressive, type-safe approach to handling various types of parameters including path parameters, query parameters, headers, and request bodies.
 

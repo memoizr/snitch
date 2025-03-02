@@ -1,4 +1,4 @@
-# Anatomy of the Snitch Validator DSL
+# Validator DSL
 
 Validators are a cornerstone of Snitch's design, ensuring that HTTP inputs are properly validated and transformed into domain types. This guide explores the internal workings of the validator DSL, explaining each component and how they fit together.
 

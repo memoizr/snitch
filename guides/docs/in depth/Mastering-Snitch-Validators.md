@@ -1,4 +1,4 @@
-# Mastering Snitch Validators
+# Validators
 
 Validators are a core feature of Snitch that ensure your HTTP inputs are properly validated, transformed, and documented. This guide will walk you through everything you need to know about validators, from basic usage to advanced customization.
 

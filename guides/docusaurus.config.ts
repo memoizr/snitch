@@ -37,6 +37,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          sidebarCollapsed: false,
           editUrl:
             'https://github.com/memoizr/snitch/tree/master/guides/',
         },
