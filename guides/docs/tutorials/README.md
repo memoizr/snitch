@@ -6,6 +6,7 @@ Welcome to the Snitch tutorials! This section contains step-by-step guides to he
 - [Quick Start Guide](../QuickStart.md) - Set up a basic Snitch application in minutes
 - [Artifacts Overview](../Artifacts.md) - Learn about all the modules in the Snitch ecosystem
 - [Using Shank with Snitch](../UsingShank.md) - Dependency injection guide
+- [Advanced Shank Patterns](../ShankPatterns.md) - Design patterns for effective dependency management
 
 ## Core Concepts
 - [Anatomy of Endpoints](Anatomy-of-Endpoints.md) - Understanding the structure of endpoints in Snitch

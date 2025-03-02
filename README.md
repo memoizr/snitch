@@ -228,6 +228,7 @@ The library is actually very small and a complete detailed overview can be had i
 - [Quick Start Guide](guides/docs/QuickStart.md) - Get up and running in minutes
 - [Artifacts Overview](guides/docs/Artifacts.md) - Learn about all Snitch modules
 - [Using Shank](guides/docs/UsingShank.md) - Dependency injection guide
+- [Advanced Shank Patterns](guides/docs/ShankPatterns.md) - Design patterns for Shank
 - [Documentation](guides/docs/Docs.md) - Full library documentation
 - [Tutorials](guides/docs/tutorials/README.md) - Step-by-step guides
 - [Example Project](example) - A complete reference implementation of a Reddit-like service
