@@ -1,5 +1,12 @@
 import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Properties
+
+// Load version from properties file
+val versionPropsFile = file("version.properties")
+val versionProps = Properties()
+versionPropsFile.inputStream().use { versionProps.load(it) }
+val projectVersion = versionProps.getProperty("version")
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -10,7 +17,7 @@ plugins {
 
 allprojects {
     group = "io.github.memoizr"
-    version = "2.0.0"
+    version = projectVersion
 
     repositories {
         mavenCentral()
@@ -38,10 +45,10 @@ subprojects {
     if (project.name != "example") {
         apply(plugin = "com.vanniktech.maven.publish")
         mavenPublishing {
-            coordinates("io.github.memoizr", "snitch-${project.name}", "1.0.0")
+            coordinates("io.github.memoizr", "snitch-${project.name}", projectVersion)
 
             pom {
-                name.set("Snitchg")
+                name.set("Snitch")
                 description.set("A web framework for Kotlin.")
                 inceptionYear.set("2020")
                 url.set("https://memoizr.github.io/snitch")
@@ -72,9 +79,47 @@ subprojects {
     }
 }
 
+tasks.register("updateVersionInDocs") {
+    group = "documentation"
+    description = "Updates version references in documentation files"
+    
+    doLast {
+        val version = project.version.toString()
+        val regex = """implementation\("io\.github\.memoizr:snitch-.*?:(\d+\.\d+\.\d+)"\)""".toRegex()
+        val testRegex = """testImplementation\("io\.github\.memoizr:snitch-.*?:(\d+\.\d+\.\d+)"\)""".toRegex()
+        var totalUpdated = 0
+        
+        // Find all markdown files in the guides directory
+        fileTree("guides").matching {
+            include("**/*.md")
+        }.forEach { file ->
+            val content = file.readText()
+            
+            // Replace version in implementation strings
+            val updatedContent = content.replace(regex) { matchResult ->
+                val artifact = matchResult.value.substringAfter("snitch-").substringBefore(":")
+                "implementation(\"io.github.memoizr:snitch-$artifact:$version\")"
+            }.replace(testRegex) { matchResult ->
+                val artifact = matchResult.value.substringAfter("snitch-").substringBefore(":")
+                "testImplementation(\"io.github.memoizr:snitch-$artifact:$version\")"
+            }
+            
+            // Only update the file if changes were made
+            if (content != updatedContent) {
+                file.writeText(updatedContent)
+                println("Updated version references in: ${file.relativeTo(projectDir)}")
+                totalUpdated++
+            }
+        }
+        
+        println("Finished updating version references in $totalUpdated files.")
+    }
+}
+
 tasks.register("llmdocs") {
     group = "documentation"
     description = "Concatenates all .md files from the guides/docs directory into a single SnitchLLMDocs.md file"
+    dependsOn("updateVersionInDocs")
 
     doLast {
         val outputFile = file("SnitchLLMDocs.md")
