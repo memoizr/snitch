@@ -513,7 +513,5 @@ Whether you're building a simple application with H2 or a complex system with Po
 ## Further Reading
 
 - [Exposed Documentation](https://github.com/JetBrains/Exposed/wiki)
-- [Snitch Exposed API Reference](/api/exposed)
 - [H2 Database Engine](https://h2database.com/html/main.html)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [Using Snitch with Exposed (Tutorial)](tutorials/UsingSnichWithExposed.md)
