@@ -1051,6 +1051,482 @@ Snitch was developed keeping a variety of other frameworks in mind, shamelessly 
 
 ---
 
+## From: DatabaseIntegration.md
+
+# Database Integration Tutorial
+
+This tutorial walks you through setting up a simple Snitch application with database integration using the Exposed modules. You'll learn how to connect to a database, define tables, implement CRUD operations, and handle transactions.
+
+## Prerequisites
+
+- Basic knowledge of Kotlin and Snitch
+- Gradle or Maven build system
+- JDK 11 or higher
+
+## Setup
+
+Add the required dependencies to your `build.gradle.kts`:
+
+```kotlin
+dependencies {
+    implementation("io.github.memoizr:snitch-core:$snitchVersion")
+    implementation("io.github.memoizr:snitch-exposed:$snitchVersion")
+    
+    // Choose one (or both) of these database modules
+    implementation("io.github.memoizr:snitch-exposed-h2:$snitchVersion")      // For development/testing
+    implementation("io.github.memoizr:snitch-exposed-postgres:$snitchVersion") // For production
+}
+```
+
+## Step 1: Configure Database Connection
+
+Let's start by setting up a database connection. We'll use H2 for development:
+
+```kotlin
+import snitch.exposed.h2.h2ConnectionConfig
+import snitch.exposed.ExposedModule
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.SchemaUtils
+
+// Create an in-memory H2 database
+val config = h2ConnectionConfig()
+ExposedModule.connection(config)
+
+// Initialize schema
+transaction {
+    // We'll define tables in the next step
+}
+```
+
+For a production PostgreSQL setup, you would use:
+
+```kotlin
+import snitch.exposed.postgres.postgresConnectionConfig
+
+val prodConfig = postgresConnectionConfig(
+    host = "localhost",
+    database = "myapp",
+    user = "dbuser",
+    password = "dbpassword"
+)
+ExposedModule.connection(prodConfig)
+```
+
+## Step 2: Define Domain Models and Tables
+
+Now, let's define our domain models and database tables:
+
+```kotlin
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.javatime.datetime
+import java.time.LocalDateTime
+
+// Domain models
+data class Task(
+    val title: String,
+    val description: String,
+    val completed: Boolean = false,
+    val dueDate: LocalDateTime? = null
+)
+
+data class TaskWithId(
+    val id: Int,
+    val title: String,
+    val description: String,
+    val completed: Boolean = false,
+    val dueDate: LocalDateTime? = null
+)
+
+// Database table
+object Tasks : Table("tasks") {
+    val id = integer("id").autoIncrement()
+    val title = varchar("title", 255)
+    val description = text("description")
+    val completed = bool("completed").default(false)
+    val dueDate = datetime("due_date").nullable()
+    
+    override val primaryKey = PrimaryKey(id)
+}
+
+// Initialize the schema
+transaction {
+    SchemaUtils.create(Tasks)
+}
+```
+
+## Step 3: Implement CRUD Operations
+
+Let's implement basic CRUD operations for our tasks:
+
+```kotlin
+import snitch.exposed.*
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+
+class TaskRepository {
+    // Create a new task
+    fun createTask(task: Task): Int = transaction {
+        Tasks.insert(task)[Tasks.id]
+    }
+    
+    // Get all tasks
+    fun getAllTasks(): List<TaskWithId> = transaction {
+        Tasks.findAll<TaskWithId>()
+    }
+    
+    // Get a task by ID
+    fun getTaskById(id: Int): TaskWithId? = transaction {
+        Tasks.findOneOrNull<TaskWithId> { Tasks.id eq id }
+    }
+    
+    // Update a task
+    fun updateTask(task: TaskWithId): Boolean = transaction {
+        val updated = Tasks.updateWhere(task) { Tasks.id eq task.id }
+        updated > 0
+    }
+    
+    // Delete a task
+    fun deleteTask(id: Int): Boolean = transaction {
+        val deleted = Tasks.deleteWhere { Tasks.id eq id }
+        deleted > 0
+    }
+    
+    // Get completed tasks
+    fun getCompletedTasks(): List<TaskWithId> = transaction {
+        Tasks.findAll<TaskWithId> { Tasks.completed eq true }
+    }
+}
+```
+
+## Step 4: Integrate with Snitch Routes
+
+Now let's create endpoints to interact with our tasks:
+
+```kotlin
+import snitch.router.routes
+import snitch.parameters.path
+import snitch.validation.ofInt
+import snitch.exposed.withTransaction
+
+val taskRepository = TaskRepository()
+val id by path(ofInt)
+
+val taskRoutes = routes {
+    // Wrap all routes in a transaction
+    withTransaction {
+        // Get all tasks
+        GET("tasks") isHandledBy {
+            taskRepository.getAllTasks().ok
+        }
+        
+        // Get a specific task
+        GET("tasks" / id) isHandledBy {
+            val taskId = request[id]
+            val task = taskRepository.getTaskById(taskId)
+            task?.ok ?: "Task not found".notFound()
+        }
+        
+        // Create a new task
+        POST("tasks") with body<Task>() isHandledBy {
+            val task = body
+            val newTaskId = taskRepository.createTask(task)
+            val createdTask = taskRepository.getTaskById(newTaskId)
+            createdTask!!.created
+        }
+        
+        // Update a task
+        PUT("tasks" / id) with body<Task>() isHandledBy {
+            val taskId = request[id]
+            val updatedTask = TaskWithId(
+                id = taskId,
+                title = body.title,
+                description = body.description,
+                completed = body.completed,
+                dueDate = body.dueDate
+            )
+            
+            val success = taskRepository.updateTask(updatedTask)
+            if (success) {
+                val task = taskRepository.getTaskById(taskId)
+                task!!.ok
+            } else {
+                "Task not found".notFound()
+            }
+        }
+        
+        // Delete a task
+        DELETE("tasks" / id) isHandledBy {
+            val taskId = request[id]
+            val deleted = taskRepository.deleteTask(taskId)
+            if (deleted) {
+                "Task deleted".ok
+            } else {
+                "Task not found".notFound()
+            }
+        }
+        
+        // Get completed tasks
+        GET("tasks/completed") isHandledBy {
+            taskRepository.getCompletedTasks().ok
+        }
+    }
+}
+```
+
+## Step 5: Start the Application
+
+Finally, let's set up the main application class:
+
+```kotlin
+import snitch.undertow.UndertowSnitchService
+import snitch.parsers.GsonJsonParser
+import snitch.config.SnitchConfig
+
+fun main() {
+    // Set up the database
+    val config = h2ConnectionConfig()
+    ExposedModule.connection(config)
+    
+    // Initialize schema
+    transaction {
+        SchemaUtils.create(Tasks)
+    }
+    
+    // Create and start the server
+    val service = UndertowSnitchService(
+        GsonJsonParser,
+        SnitchConfig(
+            SnitchConfig.Service(
+                port = 8080
+            )
+        )
+    )
+    
+    service.onRoutes(taskRoutes).start()
+    println("Server started on http://localhost:8080")
+}
+```
+
+## Step 6: Test Your Application
+
+You can now run your application and test the endpoints:
+
+1. Create a task:
+```bash
+curl -X POST http://localhost:8080/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Learn Snitch Exposed","description":"Complete the database tutorial","completed":false}'
+```
+
+2. Get all tasks:
+```bash
+curl http://localhost:8080/tasks
+```
+
+3. Get a specific task:
+```bash
+curl http://localhost:8080/tasks/1
+```
+
+4. Update a task:
+```bash
+curl -X PUT http://localhost:8080/tasks/1 \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Learn Snitch Exposed","description":"Completed the database tutorial","completed":true}'
+```
+
+5. Delete a task:
+```bash
+curl -X DELETE http://localhost:8080/tasks/1
+```
+
+## Advanced Features
+
+Let's explore some advanced features of Snitch Exposed.
+
+### Working with Value Classes
+
+```kotlin
+// Define a value class for stronger typing
+@JvmInline
+value class TaskId(val value: Int)
+
+// Domain model using the value class
+data class TaskWithValueId(
+    val id: TaskId,
+    val title: String,
+    val description: String,
+    val completed: Boolean = false,
+    val dueDate: LocalDateTime? = null
+)
+
+// Using the value class in our repository
+fun getTaskById(id: Int): TaskWithValueId? = transaction {
+    Tasks.findOneOrNull<TaskWithValueId> { Tasks.id eq id }
+}
+
+// The mapping between Int and TaskId happens automatically
+```
+
+### Custom Type Mapping
+
+```kotlin
+// Let's say we want to store task status as a string in the database
+// but use an enum in our domain model
+enum class TaskStatus { TODO, IN_PROGRESS, DONE }
+
+// Define custom mapping
+AutoMapper.customMapping<String, TaskStatus>(
+    from = { str -> TaskStatus.valueOf(str) },
+    to = { status -> status.name }
+)
+
+// Now we can use TaskStatus directly in our domain model
+data class TaskWithStatus(
+    val id: Int,
+    val title: String,
+    val description: String,
+    val status: TaskStatus
+)
+
+// And have it automatically mapped to/from String in the database
+object TasksWithStatus : Table("tasks_with_status") {
+    val id = integer("id").autoIncrement()
+    val title = varchar("title", 255)
+    val description = text("description")
+    val status = varchar("status", 20)
+    
+    override val primaryKey = PrimaryKey(id)
+}
+```
+
+### Batch Operations
+
+For better performance when working with multiple entities:
+
+```kotlin
+fun createTasks(tasks: List<Task>): List<Int> = transaction {
+    Tasks.batchInsert(tasks) { task ->
+        this[Tasks.title] = task.title
+        this[Tasks.description] = task.description
+        this[Tasks.completed] = task.completed
+        this[Tasks.dueDate] = task.dueDate
+    }.map { it[Tasks.id] }
+}
+```
+
+### Working with Relationships
+
+Let's add a related entity to our tasks:
+
+```kotlin
+// Domain models
+data class Tag(val name: String)
+data class TagWithId(val id: Int, val name: String)
+data class TaskWithTags(
+    val id: Int,
+    val title: String,
+    val description: String,
+    val completed: Boolean,
+    val dueDate: LocalDateTime?,
+    val tags: List<TagWithId>
+)
+
+// Database tables
+object Tags : Table("tags") {
+    val id = integer("id").autoIncrement()
+    val name = varchar("name", 100).uniqueIndex()
+    
+    override val primaryKey = PrimaryKey(id)
+}
+
+object TaskTags : Table("task_tags") {
+    val taskId = integer("task_id") references Tasks.id
+    val tagId = integer("tag_id") references Tags.id
+    
+    override val primaryKey = PrimaryKey(taskId, tagId)
+}
+
+// Repository methods for handling relationships
+fun getTaskWithTags(taskId: Int): TaskWithTags? = transaction {
+    val task = Tasks.findOneOrNull<TaskWithId> { Tasks.id eq taskId } ?: return@transaction null
+    
+    val tags = (TaskTags innerJoin Tags)
+        .select { TaskTags.taskId eq taskId }
+        .map { TagWithId(it[Tags.id], it[Tags.name]) }
+    
+    TaskWithTags(
+        id = task.id,
+        title = task.title,
+        description = task.description,
+        completed = task.completed,
+        dueDate = task.dueDate,
+        tags = tags
+    )
+}
+
+fun addTagToTask(taskId: Int, tagId: Int) = transaction {
+    TaskTags.insert {
+        it[TaskTags.taskId] = taskId
+        it[TaskTags.tagId] = tagId
+    }
+}
+```
+
+## Best Practices
+
+1. **Separate concerns**: Place database-related code in repositories, keeping your routes clean.
+
+2. **Use transactions appropriately**: Wrap related operations in transactions for data consistency.
+
+3. **Error handling**: Implement proper exception handling:
+
+```kotlin
+withTransaction {
+    POST("tasks") with body<Task>() isHandledBy {
+        try {
+            val task = body
+            val id = taskRepository.createTask(task)
+            TaskResponse(id, task.title).created
+        } catch (e: Exception) {
+            logger.error("Error creating task", e)
+            "Failed to create task: ${e.message}".serverError()
+        }
+    }
+}
+```
+
+4. **Testing**: Use H2 in-memory databases for testing:
+
+```kotlin
+@BeforeEach
+fun setup() {
+    // Create a fresh in-memory database for each test
+    val config = h2ConnectionConfig(name = "test_${UUID.randomUUID()}")
+    ExposedModule.connection(config)
+    
+    transaction {
+        SchemaUtils.create(Tasks, Tags, TaskTags)
+    }
+}
+```
+
+5. **Managing connections**:
+   - For development and testing, H2 in-memory is convenient
+   - For production, use PostgreSQL with connection pooling
+   - Always handle database connection lifecycle properly
+
+## Conclusion
+
+You now have a fully functional Snitch application with database integration. The Exposed modules provide a type-safe way to work with databases while eliminating much of the boilerplate typically required for database operations.
+
+For more advanced uses, refer to:
+- [Database Integration Guide](../resources/Database-Integration.md)
+- [Exposed documentation](https://github.com/JetBrains/Exposed/wiki)
+- [Example projects in the Snitch repository](https://github.com/memoizr/snitch/tree/master/example)
+
+---
+
 ## From: QuickStart.md
 
 # Snitch Quick Start Guide
@@ -4260,6 +4736,652 @@ Remember that validators aren't just about rejecting invalid inputs—they're ab
 
 ---
 
+## From: Database-Integration-With-Exposed.md
+
+# In-Depth: Database Integration with Exposed
+
+This document provides an in-depth exploration of Snitch's integration with the Exposed SQL library, focusing on the technical aspects and internal workings of the implementation.
+
+## Architecture Overview
+
+Snitch's Exposed integration consists of three main modules:
+
+1. **exposed**: Core module with the foundational abstractions and utilities
+2. **exposed-h2**: H2 database adapter for testing and development
+3. **exposed-postgres**: PostgreSQL adapter for production use
+
+The architecture follows these design principles:
+
+- **Type safety**: Leveraging Kotlin's type system for database operations
+- **Automatic mapping**: Using reflection to minimize boilerplate
+- **Transaction management**: Integrating with Snitch's routing system
+- **Database agnosticism**: Core abstractions work with any supported database
+
+## Core Components
+
+### DatabaseConnectionConfig
+
+The `DatabaseConnectionConfig` class serves as the primary configuration point:
+
+```kotlin
+data class DatabaseConnectionConfig(
+    val url: String,
+    val driver: String,
+    val user: String,
+    val password: String,
+    val setupConnection: ((Database) -> Unit)? = null,
+    val databaseConfig: DatabaseConfig? = null,
+    val manager: (Database) -> TransactionManager = { db -> TransactionManager.manager.defaultDatabase = db }
+)
+```
+
+This configuration is used to establish a database connection and configure transaction management.
+
+### ExposedModule
+
+The `ExposedModule` provides dependency injection support via Shank:
+
+```kotlin
+object ExposedModule {
+    private val connectionProvider = single<DatabaseConnectionConfig, Database> { config ->
+        Database.connect(
+            url = config.url,
+            driver = config.driver,
+            user = config.user,
+            password = config.password,
+            databaseConfig = config.databaseConfig
+        ).also {
+            config.setupConnection?.invoke(it)
+            config.manager(it)
+        }
+    }
+
+    fun connection(config: DatabaseConnectionConfig): Database = connectionProvider(config)
+}
+```
+
+This creates a singleton database connection that can be shared throughout your application.
+
+### Transaction Management
+
+The `withTransaction` decorator integrates transactions with route handlers:
+
+```kotlin
+fun Routes.withTransaction(builder: TransactionalRoutes.() -> Unit) {
+    val routes = TransactionalRoutes().apply(builder)
+    routes.endpoints.forEach { addEndpoint(it) }
+}
+
+class TransactionalRoutes : Routes() {
+    override fun <T : Any> addEndpoint(endpoint: Endpoint<T>) {
+        val wrappedHandler = { request: Request<T> ->
+            transaction {
+                endpoint.handler(request)
+            }
+        }
+        super.addEndpoint(endpoint.copy(handler = wrappedHandler))
+    }
+}
+```
+
+This approach ensures that:
+1. Each route handler executes within a transaction
+2. Exceptions trigger automatic rollback
+3. Successful execution commits the transaction
+
+### Object Mapping
+
+The core of the automatic mapping system resides in the `Mapping.kt` file, which provides:
+
+1. **Type Conversion**: Converting between domain models and database entities
+2. **Property Mapping**: Matching properties by name between objects
+3. **Value Class Handling**: Supporting Kotlin's value classes
+4. **Custom Mapping**: Allowing user-defined conversions
+
+The mapping system uses Kotlin reflection to:
+- Inspect property names and types
+- Match database columns to model properties
+- Perform appropriate type conversions
+- Handle nested objects and collections
+
+Key extension functions:
+
+```kotlin
+// Convert between similar objects
+inline fun <reified R : Any> Any.to(): R
+
+// Map ResultRow to domain model
+fun <T : ColumnSet, R : Any> ResultRow.to(from: T, to: KClass<R>): R
+
+// Insert domain model into table
+fun <R : Any> Table.insert(value: R, customize: Table.(UpdateBuilder<*>) -> Unit = {}): InsertStatement<Number>
+
+// Find all entities and map to domain model
+inline fun <reified R : Any> Table.findAll(e: SqlExpressionBuilder.() -> Op<Boolean> = { Op.TRUE })
+```
+
+### Schema Management
+
+The `ExposedDatabase` class provides utilities for schema management:
+
+```kotlin
+class ExposedDatabase(
+    private val connection: Database,
+    private vararg val tables: Table
+) {
+    fun createSchema() = transaction(connection) {
+        SchemaUtils.create(*tables)
+    }
+    
+    fun dropSchema() = transaction(connection) {
+        SchemaUtils.drop(*tables)
+    }
+    
+    fun addMissingColumns() = transaction(connection) {
+        SchemaUtils.addMissingColumnsStatements(*tables)
+    }
+}
+```
+
+## Database-Specific Implementations
+
+### H2 Integration
+
+The `exposed-h2` module provides a simplified API for H2 database connections:
+
+```kotlin
+fun h2ConnectionConfig(
+    name: String = "test",
+    inMemory: Boolean = true,
+    directory: String? = null,
+    url: String = buildH2Url(name, inMemory, directory),
+    user: String = "sa",
+    password: String = ""
+): DatabaseConnectionConfig {
+    return DatabaseConnectionConfig(
+        url = url,
+        driver = "org.h2.Driver",
+        user = user,
+        password = password
+    )
+}
+
+private fun buildH2Url(name: String, inMemory: Boolean, directory: String?): String {
+    return if (inMemory) {
+        "jdbc:h2:mem:$name;DB_CLOSE_DELAY=-1;"
+    } else {
+        "jdbc:h2:${directory ?: "~"}/$name;DB_CLOSE_DELAY=-1;"
+    }
+}
+```
+
+This provides sensible defaults for H2 databases, particularly useful for:
+- Unit and integration testing with in-memory databases
+- Development environments with quick setup
+- Simple applications that don't need a separate database server
+
+### PostgreSQL Integration
+
+The `exposed-postgres` module supports PostgreSQL connections with advanced options:
+
+```kotlin
+fun postgresConnectionConfig(
+    host: String = "localhost",
+    port: Int = 5432,
+    database: String,
+    user: String,
+    password: String,
+    properties: Map<String, String> = emptyMap(),
+    url: String = buildPostgresUrl(host, port, database, properties),
+    dataSource: DataSource? = null
+): DatabaseConnectionConfig {
+    return if (dataSource != null) {
+        DatabaseConnectionConfig(
+            url = url,
+            driver = "org.postgresql.Driver",
+            user = user,
+            password = password,
+            setupConnection = { db ->
+                (db as DatabaseImpl).config.apply {
+                    this.dataSource = dataSource
+                }
+            }
+        )
+    } else {
+        DatabaseConnectionConfig(
+            url = url,
+            driver = "org.postgresql.Driver",
+            user = user,
+            password = password
+        )
+    }
+}
+```
+
+This supports:
+- Standard PostgreSQL connections
+- Connection pooling via HikariCP or other DataSource implementations
+- Advanced connection properties for tuning performance and security
+
+## Technical Deep Dive
+
+### Automatic Mapping Implementation
+
+The core mapping functionality uses Kotlin reflection to inspect classes and convert between them:
+
+```kotlin
+fun <R : Any> Any.to(target: KClass<R>): R {
+    if (this::class == target) return this as R
+    if (target.isValue) return mapValueClass(target, this) as R
+
+    val members = this::class.members.toList().map { it.name to it }.toMap()
+    val constructor = target.constructors.first()
+    
+    try {
+        val args = constructor.parameters.map {
+            val sourceValue = members[it.name]?.call(this)?.unwrap()
+            val targetClass = it.type.classifier as KClass<*>
+
+            it to if (sourceValue == null) {
+                null
+            } else {
+                // Handle different mapping scenarios...
+            }
+        }
+        
+        val instance = constructor.callBy(
+            args.toMap().filterNot { (!it.key.type.isMarkedNullable && it.value == null) }
+        )
+        return instance
+    } catch (e: Exception) {
+        println("Error mapping $this to ${target}")
+        throw e
+    }
+}
+```
+
+This complex system handles various mapping scenarios:
+1. Direct mapping of identical types
+2. Value class mapping
+3. Collection mapping (List/Set)
+4. Custom mapping via the AutoMapper
+5. Recursive mapping of nested objects
+
+### Transaction Implementation
+
+The transaction integration leverages Exposed's transaction API:
+
+```kotlin
+inline fun <T> transaction(
+    statement: Transaction.() -> T
+): T {
+    return org.jetbrains.exposed.sql.transactions.transaction {
+        try {
+            statement()
+        } catch (e: Exception) {
+            rollback()
+            throw e
+        }
+    }
+}
+```
+
+When combined with Snitch's routing:
+
+```kotlin
+class TransactionalRoutes : Routes() {
+    override fun <T : Any> addEndpoint(endpoint: Endpoint<T>) {
+        val wrappedHandler = { request: Request<T> ->
+            transaction {
+                endpoint.handler(request)
+            }
+        }
+        super.addEndpoint(endpoint.copy(handler = wrappedHandler))
+    }
+}
+```
+
+This ensures that:
+1. Every request handler executes within a transaction
+2. Exceptions trigger transaction rollback
+3. Successful execution commits the transaction
+4. The transaction spans the entire request handling process
+
+### Value Class Support
+
+Value classes receive special handling to maintain type safety:
+
+```kotlin
+private fun mapValueClass(targetClass: KClass<*>, sourceValue: Any) = try {
+    val first = targetClass.constructors.first()
+    val kClass = first.parameters.first().type.classifier as KClass<*>
+    if (kClass != sourceValue::class) {
+        (
+            mapping[sourceValue::class]?.from?.invoke(sourceValue)
+                ?: mapping[kClass]?.to?.invoke(sourceValue)
+            )
+            ?.wrap(targetClass)
+    } else {
+        first.call(sourceValue)
+    }
+} catch (e: Exception) {
+    println("Error instantiating value $sourceValue to $targetClass")
+    throw e
+}
+
+fun Any.unwrap() = if (this::class.isValue) this::class.members.first().call(this) else this
+fun Any.wrap(target: KClass<*>) = if (target.isValue) target.constructors.first().call(this) else this
+```
+
+This allows transparent conversion between primitive types and their value class wrappers.
+
+### Custom Type Mapping System
+
+The `AutoMapper` provides a registry for custom type conversions:
+
+```kotlin
+object AutoMapper {
+    val mapping = mutableMapOf<KClass<*>, Mapper<Any, Any>>()
+
+    inline fun <reified FROM, TO> customMapping(noinline from: (FROM) -> TO, noinline to: (TO) -> FROM) {
+        mapping[FROM::class] = Mapper(from, to) as Mapper<Any, Any>
+    }
+}
+
+data class Mapper<FROM, TO>(val from: (FROM) -> TO, val to: (TO) -> FROM)
+```
+
+This registry is consulted during the mapping process to apply custom conversions when needed.
+
+## Performance Considerations
+
+### Connection Pooling
+
+For production use, connection pooling is essential:
+
+```kotlin
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+
+fun createConnectionPool(
+    url: String,
+    user: String,
+    password: String,
+    maxPoolSize: Int = 10
+): DataSource {
+    val config = HikariConfig().apply {
+        jdbcUrl = url
+        username = user
+        this.password = password
+        maximumPoolSize = maxPoolSize
+        isAutoCommit = false
+        transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+    }
+    return HikariDataSource(config)
+}
+
+// Use with PostgreSQL
+val dataSource = createConnectionPool(
+    url = "jdbc:postgresql://localhost:5432/myapp",
+    user = "dbuser",
+    password = "password"
+)
+
+val config = postgresConnectionConfig(
+    url = "jdbc:postgresql://localhost:5432/myapp",
+    user = "dbuser",
+    password = "password",
+    dataSource = dataSource
+)
+```
+
+### Batch Operations
+
+For bulk operations, batch processing is significantly more efficient:
+
+```kotlin
+// Individual inserts - slow for large datasets
+userList.forEach { user ->
+    Users.insert(user)
+}
+
+// Batch insert - much faster
+Users.batchInsert(userList) { user ->
+    this[Users.name] = user.name
+    this[Users.email] = user.email
+}
+```
+
+### Query Optimization
+
+Strategic querying can dramatically improve performance:
+
+```kotlin
+// Inefficient: Loads all users then filters in memory
+val users = transaction {
+    Users.findAll<User>()
+}.filter { it.age > 30 }
+
+// Efficient: Filters at the database level
+val users = transaction {
+    Users.findAll<User> { Users.age greater 30 }
+}
+
+// Inefficient: N+1 query problem
+val usersWithPosts = transaction {
+    Users.findAll<User>().map { user ->
+        val posts = Posts.findAll<Post> { Posts.userId eq user.id } // One query per user!
+        UserWithPosts(user, posts)
+    }
+}
+
+// More efficient: Join in a single query
+val usersWithPosts = transaction {
+    (Users innerJoin Posts)
+        .select { Posts.userId eq Users.id }
+        .groupBy { it[Users.id] }
+        .map { (userId, rows) ->
+            val user = Users.findOne<User> { Users.id eq userId }
+            val posts = rows.map { Posts.to<Post>(it) }
+            UserWithPosts(user, posts)
+        }
+}
+```
+
+## Integration with Testing
+
+The Exposed modules are designed to integrate seamlessly with testing:
+
+```kotlin
+class UserRepositoryTest {
+    private lateinit var repository: UserRepository
+    
+    @BeforeEach
+    fun setup() {
+        // Create a unique in-memory database for test isolation
+        val config = h2ConnectionConfig(name = "test_${UUID.randomUUID()}")
+        ExposedModule.connection(config)
+        
+        transaction {
+            SchemaUtils.create(Users)
+        }
+        
+        repository = UserRepository()
+    }
+    
+    @Test
+    fun `create user stores data correctly`() {
+        // Arrange
+        val user = User("Test User", "test@example.com")
+        
+        // Act
+        val id = repository.createUser(user)
+        
+        // Assert
+        val retrievedUser = repository.getUserById(id)
+        assertEquals("Test User", retrievedUser?.name)
+        assertEquals("test@example.com", retrievedUser?.email)
+    }
+    
+    @AfterEach
+    fun tearDown() {
+        transaction {
+            SchemaUtils.drop(Users)
+        }
+    }
+}
+```
+
+This approach provides:
+- Test isolation with unique databases
+- Fast test execution with in-memory storage
+- Realistic database behavior for integration tests
+
+## Advanced Usage
+
+### Custom Column Types
+
+Exposed supports custom column types for complex data:
+
+```kotlin
+// Define a column type for storing JSONs
+class JsonColumnType<T : Any>(
+    private val klass: KClass<T>,
+    private val objectMapper: ObjectMapper
+) : ColumnType() {
+    override fun sqlType(): String = "TEXT"
+    
+    override fun valueFromDB(value: Any): T = when(value) {
+        is String -> objectMapper.readValue(value, klass.java)
+        else -> error("Unexpected value: $value of ${value::class.qualifiedName}")
+    }
+    
+    override fun notNullValueToDB(value: Any): String = objectMapper.writeValueAsString(value)
+}
+
+// Use it in a table
+object Users : Table("users") {
+    val id = integer("id").autoIncrement()
+    val name = varchar("name", 255)
+    val preferences = registerColumn<UserPreferences>("preferences", JsonColumnType(UserPreferences::class, objectMapper))
+    
+    override val primaryKey = PrimaryKey(id)
+}
+```
+
+### Database Migration Strategies
+
+For evolving schemas, you can use the Exposed utilities:
+
+```kotlin
+class DatabaseMigration(
+    private val connection: Database,
+    private vararg val tables: Table
+) {
+    fun migrateSchema() = transaction(connection) {
+        // Get statements to add missing columns
+        val statements = SchemaUtils.addMissingColumnsStatements(*tables)
+        
+        // Execute each statement
+        statements.forEach { statement ->
+            exec(statement)
+        }
+        
+        // Check for any table structure changes
+        for (table in tables) {
+            val existingIndices = exec("SHOW INDEX FROM ${table.tableName}") { rs ->
+                val indices = mutableListOf<String>()
+                while (rs.next()) {
+                    indices.add(rs.getString("Column_name"))
+                }
+                indices
+            } ?: emptyList()
+            
+            // Create any missing indices
+            table.indices.forEach { index ->
+                val columns = index.columns.joinToString(", ") { it.name }
+                if (!existingIndices.contains(columns)) {
+                    val indexType = if (index.unique) "UNIQUE" else ""
+                    exec("CREATE $indexType INDEX idx_${table.tableName}_${index.name} ON ${table.tableName}($columns)")
+                }
+            }
+        }
+    }
+}
+```
+
+### Repository Pattern Implementation
+
+A clean repository implementation with Snitch Exposed:
+
+```kotlin
+interface UserRepository {
+    fun findById(id: Int): User?
+    fun findAll(): List<User>
+    fun create(user: User): Int
+    fun update(user: User): Boolean
+    fun delete(id: Int): Boolean
+}
+
+class ExposedUserRepository : UserRepository {
+    override fun findById(id: Int): User? = transaction {
+        Users.findOneOrNull<UserEntity> { Users.id eq id }
+            ?.let { mapToDomain(it) }
+    }
+    
+    override fun findAll(): List<User> = transaction {
+        Users.findAll<UserEntity>()
+            .map { mapToDomain(it) }
+    }
+    
+    override fun create(user: User): Int = transaction {
+        val entity = mapToEntity(user)
+        Users.insert(entity)[Users.id]
+    }
+    
+    override fun update(user: User): Boolean = transaction {
+        val entity = mapToEntity(user)
+        val updated = Users.updateWhere(entity) { Users.id eq entity.id }
+        updated > 0
+    }
+    
+    override fun delete(id: Int): Boolean = transaction {
+        val deleted = Users.deleteWhere { Users.id eq id }
+        deleted > 0
+    }
+    
+    private fun mapToDomain(entity: UserEntity): User = User(
+        id = entity.id,
+        name = entity.name,
+        email = entity.email,
+        isActive = entity.status == "ACTIVE"
+    )
+    
+    private fun mapToEntity(domain: User): UserEntity = UserEntity(
+        id = domain.id,
+        name = domain.name,
+        email = domain.email,
+        status = if (domain.isActive) "ACTIVE" else "INACTIVE"
+    )
+}
+```
+
+## Conclusion
+
+Snitch's Exposed integration provides a powerful, flexible foundation for database operations in your applications. The combination of type safety, automatic mapping, and seamless transaction management creates a developer-friendly experience while maintaining the performance and flexibility needed for production applications.
+
+By understanding the internal workings of this integration, you can leverage its full capabilities and customize it to fit your specific requirements.
+
+## References
+
+- [Exposed GitHub Repository](https://github.com/JetBrains/Exposed)
+- [Exposed Wiki](https://github.com/JetBrains/Exposed/wiki)
+- [H2 Database Documentation](https://h2database.com/html/main.html)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+- [HikariCP Connection Pool](https://github.com/brettwooldridge/HikariCP)
+
+---
+
 ## From: Mastering-Snitch-BeforeAfter.md
 
 # Before and After Actions
@@ -6247,7 +7369,7 @@ Check out our blog for real-world implementations and case studies:
 
 # Snitch Artifacts
 
-Snitch is modular by design, providing several artifacts that can be used independently based on your needs. All artifacts are published to Maven Central with the prefix `io.github.memoizr:snitch-{module-name}`.
+Snitch is modular by design, providing several artifacts that can be used independently based on your needs. All artifacts are published to Maven Central.
 
 ## Core Artifacts
 
@@ -6319,6 +7441,14 @@ tasks.withType<KotlinCompile> {
 }
 ```
 
+### snitch-auth
+
+```kotlin
+implementation("io.github.memoizr:snitch-auth:1.0.0")
+```
+
+Provides authentication and authorization capabilities for Snitch applications, including support for JWT tokens, role-based access control, and security middleware.
+
 ### snitch-validation
 
 ```kotlin
@@ -6334,6 +7464,46 @@ testImplementation("io.github.memoizr:snitch-tests:1.0.0")
 ```
 
 Contains testing utilities and a fluent DSL for writing integration tests for Snitch services. Includes assertion helpers and logging configuration for tests.
+
+### snitch-shank
+
+```kotlin
+implementation("io.github.memoizr:snitch-shank:1.0.0")
+```
+
+Integrates the Shank dependency injection library with Snitch, providing a lightweight, code-generated DI solution for your applications.
+
+### snitch-exposed
+
+```kotlin
+implementation("io.github.memoizr:snitch-exposed:1.0.0")
+```
+
+Integrates the Exposed SQL library with Snitch, providing type-safe database access with automatic object mapping and transaction management.
+
+### snitch-exposed-h2
+
+```kotlin
+implementation("io.github.memoizr:snitch-exposed-h2:1.0.0")
+```
+
+Provides specialized support for H2 databases with Snitch and Exposed, ideal for development and testing environments.
+
+### snitch-exposed-postgres
+
+```kotlin
+implementation("io.github.memoizr:snitch-exposed-postgres:1.0.0")
+```
+
+Provides specialized support for PostgreSQL databases with Snitch and Exposed, suitable for production environments.
+
+### snitch-kofix
+
+```kotlin
+testImplementation("io.github.memoizr:snitch-kofix:1.0.0")
+```
+
+Testing utilities for property-based testing and mocking in Snitch applications.
 
 ## Choosing the Right Dependencies
 
@@ -6354,12 +7524,23 @@ dependencies {
 }
 ```
 
-For advanced validation with Hibernate Validator:
+For applications with database access:
 
 ```kotlin
 dependencies {
     implementation("io.github.memoizr:snitch-bootstrap:1.0.0")
-    implementation("io.github.memoizr:snitch-validation:1.0.0")
+    implementation("io.github.memoizr:snitch-exposed:1.0.0")
+    implementation("io.github..memoizr:snitch-exposed-postgres:1.0.0") // For production
+    implementation("io.github.memoizr:snitch-exposed-h2:1.0.0") // For testing
+}
+```
+
+For applications requiring authentication:
+
+```kotlin
+dependencies {
+    implementation("io.github.memoizr:snitch-bootstrap:1.0.0")
+    implementation("io.github.memoizr:snitch-auth:1.0.0")
 }
 ```
 
@@ -6382,8 +7563,538 @@ dependencies {
 | snitch-undertow | Server implementation | Integrates with Undertow web server |
 | snitch-gsonparser | JSON parsing | Handles JSON serialization/deserialization with Gson |
 | snitch-coroutines | Async support | Kotlin Coroutines integration for asynchronous handlers |
+| snitch-auth | Authentication | Authentication and authorization support |
 | snitch-validation | Enhanced validation | Hibernate Validator integration |
 | snitch-tests | Testing utilities | Testing DSL and assertion helpers |
+| snitch-shank | Dependency injection | Lightweight DI integration |
+| snitch-exposed | Database access | Core database integration with Exposed |
+| snitch-exposed-h2 | H2 database | H2 database support for development and testing |
+| snitch-exposed-postgres | PostgreSQL database | PostgreSQL support for production use |
+| snitch-kofix | Testing utilities | Property-based testing and mocking |
+
+---
+
+## From: Database-Integration.md
+
+# Database Integration with Snitch Exposed
+
+Snitch offers first-class database integration through its Exposed modules, providing a seamless, type-safe experience for working with relational databases in your applications. This guide explores how Snitch's Exposed modules help you integrate databases into your applications with minimal boilerplate and maximum type safety.
+
+## Introduction
+
+Working with databases in web applications is often fraught with challenges:
+
+- **Type safety** is frequently lost at the database boundary
+- **Object-relational impedance mismatch** requires tedious mapping code
+- **Transaction management** adds complexity to request handling
+- **Database schema evolution** creates maintenance challenges
+
+Snitch solves these problems through a powerful integration with the [Exposed](https://github.com/JetBrains/Exposed) SQL library for Kotlin. This integration provides type-safe database access with automatic object mapping and transaction management tailored specifically for Snitch applications.
+
+## Available Modules
+
+Snitch provides three modules for database integration:
+
+1. **exposed**: Core module with base abstractions, mapping utilities, and transaction management
+2. **exposed-h2**: Specialized module for H2 database connections, ideal for testing and development
+3. **exposed-postgres**: Specialized module for PostgreSQL database connections, suitable for production
+
+## Key Benefits
+
+### 1. Type-Safe Database Access
+
+Snitch Exposed modules leverage Kotlin's type system to provide compile-time safety for database operations:
+
+```kotlin
+// Type-safe table definition
+object Users : Table("users") {
+    val id = integer("id").autoIncrement()
+    val name = varchar("name", 255)
+    val email = varchar("email", 255)
+    
+    override val primaryKey = PrimaryKey(id)
+}
+
+// Type-safe query
+val user = transaction {
+    Users.findOne<UserModel> { Users.email eq "user@example.com" }
+}
+```
+
+The compiler ensures that:
+- Your queries reference existing columns
+- Your comparisons use the correct data types
+- Your result mappings align with your domain models
+
+### 2. Automatic Object Mapping
+
+One of the most powerful features of Snitch Exposed is its automatic object mapping. This eliminates the tedious and error-prone code typically required to map between database tables and domain objects:
+
+```kotlin
+// Domain model
+data class User(val name: String, val email: String)
+data class UserWithId(val id: Int, val name: String, val email: String)
+
+// Automatic mapping from database to domain model
+val users = transaction {
+    Users.findAll<UserWithId>()
+}
+
+// Automatic mapping from domain model to database
+val user = User("John Doe", "john@example.com")
+transaction {
+    Users.insert(user)
+}
+```
+
+Behind the scenes, Snitch:
+1. Inspects the properties of your domain model using Kotlin reflection
+2. Matches them with database column names
+3. Performs appropriate type conversions
+4. Handles value classes and nested objects
+5. Supports custom mapping for complex cases
+
+This eliminates thousands of lines of boilerplate code in typical applications while maintaining type safety.
+
+### 3. Integrated Transaction Management
+
+Snitch Exposed seamlessly integrates transaction management with the routing system:
+
+```kotlin
+withTransaction {
+    POST("users") with body<User>() isHandledBy {
+        val user = body
+        val id = Users.insert(user)[Users.id]
+        UserResponse(id, user.name, user.email).ok
+    }
+}
+```
+
+This provides several benefits:
+- **Automatic transaction boundaries** around route handlers
+- **Consistent error handling** with automatic rollback on exceptions
+- **Clean code organization** without explicit transaction blocks
+
+### 4. Value Class Support
+
+Modern Kotlin applications often use value classes for type safety. Snitch Exposed provides first-class support for value classes:
+
+```kotlin
+// Domain model with value classes
+@JvmInline
+value class UserId(val value: Int)
+
+data class UserWithValueId(val id: UserId, val name: String, val email: String)
+
+// Automatic mapping works with value classes
+val user = transaction {
+    Users.findOne<UserWithValueId> { Users.id eq 1 }
+}
+
+println(user.id.value) // Accesses the wrapped value
+```
+
+This enables more type-safe domain models without sacrificing database integration.
+
+### 5. Flexible Schema Management
+
+Snitch Exposed provides tools for schema management:
+
+```kotlin
+// Create tables
+transaction {
+    SchemaUtils.create(Users, Posts, Comments)
+}
+
+// Add missing columns during updates
+database.addMissingColumns(Users)
+
+// Drop tables
+transaction {
+    SchemaUtils.drop(Users)
+}
+```
+
+Combined with migration tools, this gives you flexible options for evolving your database schema alongside your application.
+
+## Database-Specific Modules
+
+### H2 Integration
+
+The `exposed-h2` module provides specialized support for H2 databases, which are particularly useful for:
+
+- **Development environments** where quick setup is important
+- **Testing** where database isolation is critical
+- **Embedded applications** that need a lightweight database
+
+Key features include:
+- In-memory database support with zero configuration
+- File-based database options for persistence
+- Automatic schema creation and teardown
+
+Example:
+
+```kotlin
+// Quick in-memory database for testing
+val config = h2ConnectionConfig()
+ExposedModule.connection(config)
+
+// File-based database for development
+val devConfig = h2ConnectionConfig(
+    name = "myapp",
+    inMemory = false,
+    directory = "./data"
+)
+ExposedModule.connection(devConfig)
+```
+
+### PostgreSQL Integration
+
+The `exposed-postgres` module provides specialized support for PostgreSQL databases, which are ideal for:
+
+- **Production environments** requiring advanced database features
+- **High-performance applications** needing robust concurrency
+- **Data-intensive applications** leveraging PostgreSQL's rich data types
+
+Key features include:
+- Connection pooling for efficient resource use
+- SSL configuration for secure connections
+- Support for PostgreSQL-specific data types
+- Advanced query capabilities
+
+Example:
+
+```kotlin
+// Basic PostgreSQL connection
+val config = postgresConnectionConfig(
+    host = "localhost",
+    database = "myapp",
+    user = "appuser",
+    password = "password"
+)
+ExposedModule.connection(config)
+
+// With connection pooling
+val pooledConfig = postgresConnectionConfig(
+    dataSource = createHikariDataSource() // Your connection pool
+)
+ExposedModule.connection(pooledConfig)
+```
+
+## Advanced Usage Patterns
+
+### Custom Type Mapping
+
+For complex mapping scenarios, Snitch Exposed provides a custom mapping facility:
+
+```kotlin
+// Define custom mapping between types
+AutoMapper.customMapping<User, UserDTO>(
+    from = { user -> UserDTO(user.name, user.email, "Additional info") },
+    to = { dto -> User(dto.name, dto.email) }
+)
+
+// Now you can convert between them
+val user = User("John", "john@example.com")
+val dto = user.to<UserDTO>()
+```
+
+This is particularly useful for:
+- Converting between persistence models and API models
+- Handling legacy database schemas
+- Supporting complex business logic during mapping
+
+### Transaction Strategies
+
+Snitch Exposed supports different transaction strategies to match your application's needs:
+
+```kotlin
+// Explicit transactions for fine-grained control
+POST("users") isHandledBy {
+    val user = body
+    transaction {
+        // Database operations
+    }
+    "User created".ok
+}
+
+// Transaction-per-request for comprehensive coverage
+withTransaction {
+    POST("users") with body<User>() isHandledBy {
+        // Everything here runs within a transaction
+    }
+    
+    GET("users") isHandledBy {
+        // This handler also runs in a transaction
+    }
+}
+```
+
+### Working with Relationships
+
+Snitch Exposed makes it easy to work with database relationships:
+
+```kotlin
+// Table definitions
+object Users : Table("users") {
+    val id = integer("id").autoIncrement()
+    val name = varchar("name", 255)
+    
+    override val primaryKey = PrimaryKey(id)
+}
+
+object Posts : Table("posts") {
+    val id = integer("id").autoIncrement()
+    val userId = integer("user_id") references Users.id
+    val title = varchar("title", 255)
+    val content = text("content")
+    
+    override val primaryKey = PrimaryKey(id)
+}
+
+// Domain models
+data class User(val id: Int, val name: String)
+data class Post(val id: Int, val userId: Int, val title: String, val content: String)
+data class UserWithPosts(val id: Int, val name: String, val posts: List<Post>)
+
+// Query with relationships
+val usersWithPosts = transaction {
+    Users.findAll<User>().map { user ->
+        val posts = Posts.findAll<Post> { Posts.userId eq user.id }
+        UserWithPosts(user.id, user.name, posts)
+    }
+}
+```
+
+## Performance Considerations
+
+Snitch Exposed is designed for performance:
+
+1. **Connection pooling** reuses database connections efficiently
+2. **Batch operations** minimize database roundtrips
+3. **Lazy loading** defers expensive operations until needed
+4. **Caching** reduces redundant database queries
+
+For maximum performance:
+
+```kotlin
+// Batch inserts for bulk operations
+transaction {
+    Users.batchInsert(userList) {
+        it[name] = it.name
+        it[email] = it.email
+    }
+}
+
+// Targeted queries to minimize data transfer
+val userCount = transaction {
+    Users.selectAll().count()
+} 
+
+// Using database-specific optimizations
+transaction {
+    // PostgreSQL JSON functions for complex data
+    Users.select { Users.metadata.jsonPathExists("$.preferences") }
+}
+```
+
+## Integration with Snitch Features
+
+Snitch Exposed integrates seamlessly with other Snitch features:
+
+### Validation Integration
+
+```kotlin
+withTransaction {
+    POST("users") with validate<User>() isHandledBy {
+        // Validation runs before the transaction begins
+        // Database operations only happen for valid requests
+        val user = body
+        Users.insert(user)
+        "User created".ok
+    }
+}
+```
+
+### Error Handling Integration
+
+```kotlin
+withTransaction {
+    POST("users") with body<User>() isHandledBy {
+        try {
+            val user = body
+            Users.insert(user)
+            "User created".ok
+        } catch (e: Exception) {
+            // Transaction automatically rolls back
+            "Error: ${e.message}".serverError()
+        }
+    }
+}
+```
+
+### Testing Integration
+
+```kotlin
+// Test setup with in-memory database
+@BeforeEach
+fun setup() {
+    val config = h2ConnectionConfig()
+    ExposedModule.connection(config)
+    
+    transaction {
+        SchemaUtils.create(TestTable)
+    }
+}
+
+// Test endpoint with transaction
+@Test
+fun `test user creation`() {
+    given {
+        withTransaction {
+            POST("users") with body<User>() isHandledBy {
+                val user = body
+                Users.insert(user)
+                "User created".ok
+            }
+        }
+    } then {
+        POST("/users") withBody User("Test", "test@example.com") expect {
+            expect that it.statusCode() isEqualTo 200
+            
+            // Verify database state
+            transaction {
+                val count = Users.selectAll().count()
+                expect that count isEqualTo 1
+            }
+        }
+    }
+}
+```
+
+## Best Practices
+
+### 1. Domain Model Separation
+
+Keep your domain models separate from your database entities:
+
+```kotlin
+// Database table
+object Users : Table("users") {
+    val id = integer("id").autoIncrement()
+    val name = varchar("name", 255)
+    val email = varchar("email", 255)
+    
+    override val primaryKey = PrimaryKey(id)
+}
+
+// Domain model (persistence)
+data class UserEntity(val id: Int, val name: String, val email: String)
+
+// Domain model (business logic)
+data class User(val id: Int, val name: String, val email: String, val isValid: Boolean)
+
+// API model
+data class UserResponse(val id: Int, val name: String)
+```
+
+This separation allows each model to evolve independently according to its concerns.
+
+### 2. Repository Pattern
+
+Encapsulate database access in repository classes:
+
+```kotlin
+class UserRepository {
+    fun findById(id: Int): User? = transaction {
+        Users.findOneOrNull<UserEntity> { Users.id eq id }
+            ?.let { mapToUser(it) }
+    }
+    
+    fun create(user: User): Int = transaction {
+        val entity = mapToEntity(user)
+        Users.insert(entity)[Users.id]
+    }
+    
+    private fun mapToUser(entity: UserEntity): User = // mapping logic
+    private fun mapToEntity(user: User): UserEntity = // mapping logic
+}
+```
+
+This approach:
+- Centralizes database access logic
+- Makes database operations more testable
+- Provides a clean API for business logic
+
+### 3. Transaction Management
+
+Choose the right transaction boundaries:
+
+```kotlin
+// Transaction per request (most common)
+withTransaction {
+    // Multiple endpoint handlers here
+}
+
+// Transaction per operation (more granular)
+POST("users") isHandledBy {
+    transaction {
+        // Single operation
+    }
+}
+
+// Transaction per unit of work (intermediate)
+POST("complex-operation") isHandledBy {
+    transaction {
+        // Multiple related operations
+        // Either all succeed or all fail
+    }
+}
+```
+
+### 4. Error Handling
+
+Implement robust error handling:
+
+```kotlin
+withTransaction {
+    POST("users") with body<User>() isHandledBy {
+        try {
+            // Database operations
+        } catch (e: Exception) {
+            logger.error("Database error", e)
+            when (e) {
+                is UniqueConstraintException -> "User already exists".conflict()
+                is ReferenceConstraintException -> "Referenced entity not found".badRequest()
+                else -> "Internal server error".serverError()
+            }
+        }
+    }
+}
+```
+
+### 5. Testing Strategy
+
+Adopt a comprehensive testing strategy:
+
+- **Unit tests**: Test your repositories in isolation
+- **Integration tests**: Test endpoints with an in-memory H2 database
+- **Schema tests**: Verify your schema changes are compatible
+- **Performance tests**: Validate database performance under load
+
+## Conclusion
+
+Snitch Exposed offers a powerful, type-safe approach to database integration that eliminates boilerplate while maintaining the flexibility and performance needed for real-world applications. By leveraging Kotlin's type system and reflection capabilities, it provides a seamless bridge between your domain models and database schema.
+
+Whether you're building a simple application with H2 or a complex system with PostgreSQL, Snitch Exposed gives you the tools to work with databases efficiently and confidently.
+
+## Further Reading
+
+- [Exposed Documentation](https://github.com/JetBrains/Exposed/wiki)
+- [Snitch Exposed API Reference](/api/exposed)
+- [H2 Database Engine](https://h2database.com/html/main.html)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+- [Using Snitch with Exposed (Tutorial)](tutorials/UsingSnichWithExposed.md)
 
 ---
 

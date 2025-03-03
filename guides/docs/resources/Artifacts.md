@@ -1,6 +1,6 @@
 # Snitch Artifacts
 
-Snitch is modular by design, providing several artifacts that can be used independently based on your needs. All artifacts are published to Maven Central with the prefix `io.github.memoizr:snitch-{module-name}`.
+Snitch is modular by design, providing several artifacts that can be used independently based on your needs. All artifacts are published to Maven Central.
 
 ## Core Artifacts
 
@@ -72,6 +72,14 @@ tasks.withType<KotlinCompile> {
 }
 ```
 
+### snitch-auth
+
+```kotlin
+implementation("io.github.memoizr:snitch-auth:1.0.0")
+```
+
+Provides authentication and authorization capabilities for Snitch applications, including support for JWT tokens, role-based access control, and security middleware.
+
 ### snitch-validation
 
 ```kotlin
@@ -87,6 +95,46 @@ testImplementation("io.github.memoizr:snitch-tests:1.0.0")
 ```
 
 Contains testing utilities and a fluent DSL for writing integration tests for Snitch services. Includes assertion helpers and logging configuration for tests.
+
+### snitch-shank
+
+```kotlin
+implementation("io.github.memoizr:snitch-shank:1.0.0")
+```
+
+Integrates the Shank dependency injection library with Snitch, providing a lightweight, code-generated DI solution for your applications.
+
+### snitch-exposed
+
+```kotlin
+implementation("io.github.memoizr:snitch-exposed:1.0.0")
+```
+
+Integrates the Exposed SQL library with Snitch, providing type-safe database access with automatic object mapping and transaction management.
+
+### snitch-exposed-h2
+
+```kotlin
+implementation("io.github.memoizr:snitch-exposed-h2:1.0.0")
+```
+
+Provides specialized support for H2 databases with Snitch and Exposed, ideal for development and testing environments.
+
+### snitch-exposed-postgres
+
+```kotlin
+implementation("io.github.memoizr:snitch-exposed-postgres:1.0.0")
+```
+
+Provides specialized support for PostgreSQL databases with Snitch and Exposed, suitable for production environments.
+
+### snitch-kofix
+
+```kotlin
+testImplementation("io.github.memoizr:snitch-kofix:1.0.0")
+```
+
+Testing utilities for property-based testing and mocking in Snitch applications.
 
 ## Choosing the Right Dependencies
 
@@ -107,12 +155,23 @@ dependencies {
 }
 ```
 
-For advanced validation with Hibernate Validator:
+For applications with database access:
 
 ```kotlin
 dependencies {
     implementation("io.github.memoizr:snitch-bootstrap:1.0.0")
-    implementation("io.github.memoizr:snitch-validation:1.0.0")
+    implementation("io.github.memoizr:snitch-exposed:1.0.0")
+    implementation("io.github..memoizr:snitch-exposed-postgres:1.0.0") // For production
+    implementation("io.github.memoizr:snitch-exposed-h2:1.0.0") // For testing
+}
+```
+
+For applications requiring authentication:
+
+```kotlin
+dependencies {
+    implementation("io.github.memoizr:snitch-bootstrap:1.0.0")
+    implementation("io.github.memoizr:snitch-auth:1.0.0")
 }
 ```
 
@@ -135,5 +194,11 @@ dependencies {
 | snitch-undertow | Server implementation | Integrates with Undertow web server |
 | snitch-gsonparser | JSON parsing | Handles JSON serialization/deserialization with Gson |
 | snitch-coroutines | Async support | Kotlin Coroutines integration for asynchronous handlers |
+| snitch-auth | Authentication | Authentication and authorization support |
 | snitch-validation | Enhanced validation | Hibernate Validator integration |
 | snitch-tests | Testing utilities | Testing DSL and assertion helpers |
+| snitch-shank | Dependency injection | Lightweight DI integration |
+| snitch-exposed | Database access | Core database integration with Exposed |
+| snitch-exposed-h2 | H2 database | H2 database support for development and testing |
+| snitch-exposed-postgres | PostgreSQL database | PostgreSQL support for production use |
+| snitch-kofix | Testing utilities | Property-based testing and mocking |
