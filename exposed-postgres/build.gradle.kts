@@ -1,4 +1,4 @@
 dependencies {
     api(project(":exposed"))
-    api(libs.h2database)
+    api(libs.postgresql)
 }
