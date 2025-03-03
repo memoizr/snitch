@@ -14,6 +14,7 @@ import snitch.exposed.ExposedModule.connection
 import snitch.parameters.path
 import snitch.parsers.GsonJsonParser.parse
 import snitch.tests.InlineSnitchTest
+import snitch.validation.ofInt
 
 val databaseTestConfig = DatabaseConnectionConfig(
     url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;",
