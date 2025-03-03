@@ -24,7 +24,7 @@ plugins {
 }
 
 dependencies {
-    implementation("io.github.memoizr:snitch-bootstrap:1.0.0")
+    implementation("io.github.memoizr:snitch-bootstrap:2.0.0")
     implementation("org.jetbrains.exposed:exposed-core:0.41.1")
     implementation("org.jetbrains.exposed:exposed-dao:0.41.1")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")

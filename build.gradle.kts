@@ -1,6 +1,7 @@
+
 import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.Properties
+import java.util.*
 
 // Load version from properties file
 val versionPropsFile = file("version.properties")
@@ -85,8 +86,8 @@ tasks.register("updateVersionInDocs") {
     
     doLast {
         val version = project.version.toString()
-        val regex = """implementation\("io\.github\.memoizr:snitch-.*?:(\d+\.\d+\.\d+)"\)""".toRegex()
-        val testRegex = """testImplementation\("io\.github\.memoizr:snitch-.*?:(\d+\.\d+\.\d+)"\)""".toRegex()
+        val regex = """implementation\("io\.github\.[\.]*memoizr:snitch-.*?:(\d+\.\d+\.\d+)"\)""".toRegex()
+        val testRegex = """testImplementation\("io\.github\.[\.]*memoizr:snitch-.*?:(\d+\.\d+\.\d+)"\)""".toRegex()
         var totalUpdated = 0
         
         // Find all markdown files in the guides directory
@@ -97,11 +98,19 @@ tasks.register("updateVersionInDocs") {
             
             // Replace version in implementation strings
             val updatedContent = content.replace(regex) { matchResult ->
-                val artifact = matchResult.value.substringAfter("snitch-").substringBefore(":")
-                "implementation(\"io.github.memoizr:snitch-$artifact:$version\")"
+                val fullString = matchResult.value
+                val groupIndex = fullString.indexOf("snitch-")
+                val colonIndex = fullString.lastIndexOf(":")
+                val artifact = fullString.substring(groupIndex, fullString.indexOf(":", groupIndex))
+                val prefix = fullString.substring(0, groupIndex)
+                "$prefix$artifact:$version\")"
             }.replace(testRegex) { matchResult ->
-                val artifact = matchResult.value.substringAfter("snitch-").substringBefore(":")
-                "testImplementation(\"io.github.memoizr:snitch-$artifact:$version\")"
+                val fullString = matchResult.value
+                val groupIndex = fullString.indexOf("snitch-")
+                val colonIndex = fullString.lastIndexOf(":")
+                val artifact = fullString.substring(groupIndex, fullString.indexOf(":", groupIndex))
+                val prefix = fullString.substring(0, groupIndex)
+                "$prefix$artifact:$version\")"
             }
             
             // Only update the file if changes were made

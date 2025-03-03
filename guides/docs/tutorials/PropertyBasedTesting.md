@@ -20,7 +20,7 @@ First, add the Kofix dependency to your project:
 
 ```kotlin
 dependencies {
-    testImplementation("io.github.memoizr:snitch-kofix:1.0.0")
+    testImplementation("io.github.memoizr:snitch-kofix:2.0.0")
 }
 ```
 
