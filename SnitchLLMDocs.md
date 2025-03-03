@@ -1527,6 +1527,776 @@ For more advanced uses, refer to:
 
 ---
 
+## From: HandlingParameters.md
+
+# Handling Parameters in Snitch
+
+This tutorial covers how to define, access, and validate different types of parameters in Snitch applications. Parameters are a crucial part of building APIs as they allow your endpoints to receive and process various kinds of input data.
+
+## Parameter Types
+
+Snitch supports several types of parameters:
+
+1. **Path Parameters**: Variables embedded in the URL path
+2. **Query Parameters**: Key-value pairs in the URL query string
+3. **Header Parameters**: HTTP request headers
+4. **Body Parameters**: Data in the request body (typically JSON)
+
+Let's explore how to use each type of parameter in your Snitch applications.
+
+## Defining Parameters
+
+Parameters in Snitch are defined using property delegates, making them type-safe and easy to use. 
+
+### Path Parameters
+
+Path parameters are defined using the `path()` delegate and are embedded directly in the URL path:
+
+```kotlin
+// Define a path parameter
+val userId by path(ofInt, description = "User ID")
+
+// Use it in a route
+GET("users" / userId) isHandledBy { 
+    // Handler code
+}
+```
+
+The `ofInt` parameter is a validator that ensures the parameter can be parsed as an integer.
+
+### Query Parameters
+
+Query parameters are defined using the `query()` delegate:
+
+```kotlin
+// Define a query parameter
+val page by query(ofInt, description = "Page number")
+val limit by optionalQuery(ofInt, default = 10, description = "Items per page")
+
+// Use it in a route
+GET("users") withQuery page isHandledBy {
+    // Handler code
+}
+```
+
+### Header Parameters
+
+Header parameters are defined using the `header()` delegate:
+
+```kotlin
+// Define a header parameter
+val authorization by header(description = "Authorization token")
+
+// Use it in a route
+GET("secured") withHeader authorization isHandledBy {
+    // Handler code
+}
+```
+
+### Body Parameters
+
+Body parameters are defined directly in the route definition:
+
+```kotlin
+// Define a route with a body parameter
+POST("users") with body<CreateUserRequest>() isHandledBy {
+    // Handler code
+}
+```
+
+## Accessing Parameters in Handlers
+
+Once parameters are defined, you can access them in your handlers using the request object.
+
+### Path Parameters
+
+Access path parameters using indexed syntax:
+
+```kotlin
+val userId by path(ofInt)
+
+val getUser by handling {
+    val id = request[userId]
+    userService.getUser(id)?.ok ?: "User not found".notFound()
+}
+```
+
+### Query Parameters
+
+Query parameters are accessed the same way:
+
+```kotlin
+val page by query(ofInt)
+val limit by optionalQuery(ofInt, default = 10)
+
+val listUsers by handling {
+    val pageNum = request[page]
+    val pageSize = request[limit]
+    userService.getUsers(pageNum, pageSize).ok
+}
+```
+
+### Header Parameters
+
+Headers are accessed using the same syntax:
+
+```kotlin
+val authorization by header()
+
+val securedEndpoint by handling {
+    val authHeader = request[authorization]
+    if (isValidToken(authHeader)) {
+        "Authenticated".ok
+    } else {
+        "Unauthorized".unauthorized()
+    }
+}
+```
+
+### Body Parameters
+
+Body parameters are accessed using the `body` property:
+
+```kotlin
+val createUser by parsing<CreateUserRequest>() handling {
+    val name = body.name
+    val email = body.email
+    userService.createUser(name, email)
+    "User created".created
+}
+```
+
+## Optional vs Required Parameters
+
+By default, parameters defined with `path()`, `query()`, and `header()` are required. If a required parameter is missing or invalid, Snitch automatically returns a 400 Bad Request response.
+
+For optional parameters, use the `optionalPath()`, `optionalQuery()`, and `optionalHeader()` delegates:
+
+```kotlin
+// Required parameter
+val userId by path(ofInt)
+
+// Optional parameter with default value
+val page by optionalQuery(ofInt, default = 1)
+
+// Optional parameter without default (will be null if missing)
+val filter by optionalQuery()
+```
+
+When accessing optional parameters without defaults, check for null values:
+
+```kotlin
+val listUsers by handling {
+    val filterValue = request[filter]
+    val users = if (filterValue != null) {
+        userService.getUsersWithFilter(filterValue)
+    } else {
+        userService.getAllUsers()
+    }
+    users.ok
+}
+```
+
+## Parameter Validation
+
+Snitch provides built-in validators for common parameter types:
+
+- `ofInt`: Validates that the parameter is an integer
+- `ofLong`: Validates that the parameter is a long integer
+- `ofDouble`: Validates that the parameter is a double
+- `ofBoolean`: Validates that the parameter is a boolean
+- `ofNonNegativeInt`: Validates that the parameter is a non-negative integer
+- `ofEmail`: Validates that the parameter is a valid email address
+- `matches(regex)`: Validates that the parameter matches a regular expression
+
+You can also create custom validators:
+
+```kotlin
+// Custom validator for UUIDs
+val ofUUID = validator { input ->
+    try {
+        UUID.fromString(input)
+        input
+    } catch (e: IllegalArgumentException) {
+        throw InvalidParameterException("Invalid UUID format")
+    }
+}
+
+// Use the custom validator
+val orderId by path(ofUUID, description = "Order ID in UUID format")
+```
+
+## Real-World Example
+
+Here's a more complete example showing different parameter types in action:
+
+```kotlin
+// Parameter definitions
+val userId by path(ofInt, description = "User ID")
+val page by optionalQuery(ofNonNegativeInt, default = 1, description = "Page number")
+val limit by optionalQuery(ofNonNegativeInt, default = 10, description = "Items per page")
+val authorization by header(description = "Bearer token")
+
+// Route definitions
+val routes = routes {
+    // Get user by ID
+    GET("users" / userId) isHandledBy {
+        val id = request[userId]
+        userService.getUser(id)?.ok ?: "User not found".notFound()
+    }
+    
+    // List users with pagination
+    GET("users") withQuery page withQuery limit isHandledBy {
+        val pageNum = request[page]
+        val pageSize = request[limit]
+        userService.getUsers(pageNum, pageSize).ok
+    }
+    
+    // Create user with request body
+    POST("users") with body<CreateUserRequest>() isHandledBy {
+        val newUser = userService.createUser(body.name, body.email)
+        newUser.created
+    }
+    
+    // Secured endpoint with authorization header
+    GET("secured") withHeader authorization isHandledBy {
+        val token = request[authorization]
+        if (isValidToken(token)) {
+            "Authenticated".ok
+        } else {
+            "Unauthorized".unauthorized()
+        }
+    }
+}
+```
+
+## Advanced Parameter Handling
+
+### Organizing Parameters
+
+For better organization, you can group related parameters in objects:
+
+```kotlin
+object Paths {
+    val userId by path(ofInt)
+    val postId by path(ofInt)
+}
+
+object Queries {
+    val page by optionalQuery(ofNonNegativeInt, default = 1)
+    val limit by optionalQuery(ofNonNegativeInt, default = 10)
+}
+
+object Headers {
+    val authorization by header()
+}
+
+// Using organized parameters
+GET("users" / Paths.userId / "posts" / Paths.postId) isHandledBy {
+    val userId = request[Paths.userId]
+    val postId = request[Paths.postId]
+    // ...
+}
+```
+
+### Parameter Conditions
+
+You can add conditions to parameters that must be satisfied:
+
+```kotlin
+// Define a condition for token validation
+val validToken = condition<String> { token ->
+    jwtService.validateToken(token)
+}
+
+// Apply the condition to a parameter
+val accessToken by header(
+    condition = validToken,
+    name = "X-Access-Token",
+    description = "Valid access token"
+)
+```
+
+### Custom Parameter Processing
+
+For complex parameter processing, you can use the `parsing` handler:
+
+```kotlin
+val createUser by parsing<CreateUserRequest>() handling {
+    // Validate and transform the request body
+    val sanitizedName = sanitizeInput(body.name)
+    val normalizedEmail = normalizeEmail(body.email)
+    
+    // Use the processed parameters
+    userService.createUser(sanitizedName, normalizedEmail)
+    "User created".created
+}
+```
+
+## Best Practices
+
+1. **Use Descriptive Names**: Choose parameter names that clearly indicate their purpose.
+
+2. **Add Descriptions**: Include descriptions for all parameters to improve API documentation.
+
+3. **Validate Inputs**: Use appropriate validators to ensure parameters meet your requirements.
+
+4. **Handle Errors Gracefully**: Provide meaningful error messages when parameter validation fails.
+
+5. **Group Related Parameters**: Organize parameters into logical groups for better code organization.
+
+6. **Use Appropriate Parameter Types**: Choose the right parameter type (path, query, header, body) based on your API design.
+
+7. **Make Parameters Optional When Appropriate**: Don't require parameters that aren't strictly necessary.
+
+8. **Set Sensible Defaults**: Provide meaningful default values for optional parameters.
+
+## Conclusion
+
+Snitch's parameter handling system provides a type-safe, declarative way to define and validate request parameters. By using the right parameter types and validation rules, you can create robust APIs that gracefully handle various input scenarios.
+
+For more information on parameter handling, refer to the [Snitch API reference](/api/parameters) and check out the example project for real-world usage patterns.
+
+---
+
+## From: PropertyBasedTesting.md
+
+# Property-Based Testing with Kofix
+
+This tutorial introduces property-based testing in Snitch applications using the Kofix library. You'll learn how to use Kofix to generate test data, write more robust tests, and reduce test boilerplate.
+
+## What is Property-Based Testing?
+
+Property-based testing is an approach where instead of writing tests with specific input values, you define properties that should hold true for all possible inputs. The testing framework then generates random inputs to verify these properties.
+
+This approach has several advantages:
+- Discovers edge cases you might not think of
+- Reduces test maintenance as requirements change
+- Provides better test coverage with less code
+- Helps identify subtle bugs that appear only with specific inputs
+
+## Getting Started with Kofix
+
+### Installation
+
+First, add the Kofix dependency to your project:
+
+```kotlin
+dependencies {
+    testImplementation("io.github.memoizr:snitch-kofix:1.0.0")
+}
+```
+
+### Creating Your First Property-Based Test
+
+Let's start with a simple example - testing a user registration service:
+
+```kotlin
+class UserServiceTest {
+    // Create random test data using property delegation
+    val user by aRandom<User>()
+    val email by aRandom<Email>()
+    
+    @Test
+    fun `registered users can be retrieved by email`() {
+        // Act
+        userService.register(user)
+        
+        // Assert
+        val retrievedUser = userService.findByEmail(user.email)
+        assertEquals(user.id, retrievedUser?.id)
+        assertEquals(user.name, retrievedUser?.name)
+    }
+}
+```
+
+In this example, Kofix automatically generates random `User` objects with all required properties filled with sensible random values.
+
+## Core Concepts
+
+### Random Object Generation
+
+Kofix can generate random instances of any class:
+
+```kotlin
+// Simple types
+val randomString by aRandom<String>()
+val randomInt by aRandom<Int>()
+val randomInstant by aRandom<Instant>()
+
+// Domain objects
+val user by aRandom<User>()
+val product by aRandom<Product>()
+
+// Even complex generic types
+val listOfMaps by aRandom<List<Map<String, User>>>()
+```
+
+### Customizing Generated Objects
+
+Often you need to customize the generated objects for specific test scenarios:
+
+```kotlin
+// Customize individual instances
+val activeUser by aRandom<User> { 
+    copy(status = UserStatus.ACTIVE, verifiedEmail = true) 
+}
+
+// Customize with dependencies between objects
+val order by aRandom<Order>()
+val orderItem by aRandom<OrderItem> {
+    copy(orderId = order.id)
+}
+```
+
+### Collections of Random Objects
+
+For testing with collections:
+
+```kotlin
+// Random lists with default size (1-10 elements)
+val users by aRandomListOf<User>() 
+
+// Fixed size
+val fiveProducts by aRandomListOf<Product>(size = 5)
+
+// Size range
+val orders by aRandomListOf<Order>(minSize = 2, maxSize = 10)
+
+// Customized lists
+val activeUsers by aRandomListOf<User> {
+    map { it.copy(status = UserStatus.ACTIVE) }
+}
+```
+
+## Integration with Snitch Tests
+
+Kofix is particularly powerful when combined with Snitch's testing framework. Let's see how to use it in API tests:
+
+```kotlin
+class UserApiTest : SnitchTest({ Application.setup(it) }) {
+    // Test data
+    val user by aRandom<User>()
+    val createUserRequest by aRandom<CreateUserRequest>()
+    val updateUserRequest by aRandom<UpdateUserRequest>()
+    
+    // JWT tokens for authentication
+    lateinit var userToken: String
+    
+    @BeforeEach
+    fun setup() {
+        // Use the random user to create a real user in the system
+        userService.createUser(user)
+        userToken = jwtService.createToken(user.id)
+    }
+    
+    @Test
+    fun `authenticated users can update their profile`() {
+        // Send a PUT request with random data
+        PUT("/users/${user.id}")
+            .withHeaders(mapOf("Authorization" to "Bearer $userToken"))
+            .withBody(updateUserRequest)
+            .expectCode(200)
+        
+        // Verify the update was applied
+        GET("/users/${user.id}")
+            .withHeaders(mapOf("Authorization" to "Bearer $userToken"))
+            .expectCode(200)
+            .expectJsonPath("$.name", updateUserRequest.name)
+            .expectJsonPath("$.email", updateUserRequest.email)
+    }
+}
+```
+
+Here's a more complete example based on the `PostsRoutesTest` from the Snitch example project:
+
+```kotlin
+class PostsRoutesTest : BaseTest() {
+    // Random data for our tests
+    val createPostRequest by aRandom<CreatePostRequest>()
+    val updatePostRequest by aRandom<UpdatePostRequest>()
+
+    // Different users with different roles
+    val otherUser by aRandom<User>()
+    val user by aRandom<User>()
+    val admin by aRandom<User> { copy(role = Role.ADMIN) }
+    
+    // Posts owned by different users
+    val post by aRandom<Post> { 
+        copy(creator = UserView(user.id, user.name), createdAt = now()) 
+    }
+    val postByOtherUser by aRandom<Post> { 
+        copy(creator = UserView(otherUser.id, otherUser.name), createdAt = now()) 
+    }
+
+    // Authentication tokens
+    lateinit var userToken: String
+    lateinit var adminToken: String
+
+    @BeforeEach
+    fun setup() {
+        // Setup test environment with our random users
+        userToken = user.create().let { jwt().newToken(JWTClaims(user.id, Role.USER)) }
+        adminToken = admin.create().let { jwt().newToken(JWTClaims(admin.id, Role.ADMIN)) }
+        otherUser.create()
+    }
+
+    @Test
+    fun `a logged in user can create a post then view it`() {
+        // Create a post with random data
+        POST("/users/${user.id.value}/posts")
+            .withHeaders(mapOf("X-Access-Token" to userToken))
+            .withBody(createPostRequest)
+            .expectCode(201)
+
+        // Verify we can view the created post
+        GET("/users/${user.id.value}/posts")
+            .withHeaders(mapOf("X-Access-Token" to userToken))
+            .expectCode(200)
+            .expectJsonPath("$.posts[0].title", createPostRequest.title)
+            .expectJsonPath("$.posts[0].content", createPostRequest.content)
+    }
+    
+    @Test
+    fun `a user cannot post on another user's behalf`() {
+        POST("/users/${otherUser.id.value}/posts")
+            .withHeaders(mapOf("X-Access-Token" to userToken))
+            .withBody(createPostRequest)
+            .expectCode(403)
+    }
+}
+```
+
+## Advanced Features
+
+### Global Type Customization
+
+For consistent data generation across tests, customize types globally:
+
+```kotlin
+// In your BaseTest class
+init {
+    // Custom email format
+    customize<Email> { Email("${randomString()}@example.com") }
+    
+    // Current timestamp for all tests
+    customize<Instant> { clock.now() }
+    
+    // UUIDs for IDs
+    customize<UserId> { UserId(UUID.randomUUID().toString()) }
+}
+```
+
+The example project does this in `BaseTest.kt`:
+
+```kotlin
+abstract class BaseTest : SnitchTest({ Application.setup(it) }) {
+    init {
+        connection()
+        customize<Email> { Email("${randomString()}@${randomString()}.com") }
+    }
+    
+    fun randomString(n: Int = 1, m: Int = 5): String {
+        val length = Random.nextInt(n, m + 1)
+        val chars = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+        return List(length) { chars.random() }.joinToString("")
+    }
+    
+    // ...
+}
+```
+
+### Seed Control for Reproducible Tests
+
+Control randomness with seeds for reproducible tests:
+
+```kotlin
+// Fixed seed for deterministic tests
+@BeforeEach
+fun setupSeed() {
+    Seed.seed = 12345L // Same random values every time
+}
+
+// Test mode for consistent random values within a test
+@BeforeEach
+fun setupTestMode() {
+    Seed.testing = true // Different between test runs but consistent within a test
+}
+```
+
+### Testing with Interfaces and Abstract Classes
+
+Kofix can even generate implementations of interfaces and abstract classes:
+
+```kotlin
+// Generates a mock implementation of the interface
+val repository by aRandom<UserRepository>()
+
+@Test
+fun `test with mock repository`() {
+    // The mock implementation will return random data
+    val users = repository.findAllUsers()
+    assertTrue(users.isNotEmpty())
+}
+```
+
+## Best Practices
+
+### 1. Combine Property-Based and Example-Based Testing
+
+Use property-based testing for broad verification and example-based testing for specific cases:
+
+```kotlin
+@Test
+fun `email validation rejects invalid formats`() {
+    // Property-based: generate many random invalid emails
+    repeat(100) {
+        val invalidEmail = "${a<String>()}${a<String>()}"
+        assertFalse(emailValidator.isValid(invalidEmail))
+    }
+    
+    // Example-based: specific cases that must work
+    assertTrue(emailValidator.isValid("user@example.com"))
+    assertFalse(emailValidator.isValid("user@"))
+}
+```
+
+### 2. Use Custom Generators for Domain Constraints
+
+Create custom generators for domain-specific constraints:
+
+```kotlin
+// In your BaseTest class
+init {
+    // Valid product codes must follow a pattern
+    customize<ProductCode> { 
+        val category = listOf("HW", "SW", "SRV").random()
+        val number = (1000..9999).random()
+        ProductCode("$category-$number") 
+    }
+}
+```
+
+### 3. Structure Test Data for Readability
+
+Structure your test data declarations for better readability:
+
+```kotlin
+class OrderTest {
+    // Group related test data together
+    object TestUsers {
+        val customer by aRandom<User>()
+        val admin by aRandom<User> { copy(role = Role.ADMIN) }
+    }
+    
+    object TestProducts {
+        val inStock by aRandom<Product> { copy(stockQuantity = 100) }
+        val outOfStock by aRandom<Product> { copy(stockQuantity = 0) }
+    }
+    
+    // Use the structured data in tests
+    @Test
+    fun `customers cannot order out-of-stock products`() {
+        val result = orderService.placeOrder(
+            TestUsers.customer, 
+            TestProducts.outOfStock, 
+            quantity = 1
+        )
+        
+        assertEquals(OrderResult.OUT_OF_STOCK, result)
+    }
+}
+```
+
+### 4. Test Boundary Cases Explicitly
+
+Even with property-based testing, explicitly test boundary cases:
+
+```kotlin
+@Test
+fun `boundary cases are handled correctly`() {
+    // Zero quantity
+    val zeroQuantityOrder by aRandom<Order> { copy(quantity = 0) }
+    assertFalse(orderValidator.isValid(zeroQuantityOrder))
+    
+    // Maximum quantity
+    val maxQuantityOrder by aRandom<Order> { copy(quantity = MAX_QUANTITY) }
+    assertTrue(orderValidator.isValid(maxQuantityOrder))
+    
+    // Quantity just above maximum
+    val tooLargeOrder by aRandom<Order> { copy(quantity = MAX_QUANTITY + 1) }
+    assertFalse(orderValidator.isValid(tooLargeOrder))
+}
+```
+
+## Common Pitfalls and Solutions
+
+### Slow Tests Due to Large Object Graphs
+
+**Problem**: Tests are slow because Kofix generates large object graphs.
+
+**Solution**: Limit collection sizes and customize complex objects:
+
+```kotlin
+// Limit collection sizes
+val smallList by aRandomListOf<ComplexObject>(maxSize = 3)
+
+// Simplify complex objects
+customize<ComplexObject> {
+    // Create a simplified version with only essential properties
+    ComplexObject(
+        id = a<Id>(),
+        name = a<String>(),
+        // Use empty collections instead of generating them
+        references = emptyList()
+    )
+}
+```
+
+### Non-Deterministic Test Failures
+
+**Problem**: Tests sometimes fail due to randomness.
+
+**Solution**: Use seed control and properly constrain your generators:
+
+```kotlin
+@BeforeEach
+fun setupSeed() {
+    // When a test fails, log the seed value and use it here to reproduce
+    Seed.seed = System.getProperty("test.seed")?.toLongOrNull() 
+        ?: Random.nextLong().also { println("Test seed: $it") }
+}
+```
+
+### Unnecessary Object Creation
+
+**Problem**: Creating too many objects when only a few properties are needed.
+
+**Solution**: Use domain-specific generators or customize at use:
+
+```kotlin
+// Instead of a full user with all properties
+val simpleUser by aRandom<User> {
+    // Keep only what you need for the test
+    copy(
+        email = Email("test@example.com"),
+        password = null,
+        profile = null,
+        settings = emptyMap(),
+        // Clear other complex properties
+        address = null
+    )
+}
+```
+
+## Conclusion
+
+Property-based testing with Kofix helps you write more robust tests with less code. By generating random but valid test data, you can discover edge cases and ensure your code works correctly across a wide range of inputs.
+
+Kofix integrates seamlessly with Snitch's testing framework, making it easy to test your API endpoints with realistic, randomly generated data. This approach is particularly valuable for testing business logic, validation rules, and API endpoints.
+
+---
+
 ## From: QuickStart.md
 
 # Snitch Quick Start Guide
@@ -7365,6 +8135,456 @@ Check out our blog for real-world implementations and case studies:
 
 ---
 
+## From: Working-With-Parameters.md
+
+# Working with Parameters in Snitch
+
+This in-depth guide explores Snitch's parameter handling system, covering advanced topics, implementation details, and best practices for building robust, type-safe APIs.
+
+## Parameter System Architecture
+
+Snitch's parameter system is built on Kotlin's property delegation pattern, providing both compile-time and runtime safety. The system consists of several key components:
+
+1. **Parameter Definitions**: Type-safe property delegates that define parameters
+2. **Validators**: Functions that validate and transform parameter values
+3. **Parameter Registry**: Keeps track of all parameters used in routes
+4. **Parameter Extraction**: Pulls parameter values from HTTP requests
+5. **Parameter Access**: Type-safe access to parameter values in handlers
+
+## Parameter Delegates
+
+Each parameter type is implemented as a property delegate:
+
+- `path()`: Path parameters embedded in URL segments
+- `query()`: Query parameters from the URL query string
+- `header()`: Parameters from HTTP headers
+- `body<T>()`: Type-safe access to the request body
+
+Each delegate creates a parameter definition that is registered with the framework when routes are defined.
+
+## Parameter Definition Internals
+
+Let's look at how parameters are defined under the hood:
+
+```kotlin
+// PathParam implementation (simplified)
+class PathParam<T : Any, C : Any>(
+    override val name: String,
+    override val validator: ValueValidator<T, C>,
+    override val description: String,
+    override val emptyAsMissing: Boolean,
+    override val invalidAsMissing: Boolean,
+    override val visibility: ParameterVisibility,
+    override val condition: ValueCondition<C>?
+) : Parameter<T, C>
+```
+
+The `Parameter<T, C>` interface defines common properties and behaviors for all parameter types:
+
+- `name`: The parameter name used in documentation and error messages
+- `validator`: Validates and transforms the parameter string value to type T
+- `description`: Human-readable description for documentation
+- `emptyAsMissing`: Controls whether empty values are treated as missing
+- `invalidAsMissing`: Controls whether invalid values are treated as missing
+- `visibility`: Controls whether parameter appears in documentation
+- `condition`: Additional validation logic for the parameter
+
+## Parameter Registration and Resolution
+
+When a route is defined, its parameters are registered with the framework:
+
+```kotlin
+val userId by path(ofInt)
+
+// The route definition registers the userId parameter
+GET("users" / userId) isHandledBy { ... }
+```
+
+During request handling:
+
+1. Parameters are extracted from the request
+2. Each parameter is validated using its validator
+3. Additional conditions are checked
+4. If validation fails, an appropriate error response is returned
+5. If successful, the handler is invoked with access to the validated parameters
+
+## Advanced Parameter Usage
+
+### Custom Validator Implementation
+
+Creating a custom validator involves implementing the `ValueValidator<T, C>` interface:
+
+```kotlin
+// Custom UUID validator implementation
+val ofUUID = object : ValueValidator<String, UUID> {
+    override val invalidValueErrorMessage = "Invalid UUID format"
+    
+    override fun validate(value: String): UUID {
+        try {
+            return UUID.fromString(value)
+        } catch (e: IllegalArgumentException) {
+            throw InvalidParameterException(invalidValueErrorMessage)
+        }
+    }
+    
+    override fun serialize(value: UUID): String {
+        return value.toString()
+    }
+}
+
+// Usage
+val userId by path(ofUUID, description = "User ID in UUID format")
+```
+
+For simpler validators, you can use the `validator` helper function:
+
+```kotlin
+val ofUUID = validator { input ->
+    try {
+        UUID.fromString(input)
+        input
+    } catch (e: IllegalArgumentException) {
+        throw InvalidParameterException("Invalid UUID format")
+    }
+}
+```
+
+### Parameter Conditions
+
+Conditions provide additional validation for parameters beyond basic type conversion:
+
+```kotlin
+// Condition implementation
+val positiveNumber = condition<Int> { value ->
+    if (value <= 0) {
+        ConditionResult.Failure("Value must be positive")
+    } else {
+        ConditionResult.Success
+    }
+}
+
+// Usage with a parameter
+val quantity by query(ofInt, condition = positiveNumber)
+```
+
+Conditions are evaluated after the parameter has been successfully validated and converted to its target type.
+
+### Parameter Visibility
+
+Control whether parameters appear in documentation:
+
+```kotlin
+// Public parameter visible in documentation
+val apiKey by header(visibility = ParameterVisibility.PUBLIC)
+
+// Internal parameter hidden from documentation
+val internalId by header(visibility = ParameterVisibility.INTERNAL)
+```
+
+### Parameter Grouping and Organization
+
+For better code organization, group related parameters in objects:
+
+```kotlin
+object UserParameters {
+    val id by path(ofInt, description = "User ID")
+    val email by query(ofEmail, description = "User email")
+    val status by optionalQuery(
+        validator { input -> UserStatus.valueOf(input.uppercase()) },
+        default = UserStatus.ACTIVE,
+        description = "User status"
+    )
+}
+
+object PaginationParameters {
+    val page by optionalQuery(ofNonNegativeInt, default = 1, description = "Page number")
+    val size by optionalQuery(ofNonNegativeInt, default = 20, description = "Page size")
+    val sort by optionalQuery(description = "Sort field")
+    val direction by optionalQuery(
+        validator { input -> SortDirection.valueOf(input.uppercase()) },
+        default = SortDirection.ASC,
+        description = "Sort direction"
+    )
+}
+```
+
+This approach makes route definitions more readable and groups related parameters logically:
+
+```kotlin
+GET("users") withQuery PaginationParameters.page withQuery PaginationParameters.size isHandledBy {
+    val page = request[PaginationParameters.page]
+    val size = request[PaginationParameters.size]
+    // ...
+}
+```
+
+## Parameter Validation Flow
+
+When a request is processed, parameters go through the following validation flow:
+
+1. **Extraction**: Parameters are extracted from the request
+   - Path parameters from URL path segments
+   - Query parameters from the query string
+   - Header parameters from request headers
+
+2. **Presence Check**: For required parameters, verify the parameter is present
+
+3. **Empty Value Handling**: Apply `emptyAsMissing` logic if configured
+
+4. **Type Validation and Conversion**: Apply the parameter's validator
+   - Validates the string value
+   - Converts to the target type
+   - May throw `InvalidParameterException` if validation fails
+
+5. **Invalid Value Handling**: Apply `invalidAsMissing` logic if configured and validation failed
+
+6. **Condition Check**: Apply additional conditions if defined
+   - Evaluated on the converted value
+   - May return failure with a custom error message
+
+7. **Default Value Application**: For optional parameters with defaults, apply the default value if the parameter is missing
+
+8. **Availability**: Make validated parameters available to the handler
+
+If any step fails, the framework generates an appropriate error response, typically a 400 Bad Request with details about the invalid parameter.
+
+## Body Parameter Handling
+
+Body parameters are handled differently from other parameter types:
+
+1. The request body is read and parsed according to the Content-Type
+2. The parsed data is converted to the target type
+3. The typed body is made available in handlers via the `body` property
+
+Body parameters are defined in route declarations:
+
+```kotlin
+POST("users") with body<CreateUserRequest>() isHandledBy {
+    // Access body properties directly
+    val name = body.name
+    val email = body.email
+    // ...
+}
+```
+
+For more control over body parsing and validation, use the `parsing` handler:
+
+```kotlin
+val createUser by parsing<CreateUserRequest>() handling {
+    // Additional validation
+    if (body.name.isBlank()) {
+        return@handling "Name cannot be blank".badRequest()
+    }
+    
+    // Process the request
+    userService.createUser(body.name, body.email)
+    "User created".created
+}
+```
+
+## Combining Parameters with Path Building
+
+Snitch's path building syntax integrates seamlessly with parameters:
+
+```kotlin
+// Basic path with parameter
+GET("users" / userId) isHandledBy { ... }
+
+// Nested paths with multiple parameters
+val api = routes {
+    "users" / {
+        GET() isHandledBy { ... }  // GET /users
+        
+        userId / {
+            GET() isHandledBy { ... }  // GET /users/{userId}
+            
+            "posts" / {
+                GET() isHandledBy { ... }  // GET /users/{userId}/posts
+                
+                postId / {
+                    GET() isHandledBy { ... }  // GET /users/{userId}/posts/{postId}
+                }
+            }
+        }
+    }
+}
+```
+
+This composition approach makes it easy to build hierarchical APIs with clear parameter scoping.
+
+## Type-Safe Parameter Access
+
+Snitch provides type-safe access to parameters in handlers:
+
+```kotlin
+val userId by path(ofInt)
+val page by optionalQuery(ofInt, default = 1)
+
+val handler by handling {
+    val id: Int = request[userId]  // Type-safe access
+    val pageNum: Int = request[page]  // Default applied if missing
+    
+    // ...
+}
+```
+
+The type information is preserved through the property delegate system, so you get compile-time type checking for parameter access.
+
+## Error Handling and Customization
+
+You can customize how parameter validation errors are handled:
+
+```kotlin
+// Global error handler for parameter validation errors
+app.handleException(InvalidParameterException::class) { exception, _ ->
+    ErrorResponse(
+        code = 400,
+        message = "Invalid parameter: ${exception.message}"
+    ).badRequest()
+}
+
+// Custom error handler for specific routes
+routes {
+    handleException(InvalidParameterException::class) { exception, _ ->
+        ErrorResponse(
+            code = 400,
+            message = "Validation failed: ${exception.message}",
+            details = mapOf("parameter" to exception.parameterName)
+        ).badRequest()
+    }
+    
+    // Routes with custom error handling...
+}
+```
+
+## Working with Collections of Parameters
+
+Handling collections of parameter values:
+
+```kotlin
+// Define a multi-value query parameter
+val tags by query(description = "Filter by tags", multiValued = true)
+
+// Access as a list in the handler
+val handler by handling {
+    val tagList: List<String> = request[tags]
+    // ...
+}
+```
+
+For more complex parsing:
+
+```kotlin
+// Define a collection parameter with custom parsing
+val sortFields by query(
+    validator { input ->
+        input.split(",").map { field ->
+            val parts = field.split(":")
+            val name = parts[0]
+            val direction = if (parts.size > 1) parts[1].uppercase() else "ASC"
+            SortField(name, SortDirection.valueOf(direction))
+        }
+    },
+    description = "Sorting fields in format field:direction,field:direction"
+)
+
+// Access in handler
+val handler by handling {
+    val sorting: List<SortField> = request[sortFields]
+    // ...
+}
+```
+
+## Performance Considerations
+
+The parameter handling system is designed to be efficient:
+
+1. **Property Delegates**: Parameters are defined once at initialization time
+2. **Lazy Validation**: Parameters are only validated when accessed
+3. **Caching**: Validation results are cached within a request
+4. **Early Validation**: Basic validation happens before handlers are invoked, preventing unnecessary work
+
+For optimal performance:
+
+- Use appropriate validators for your parameter types
+- Consider organizing parameters by usage patterns
+- Leverage built-in validators when possible
+- Use conditional logic in handlers for complex validation scenarios
+
+## Integration with API Documentation
+
+Parameters are automatically included in API documentation:
+
+- Path parameters are shown in URL templates
+- Query parameters are listed with types and descriptions
+- Header parameters are included in expected headers
+- Body parameters are documented with schemas when possible
+
+To improve documentation:
+
+- Add clear descriptions to all parameters
+- Use appropriate visibility settings
+- Organize parameters logically
+- Consider using custom validators with descriptive error messages
+
+## Best Practices
+
+### Parameter Naming
+
+Follow consistent naming conventions:
+
+- Use camelCase for parameter names
+- Be descriptive but concise
+- Use singular nouns for single values (e.g., `userId`)
+- Use plural nouns for collections (e.g., `tags`)
+- Prefer specific names over generic ones (e.g., `email` instead of `value`)
+
+### Parameter Organization
+
+Organize parameters for maintainability:
+
+- Group related parameters in objects
+- Use common objects for shared parameters (e.g., pagination)
+- Keep parameter definitions close to their usage
+- Consider organizing parameters by domain concept
+
+### Validation Strategy
+
+Create a robust validation strategy:
+
+- Validate parameters at the appropriate level
+- Use parameter validators for basic type and format validation
+- Use conditions for business rule validation
+- Use handler logic for complex or cross-parameter validation
+- Consider using the Jakarta Bean Validation API for complex objects
+
+### Parameter Documentation
+
+Document parameters thoroughly:
+
+- Add clear descriptions to all parameters
+- Indicate parameter constraints (e.g., "must be positive")
+- Document default values for optional parameters
+- Use examples for complex parameters
+
+### Parameter Security
+
+Consider security implications:
+
+- Validate all user input
+- Sanitize path and query parameters
+- Be cautious with header parameters that may contain sensitive data
+- Consider using `emptyAsMissing` for parameters that should never be empty
+- Use conditions to implement additional security checks
+
+## Conclusion
+
+Snitch's parameter handling system provides a powerful, type-safe approach to working with request parameters. By leveraging Kotlin's property delegation feature, it offers a declarative syntax for parameter definition with strong type safety and robust validation.
+
+Understanding the internals of the parameter system allows you to build more maintainable, secure, and well-documented APIs with Snitch, while taking advantage of the framework's type safety and validation features.
+
+---
+
 ## From: Artifacts.md
 
 # Snitch Artifacts
@@ -8091,10 +9311,8 @@ Whether you're building a simple application with H2 or a complex system with Po
 ## Further Reading
 
 - [Exposed Documentation](https://github.com/JetBrains/Exposed/wiki)
-- [Snitch Exposed API Reference](/api/exposed)
 - [H2 Database Engine](https://h2database.com/html/main.html)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [Using Snitch with Exposed (Tutorial)](tutorials/UsingSnichWithExposed.md)
 
 ---
 
