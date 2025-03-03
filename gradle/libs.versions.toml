@@ -19,6 +19,7 @@ logback-classic = "1.1.7"
 jacoco = "0.8.8"
 hibernate-validator = "8.0.1.Final"
 jakarta-el = "4.0.2"
+h2 = "2.2.224"
 
 [libraries]
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
@@ -52,6 +53,7 @@ logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.
 logstash-encoder = { group = "net.logstash.logback", name = "logstash-logback-encoder", version.ref = "logstash" }
 
 assertj-core = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
+h2database= { group = "com.h2database", name= "h2", version.ref = "h2"}
 assertk-core = { group = "com.github.memoizr", name = "assertk-core", version = "-SNAPSHOT" }
 momster = { group = "com.github.memoizr", name = "momster", version = "fac1dae13d" }
 
