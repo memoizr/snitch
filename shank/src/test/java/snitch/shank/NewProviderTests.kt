@@ -19,7 +19,7 @@ private object ParameterNewModule : ShankModule {
     val fiveParamNew = new { a: Int, b: Int, c: Int, d: Int, e: Int -> ParamData(a, b, c, d, e) }
 }
 
-class NewTests {
+class NewProviderTests {
 
     @BeforeEach
     fun setUp() {

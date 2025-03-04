@@ -15,12 +15,12 @@ import snitch.shank.ParameterSingletonModule.noParam
 import snitch.shank.ParameterSingletonModule.oneParam
 import snitch.shank.ParameterSingletonModule.threeParam
 import snitch.shank.ParameterSingletonModule.twoParam
-import snitch.shank.SingletonTests.ConcurrentSingleton.nanotime0
-import snitch.shank.SingletonTests.ConcurrentSingleton.nanotime1
-import snitch.shank.SingletonTests.ConcurrentSingleton.nanotime2
-import snitch.shank.SingletonTests.ConcurrentSingleton.nanotime3
-import snitch.shank.SingletonTests.ConcurrentSingleton.nanotime4
-import snitch.shank.SingletonTests.ConcurrentSingleton.nanotime5
+import snitch.shank.SingletonProviderTests.ConcurrentSingleton.nanotime0
+import snitch.shank.SingletonProviderTests.ConcurrentSingleton.nanotime1
+import snitch.shank.SingletonProviderTests.ConcurrentSingleton.nanotime2
+import snitch.shank.SingletonProviderTests.ConcurrentSingleton.nanotime3
+import snitch.shank.SingletonProviderTests.ConcurrentSingleton.nanotime4
+import snitch.shank.SingletonProviderTests.ConcurrentSingleton.nanotime5
 
 private object ParameterSingletonModule : ShankModule {
     val noParam = single { -> ParamData() }
@@ -31,7 +31,7 @@ private object ParameterSingletonModule : ShankModule {
     val fiveParam = single { a: Int, b: Int, c: Int, d: Int, e: Int -> ParamData(a, b, c, d, e) }
 }
 
-class SingletonTests {
+class SingletonProviderTests {
 
     @BeforeEach
     fun setUp() {
