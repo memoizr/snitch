@@ -182,4 +182,3 @@ infix fun Any?.shouldNotBeSameReference(other: Any?) {
         throw AssertionError("Expected $this to not be the same reference as $other")
     }
 }
-
