@@ -1,7 +1,14 @@
 package snitch.shank
 
-interface SingleProvider0<T> : Provider0<T> {
-    infix fun override(f: (() -> T)?): SingleProvider0<T>
+class SingleProvider0<T>(
+    val factory: () -> T
+) : Provider0<T> {
+    private var cache: T? = null
+    private var o: (() -> T)? = null
+    fun override(f: (() -> T)?) = also { o = f }.also { cache = null }
+
+    @Synchronized
+    override fun invoke(): T = cache ?: (o?.invoke() ?: factory()).also { cache = it }
 }
 
 interface SingleProvider1<A, T> : Provider1<A, T> {
@@ -16,14 +23,7 @@ interface SingleProvider3<A, B, C, T> : Provider3<A, B, C, T> {
     infix fun override(f: ((A, B, C) -> T)?): SingleProvider3<A, B, C, T>
 }
 
-inline fun <T> ShankModule.single(crossinline factory: () -> T) = object : SingleProvider0<T> {
-    private var cache: T? = null
-    private var o: (() -> T)? = null
-    override fun override(f: (() -> T)?) = also { o = f }.also { cache = null }
-
-    @Synchronized
-    override fun invoke(): T = cache ?: (o?.invoke() ?: factory()).also { cache = it }
-}
+inline fun <T> ShankModule.single(noinline factory: () -> T) = SingleProvider0<T>(factory)
 
 inline fun <A, T> ShankModule.single(crossinline factory: (A) -> T) = object : SingleProvider1<A, T> {
     private var cache: HashcodeHashMap<T>? = null

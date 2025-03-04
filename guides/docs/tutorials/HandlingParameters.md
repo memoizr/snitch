@@ -323,5 +323,3 @@ val createUser by parsing<CreateUserRequest>() handling {
 ## Conclusion
 
 Snitch's parameter handling system provides a type-safe, declarative way to define and validate request parameters. By using the right parameter types and validation rules, you can create robust APIs that gracefully handle various input scenarios.
-
-For more information on parameter handling, refer to the [Snitch API reference](/api/parameters) and check out the example project for real-world usage patterns.

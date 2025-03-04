@@ -1,9 +1,9 @@
 package snitch.shank
 
 
-interface Provider<T, F : Function<T>>
+interface Provider<out T, out F : Function<T>>
 
-interface Provider0<T> : Provider<T, () -> T> {
+interface Provider0<out T> : Provider<T, () -> T> {
     operator fun invoke(): T
 }
 
