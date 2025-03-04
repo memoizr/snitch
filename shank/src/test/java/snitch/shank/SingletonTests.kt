@@ -39,76 +39,114 @@ class SingletonTests {
     }
 
     @Test
-    fun `supports parameters`() {
+    fun `should create and cache instances with no parameters`() {
         noParam() shouldBeEqualTo ParamData()
         noParam() shouldBeSameReference noParam()
-        
+    }
+    
+    @Test
+    fun `should create and cache instances with one parameter`() {
         oneParam(1) shouldBeEqualTo ParamData(1)
         oneParam(1) shouldBeSameReference oneParam(1)
-
+    }
+    
+    @Test
+    fun `should create and cache instances with two parameters`() {
         twoParam(1, 2) shouldBeEqualTo ParamData(1, 2)
         twoParam(1, 2) shouldBeSameReference twoParam(1, 2)
-
+    }
+    
+    @Test
+    fun `should create and cache instances with three parameters`() {
         threeParam(1, 2, 3) shouldBeEqualTo ParamData(1, 2, 3)
         threeParam(1, 2, 3) shouldBeSameReference threeParam(1, 2, 3)
-
+    }
+    
+    @Test
+    fun `should create and cache instances with four parameters`() {
         fourParam(1, 2, 3, 4) shouldBeEqualTo ParamData(1, 2, 3, 4)
         fourParam(1, 2, 3, 4) shouldBeSameReference fourParam(1, 2, 3, 4)
-
+    }
+    
+    @Test
+    fun `should create and cache instances with five parameters`() {
         fiveParam(1, 2, 3, 4, 5) shouldBeEqualTo ParamData(1, 2, 3, 4, 5)
         fiveParam(1, 2, 3, 4, 5) shouldBeSameReference fiveParam(1, 2, 3, 4, 5)
     }
 
     @Test
-    fun `provides different values per params`() {
+    fun `should cache different instances for different one parameter values`() {
         oneParam(1) shouldBeSameReference oneParam(1)
         oneParam(2).a shouldBeEqualTo 2
         oneParam(1) shouldNotBeSameReference oneParam(2)
-
+    }
+    
+    @Test
+    fun `should cache different instances for different two parameter values`() {
         twoParam(1, 2) shouldBeEqualTo ParamData(1, 2)
         twoParam(2, 3) shouldBeEqualTo ParamData(2, 3)
         twoParam(1, 2) shouldNotBeSameReference twoParam(2, 3)
-
+    }
+    
+    @Test
+    fun `should cache different instances for different three parameter values`() {
         threeParam(1, 2, 3) shouldBeEqualTo ParamData(1, 2, 3)
         threeParam(2, 3, 4) shouldBeEqualTo ParamData(2, 3, 4)
         threeParam(1, 2, 3) shouldNotBeSameReference threeParam(2, 3, 4)
-
+    }
+    
+    @Test
+    fun `should cache different instances for different four parameter values`() {
         fourParam(1, 2, 3, 4) shouldBeEqualTo ParamData(1, 2, 3, 4)
         fourParam(2, 3, 4, 5) shouldBeEqualTo ParamData(2, 3, 4, 5)
         fourParam(1, 2, 3, 4) shouldNotBeSameReference fourParam(2, 3, 4, 5)
-
+    }
+    
+    @Test
+    fun `should cache different instances for different five parameter values`() {
         fiveParam(1, 2, 3, 4, 5) shouldBeEqualTo ParamData(1, 2, 3, 4, 5)
         fiveParam(2, 3, 4, 5, 6) shouldBeEqualTo ParamData(2, 3, 4, 5, 6)
         fiveParam(1, 2, 3, 4, 5) shouldNotBeSameReference fiveParam(2, 3, 4, 5, 6)
     }
 
-
     @Test
-    fun `allows override`() {
+    fun `should allow overriding factory implementation with no parameters`() {
         noParam() shouldBeEqualTo ParamData()
         noParam.override { -> ParamData(2) }
         noParam() shouldBeEqualTo ParamData(2)
         noParam.override(null)
         noParam() shouldBeEqualTo ParamData()
-
+    }
+    
+    @Test
+    fun `should allow overriding factory implementation with one parameter`() {
         oneParam(1) shouldBeEqualTo ParamData(1)
         oneParam.override { a: Int -> ParamData(a * 2) }
         oneParam(1) shouldBeEqualTo ParamData(2)
         oneParam.override(null)
         oneParam(1) shouldBeEqualTo ParamData(1)
-
+    }
+    
+    @Test
+    fun `should allow overriding factory implementation with two parameters`() {
         twoParam(1, 2) shouldBeEqualTo ParamData(1, 2)
         twoParam.override { a: Int, b: Int -> ParamData(a * 2, b * 2) }
         twoParam(1, 2) shouldBeEqualTo ParamData(2, 4)
         twoParam.override(null)
         twoParam(1, 2) shouldBeEqualTo ParamData(1, 2)
-
+    }
+    
+    @Test
+    fun `should allow overriding factory implementation with three parameters`() {
         threeParam(1, 2, 3) shouldBeEqualTo ParamData(1, 2, 3)
         threeParam.override { a: Int, b: Int, c: Int -> ParamData(a * 2, b * 2, c * 2) }
         threeParam(1, 2, 3) shouldBeEqualTo ParamData(2, 4, 6)
         threeParam.override(null)
         threeParam(1, 2, 3) shouldBeEqualTo ParamData(1, 2, 3)
-
+    }
+    
+    @Test
+    fun `should allow overriding factory implementation with four parameters`() {
         fourParam(1, 2, 3, 4) shouldBeEqualTo ParamData(1, 2, 3, 4)
         fourParam.override { a: Int, b: Int, c: Int, d: Int ->
             ParamData(
@@ -121,7 +159,10 @@ class SingletonTests {
         fourParam(1, 2, 3, 4) shouldBeEqualTo ParamData(2, 4, 6, 8)
         fourParam.override(null)
         fourParam(1, 2, 3, 4) shouldBeEqualTo ParamData(1, 2, 3, 4)
-
+    }
+    
+    @Test
+    fun `should allow overriding factory implementation with five parameters`() {
         fiveParam(1, 2, 3, 4, 5) shouldBeEqualTo ParamData(1, 2, 3, 4, 5)
         fiveParam.override { a: Int, b: Int, c: Int, d: Int, e: Int ->
             ParamData(
@@ -137,15 +178,44 @@ class SingletonTests {
         fiveParam(1, 2, 3, 4, 5) shouldBeEqualTo ParamData(1, 2, 3, 4, 5)
     }
 
-
     @Test
-    fun `supports concurrent requests`() {
+    fun `should return same instance when accessed concurrently with no parameters`() {
         runBlocking(Dispatchers.Default) {
             testConcurrentAccess { nanotime0() }
+        }
+    }
+    
+    @Test
+    fun `should return same instance when accessed concurrently with one parameter`() {
+        runBlocking(Dispatchers.Default) {
             testConcurrentAccess { nanotime1(0) }
+        }
+    }
+    
+    @Test
+    fun `should return same instance when accessed concurrently with two parameters`() {
+        runBlocking(Dispatchers.Default) {
             testConcurrentAccess { nanotime2(0, 0) }
+        }
+    }
+    
+    @Test
+    fun `should return same instance when accessed concurrently with three parameters`() {
+        runBlocking(Dispatchers.Default) {
             testConcurrentAccess { nanotime3(0, 0, 0) }
+        }
+    }
+    
+    @Test
+    fun `should return same instance when accessed concurrently with four parameters`() {
+        runBlocking(Dispatchers.Default) {
             testConcurrentAccess { nanotime4(0, 0, 0, 0) }
+        }
+    }
+    
+    @Test
+    fun `should return same instance when accessed concurrently with five parameters`() {
+        runBlocking(Dispatchers.Default) {
             testConcurrentAccess { nanotime5(0, 0, 0, 0, 0) }
         }
     }
