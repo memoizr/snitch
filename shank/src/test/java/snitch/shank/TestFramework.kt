@@ -15,8 +15,11 @@ infix fun <T : Any> T?.shouldBeSameReference(other: T) = asserts(this === other)
     """Values should be same reference but aren't;
     Expected:
     $other
+    ${other.hashCode()}
     Actual:
-    $this"""
+    $this
+    ${this.hashCode()}
+    """
 }
 
 infix fun <T : Any> T?.shouldBeEqualTo(other: T) = asserts(this == other) {
