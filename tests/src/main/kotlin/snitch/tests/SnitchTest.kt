@@ -1,5 +1,8 @@
 package snitch.tests
 
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.TestInstance
 import snitch.parsers.GsonJsonParser
 import snitch.parsers.GsonJsonParser.parse
 import snitch.parsers.GsonJsonParser.serialized
@@ -164,23 +167,28 @@ data class Expectation(
 
     infix inline fun <reified T : Any> expectBodyJson(body: T) = apply {
         val r = response.body()
-        com.memoizr.assertk.expect that r.parse(T::class.java) isEqualTo body
+        assert(r.parse(T::class.java) == body)
+        { "Expecting: $body, but got: $r" }
     }
 }
 
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class SnitchTest(service: (Int) -> RoutedService) : Ported, TestMethods {
     override open val port = Random().nextInt(5000) + 2000
     val activeService by lazy { service(port) }
     protected val whenPerform = this
 
+    @BeforeAll
     open fun before() {
         activeService.start()
     }
 
+    @AfterAll
     open fun after() {
         activeService.stop()
     }
 }
+
 
 private val clnt = java.net.http.HttpClient.newBuilder().build()

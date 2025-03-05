@@ -1,8 +1,8 @@
 package snitch.exposed
 
-import life.shank.ShankModule
-import life.shank.single
 import org.jetbrains.exposed.sql.Database
+import snitch.shank.ShankModule
+import snitch.shank.single
 
 object ExposedModule : ShankModule {
     val connection = single { config: DatabaseConnectionConfig ->

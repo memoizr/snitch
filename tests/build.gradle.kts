@@ -4,10 +4,11 @@ dependencies {
     implementation(project(":shank"))
     implementation(libs.kotlin.reflect)
 
-    api(platform(libs.junit.bom))
-    api(libs.junit.jupiter)
-    api(libs.mockk)
-    api(libs.assertk.core)
-    api(libs.assertj.core)
-    api(libs.logback.classic)
+    implementation(platform(libs.junit.bom))
+    implementation(libs.junit.jupiter)
+    implementation(libs.junit.jupiter.api)
+    implementation(libs.mockk)
+    implementation(libs.assertj.core)
+
+    testImplementation(libs.assertk.core)
 }

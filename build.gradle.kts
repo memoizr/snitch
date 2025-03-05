@@ -45,6 +45,10 @@ subprojects {
 
     if (project.name != "example") {
         apply(plugin = "com.vanniktech.maven.publish")
+
+        if (file("gradle-local.properties").exists()) {
+            apply(from= "gradle-local.properties")
+        }
         mavenPublishing {
             coordinates("io.github.memoizr", "snitch-${project.name}", projectVersion)
 
