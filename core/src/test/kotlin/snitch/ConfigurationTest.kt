@@ -10,7 +10,6 @@ import snitch.parsers.GsonJsonParser
 import snitch.tests.SnitchTest
 import snitch.undertow.UndertowSnitchService
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ConfigurationTest : SnitchTest({
     UndertowSnitchService(
         GsonJsonParser,
@@ -21,15 +20,6 @@ class ConfigurationTest : SnitchTest({
 }) {
     override val port = 3333
 
-    @BeforeAll
-    fun beforeAll() {
-        super.before()
-    }
-
-    @AfterAll
-    override fun after() {
-        super.after()
-    }
 
     @Test
     fun `supports port from config`() {

@@ -16,5 +16,6 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockk)
+    testImplementation(libs.assertk.core)
     testImplementation(kotlin("test"))
 }

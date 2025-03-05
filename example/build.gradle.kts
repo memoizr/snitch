@@ -29,6 +29,7 @@ dependencies {
     testImplementation(project(":tests"))
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.assertj.core)
+    testImplementation(libs.assertk.core)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.momster)
 }
