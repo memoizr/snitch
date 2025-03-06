@@ -5,6 +5,7 @@ import org.jetbrains.exposed.sql.ColumnSet
 import org.jetbrains.exposed.sql.Expression
 import org.jetbrains.exposed.sql.ExpressionAlias
 import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.Table
@@ -158,14 +159,26 @@ fun <R : Any> Table.batchInsert(values: List<R>, customize: Table.(UpdateBuilder
 inline fun <reified R : Any> InsertStatement<Number>.id() =
     this.table.primaryKey?.columns?.find { it.name == "id" }?.let { this[it]?.wrap(R::class) } as R
 
-inline fun <reified R : Any> Table.findAll(e: SqlExpressionBuilder.() -> Op<Boolean> = { Op.TRUE }) = select(e)
+inline fun <reified R : Any> Table.findAll(
+    query: Query.() -> Query = {this},
+    e: SqlExpressionBuilder.() -> Op<Boolean> = { Op.TRUE },
+) = select(e)
+    .query()
     .map { it.to(this, R::class) }
 
-inline fun <reified R : Any> Table.findOne(e: SqlExpressionBuilder.() -> Op<Boolean>) = select(e)
+inline fun <reified R : Any> Table.findOne(
+    query: Query.() -> Query = {this},
+    e: SqlExpressionBuilder.() -> Op<Boolean>,
+) = select(e)
+    .query()
     .map { it.to(this, R::class) }
     .single()
 
-inline fun <reified R : Any> Table.findOneOrNull(e: SqlExpressionBuilder.() -> Op<Boolean>) = select(e)
+inline fun <reified R : Any> Table.findOneOrNull(
+    query: Query.() -> Query = {this},
+    e: SqlExpressionBuilder.() -> Op<Boolean>,
+) = select(e)
+    .query()
     .map { it.to(this, R::class) }
     .singleOrNull()
 

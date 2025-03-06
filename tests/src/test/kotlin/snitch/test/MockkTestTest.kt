@@ -114,7 +114,7 @@ class HttpTestTest : MockkTest {
 
         expect that one().bar() isEqualTo "mocked"
 
-        after()
+        mockAfter()
 
         expect that one().bar() isEqualTo "one"
     }

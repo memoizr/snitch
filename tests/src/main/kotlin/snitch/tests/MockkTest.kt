@@ -14,12 +14,12 @@ interface MockkTest {
     val mocks: MockConfig get() = {}
 
     @BeforeEach
-    fun before() {
+    fun mockBefore() {
         mocks(Mocks(this::class))
     }
 
     @AfterEach
-    fun after() {
+    fun mockAfter() {
         resetShank()
         internalMocks[this::class]?.forEach { resetProvider(it) }
         internalMocks.clear()
