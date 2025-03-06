@@ -5,10 +5,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
-import ro.kreator.customize
 import snitch.example.database.DBModule
 import snitch.example.database.DBModule.connection
 import snitch.example.types.Email
+import snitch.kofix.customize
 import snitch.tests.SnitchTest
 import kotlin.random.Random
 

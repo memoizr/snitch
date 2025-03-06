@@ -6,10 +6,9 @@ dependencies {
     implementation(project(":shank"))
 
     // Database
-    implementation(libs.postgresql)
-    implementation(libs.exposed.core)
-    implementation(libs.exposed.jdbc)
-    implementation(libs.exposed.java.time)
+    implementation(project(":exposed"))
+    implementation(project(":exposed-h2"))
+    implementation(project(":exposed-postgres"))
 
     // Security & Utils
     implementation(libs.argon2)
@@ -27,9 +26,9 @@ dependencies {
 
     // Testing
     testImplementation(project(":tests"))
+    testImplementation(project(":kofix"))
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.assertj.core)
     testImplementation(libs.assertk.core)
     testImplementation(libs.junit.jupiter)
-    testImplementation(libs.momster)
 }

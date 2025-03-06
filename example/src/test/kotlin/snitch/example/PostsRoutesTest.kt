@@ -4,7 +4,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import ro.kreator.aRandom
 import snitch.example.ApplicationModule.clock
 import snitch.example.ApplicationModule.now
 import snitch.example.api.CreatePostRequest
@@ -23,6 +22,7 @@ import snitch.example.types.Hash
 import snitch.example.types.Post
 import snitch.example.types.User
 import snitch.example.types.UserView
+import snitch.kofix.aRandom
 import snitch.parsers.GsonJsonParser.serialized
 import java.time.Clock
 import java.time.Instant

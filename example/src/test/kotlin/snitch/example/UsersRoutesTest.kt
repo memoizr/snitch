@@ -2,12 +2,12 @@ package snitch.example
 
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import ro.kreator.aRandom
 import snitch.example.api.CreateUserRequest
 import snitch.example.api.LoginRequest
 import snitch.example.security.IPasswordHasher
 import snitch.example.security.SecurityModule.hasher
 import snitch.example.types.Hash
+import snitch.kofix.aRandom
 
 class UsersRoutesTest : BaseTest() {
     val createRequest by aRandom<CreateUserRequest> { copy(email = "foo@gmail.com") }
