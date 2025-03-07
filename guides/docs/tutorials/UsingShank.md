@@ -25,7 +25,7 @@ The Shank library is included as a transitive dependency when you include Snitch
 
 ```kotlin
 dependencies {
-    implementation("io.github.memoizr:snitch-bootstrap:4.0.0")
+    implementation("io.github.memoizr:snitch-bootstrap:4.0.1")
 }
 ```
 
