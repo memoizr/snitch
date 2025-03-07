@@ -43,7 +43,7 @@ object Application {
         setUpDatabase()
 
         return snitch(GsonJsonParser, SnitchConfig(Service(port = port)))
-            .onRoutes(snitch.example.rootRouter)
+            .onRoutes(rootRouter)
             .handleExceptions()
     }
 

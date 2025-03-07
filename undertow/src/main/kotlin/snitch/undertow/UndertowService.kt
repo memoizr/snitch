@@ -80,27 +80,11 @@ class UndertowSnitchService(
 
     override fun registerMethod(endpointBundle: EndpointBundle<*>, path: String) {
         with(parser) {
-            handlers.add(routingHandler.add(OPTIONS, path, {
-                it.responseHeaders.put(HttpString("Access-Control-Allow-Origin"),  "*")
-                it.responseHeaders.put(HttpString("Access-Control-Allow-Methods"),  "GET, POST, PATCH, PUT, DELETE, OPTIONS")
-                it.responseHeaders.put(HttpString("Access-Control-Allow-Headers"),  "*")
-                it.responseHeaders.put(HttpString("Access-Control-Allow-Credentials"),  "true")
-                it.responseHeaders.put(HttpString("Access-Control-Max-Age"),  "86400")
-                it.statusCode = 200
-                it.endExchange()
-            }))
             handlers.add(
                 routingHandler.add(
                     endpointBundle.endpoint.httpMethod.toUndertow(),
                     path,
-                    {
-                        it.responseHeaders.put(HttpString("Access-Control-Allow-Origin"),  "*")
-                        it.responseHeaders.put(HttpString("Access-Control-Allow-Methods"),  "GET, POST, PATCH, PUT, DELETE, OPTIONS")
-                        it.responseHeaders.put(HttpString("Access-Control-Allow-Headers"),  "Content-Type, Authorization, X-Requested-With")
-                        it.responseHeaders.put(HttpString("Access-Control-Allow-Credentials"),  "true")
-                        it.responseHeaders.put(HttpString("Access-Control-Max-Age"),  "86400")
-                        endpointBundle.undertowHandler(it)
-                    }
+                    { endpointBundle.undertowHandler(it) }
                 )
             )
         }

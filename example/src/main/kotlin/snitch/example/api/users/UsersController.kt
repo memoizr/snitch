@@ -33,7 +33,6 @@ val usersController = routes {
         userId / "posts" / {
             authenticated {
                 GET() onlyIf principalEquals(userId) isHandledBy getPosts
-                GET() onlyIf principalEquals(userId) isHandledBy getPosts
                 POST() onlyIf principalEquals(userId) with body<CreatePostRequest>() isHandledBy createPost
 
                 GET(postId) isHandledBy getPost

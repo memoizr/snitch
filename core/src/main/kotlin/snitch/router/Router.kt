@@ -93,15 +93,14 @@ fun routes(vararg tags: String, routes: Routes): Router.() -> Unit = {
 internal val String.leadingSlash get() = if (!startsWith("/")) "/$this" else this
 
 fun decorateWith(
-    vararg params: Parameter<*,*>,
-    decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>): Router.(Router.() -> Unit) -> Router =
-    transformEndpoints {
-        with(params.asList()).
-        decorated(decoration) }
+    vararg params: Parameter<*, *>,
+    decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>
+): Router.(Router.() -> Unit) -> Router =
+    transformEndpoints { with(params.asList()).decorated(decoration) }
 
 fun decoration(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = decoration
 fun transformEndpoints(action: Endpoint<*>.() -> Endpoint<*>): Router.(Routes) -> Router =
-    { it: Routes -> this.applyToAll_(it, action) }
+    { this.applyToAll_(it, action) }
 
 fun Router.only(condition: Condition, routes: Routes) = transformEndpoints { onlyIf(condition) }(routes)
 
