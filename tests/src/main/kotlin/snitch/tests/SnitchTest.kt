@@ -350,8 +350,6 @@ data class Expectation(
      * Create a JsonPath reader with the Gson parser
      */
     fun createJsonPathReader(json: String): com.jayway.jsonpath.ReadContext {
-//        val jsonObject = GsonJsonParser.parse(json, com.google.gson.JsonElement::class.java)
-//        val jsonString = GsonJsonParser.serialized(jsonObject)
         return JsonPath.parse(
         with (GsonJsonParser) {
             json.parseJson<JsonElement>().serialized
