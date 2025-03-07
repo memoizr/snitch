@@ -22,7 +22,7 @@ Adding Snitch to your project is straightforward:
 
 ```kotlin
 dependencies {
-    implementation("io.github.memoizr:snitch-bootstrap:2.0.0")
+    implementation("io.github.memoizr:snitch-bootstrap:4.0.0")
 }
 ```
 

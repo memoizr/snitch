@@ -7,7 +7,7 @@ Snitch is modular by design, providing several artifacts that can be used indepe
 ### snitch-bootstrap
 
 ```kotlin
-implementation("io.github.memoizr:snitch-bootstrap:2.0.0")
+implementation("io.github.memoizr:snitch-bootstrap:4.0.0")
 ```
 
 This is the main artifact most users should depend on. It includes everything needed to create a complete web service using Snitch with Undertow as the server and Gson for JSON parsing.
@@ -17,7 +17,7 @@ This is the main artifact most users should depend on. It includes everything ne
 ### snitch-core
 
 ```kotlin
-implementation("io.github.memoizr:snitch-core:2.0.0")
+implementation("io.github.memoizr:snitch-core:4.0.0")
 ```
 
 The core module contains the essential building blocks of Snitch:
@@ -31,7 +31,7 @@ This module is server-agnostic and doesn't include any specific JSON parsing imp
 ### snitch-types
 
 ```kotlin
-implementation("io.github.memoizr:snitch-types:2.0.0")
+implementation("io.github.memoizr:snitch-types:4.0.0")
 ```
 
 A lightweight module containing the basic types and interfaces used across the Snitch ecosystem. This module has minimal dependencies and can be used in your domain model to avoid pulling in the entire Snitch framework.
@@ -41,7 +41,7 @@ A lightweight module containing the basic types and interfaces used across the S
 ### snitch-undertow
 
 ```kotlin
-implementation("io.github.memoizr:snitch-undertow:2.0.0")
+implementation("io.github.memoizr:snitch-undertow:4.0.0")
 ```
 
 Provides Undertow server integration for Snitch. Undertow is a flexible, high-performance web server by JBoss that serves as the default server implementation for Snitch.
@@ -49,7 +49,7 @@ Provides Undertow server integration for Snitch. Undertow is a flexible, high-pe
 ### snitch-gsonparser
 
 ```kotlin
-implementation("io.github.memoizr:snitch-gsonparser:2.0.0")
+implementation("io.github.memoizr:snitch-gsonparser:4.0.0")
 ```
 
 Implements JSON parsing and serialization using Google's Gson library. This module allows Snitch to convert between JSON and Kotlin objects.
@@ -57,7 +57,7 @@ Implements JSON parsing and serialization using Google's Gson library. This modu
 ### snitch-coroutines
 
 ```kotlin
-implementation("io.github.memoizr:snitch-coroutines:2.0.0")
+implementation("io.github.memoizr:snitch-coroutines:4.0.0")
 ```
 
 Adds Kotlin Coroutines support to Snitch, allowing you to define suspending handlers and use the full power of Kotlin's asynchronous programming features.
@@ -75,7 +75,7 @@ tasks.withType<KotlinCompile> {
 ### snitch-auth
 
 ```kotlin
-implementation("io.github.memoizr:snitch-auth:2.0.0")
+implementation("io.github.memoizr:snitch-auth:4.0.0")
 ```
 
 Provides authentication and authorization capabilities for Snitch applications, including support for JWT tokens, role-based access control, and security middleware.
@@ -83,7 +83,7 @@ Provides authentication and authorization capabilities for Snitch applications, 
 ### snitch-validation
 
 ```kotlin
-implementation("io.github.memoizr:snitch-validation:2.0.0")
+implementation("io.github.memoizr:snitch-validation:4.0.0")
 ```
 
 Provides integration with Hibernate Validator (Jakarta Bean Validation), allowing you to use standard validation annotations in your request/response models.
@@ -91,7 +91,7 @@ Provides integration with Hibernate Validator (Jakarta Bean Validation), allowin
 ### snitch-tests
 
 ```kotlin
-testImplementation("io.github.memoizr:snitch-tests:2.0.0")
+testImplementation("io.github.memoizr:snitch-tests:4.0.0")
 ```
 
 Contains testing utilities and a fluent DSL for writing integration tests for Snitch services. Includes assertion helpers and logging configuration for tests.
@@ -99,7 +99,7 @@ Contains testing utilities and a fluent DSL for writing integration tests for Sn
 ### snitch-shank
 
 ```kotlin
-implementation("io.github.memoizr:snitch-shank:2.0.0")
+implementation("io.github.memoizr:snitch-shank:4.0.0")
 ```
 
 Integrates the Shank dependency injection library with Snitch, providing a lightweight, code-generated DI solution for your applications.
@@ -107,7 +107,7 @@ Integrates the Shank dependency injection library with Snitch, providing a light
 ### snitch-exposed
 
 ```kotlin
-implementation("io.github.memoizr:snitch-exposed:2.0.0")
+implementation("io.github.memoizr:snitch-exposed:4.0.0")
 ```
 
 Integrates the Exposed SQL library with Snitch, providing type-safe database access with automatic object mapping and transaction management.
@@ -115,7 +115,7 @@ Integrates the Exposed SQL library with Snitch, providing type-safe database acc
 ### snitch-exposed-h2
 
 ```kotlin
-implementation("io.github.memoizr:snitch-exposed-h2:2.0.0")
+implementation("io.github.memoizr:snitch-exposed-h2:4.0.0")
 ```
 
 Provides specialized support for H2 databases with Snitch and Exposed, ideal for development and testing environments.
@@ -123,7 +123,7 @@ Provides specialized support for H2 databases with Snitch and Exposed, ideal for
 ### snitch-exposed-postgres
 
 ```kotlin
-implementation("io.github.memoizr:snitch-exposed-postgres:2.0.0")
+implementation("io.github.memoizr:snitch-exposed-postgres:4.0.0")
 ```
 
 Provides specialized support for PostgreSQL databases with Snitch and Exposed, suitable for production environments.
@@ -131,7 +131,7 @@ Provides specialized support for PostgreSQL databases with Snitch and Exposed, s
 ### snitch-kofix
 
 ```kotlin
-testImplementation("io.github.memoizr:snitch-kofix:2.0.0")
+testImplementation("io.github.memoizr:snitch-kofix:4.0.0")
 ```
 
 Testing utilities for property-based testing and mocking in Snitch applications.
@@ -142,7 +142,7 @@ For most applications, the bootstrap module is sufficient:
 
 ```kotlin
 dependencies {
-    implementation("io.github.memoizr:snitch-bootstrap:2.0.0")
+    implementation("io.github.memoizr:snitch-bootstrap:4.0.0")
 }
 ```
 
@@ -150,8 +150,8 @@ For applications requiring coroutines:
 
 ```kotlin
 dependencies {
-    implementation("io.github.memoizr:snitch-bootstrap:2.0.0")
-    implementation("io.github.memoizr:snitch-coroutines:2.0.0")
+    implementation("io.github.memoizr:snitch-bootstrap:4.0.0")
+    implementation("io.github.memoizr:snitch-coroutines:4.0.0")
 }
 ```
 
@@ -159,10 +159,10 @@ For applications with database access:
 
 ```kotlin
 dependencies {
-    implementation("io.github.memoizr:snitch-bootstrap:2.0.0")
-    implementation("io.github.memoizr:snitch-exposed:2.0.0")
-    implementation("io.github.memoizr:snitch-exposed-postgres:2.0.0") // For production
-    implementation("io.github.memoizr:snitch-exposed-h2:2.0.0") // For testing
+    implementation("io.github.memoizr:snitch-bootstrap:4.0.0")
+    implementation("io.github.memoizr:snitch-exposed:4.0.0")
+    implementation("io.github.memoizr:snitch-exposed-postgres:4.0.0") // For production
+    implementation("io.github.memoizr:snitch-exposed-h2:4.0.0") // For testing
 }
 ```
 
@@ -170,8 +170,8 @@ For applications requiring authentication:
 
 ```kotlin
 dependencies {
-    implementation("io.github.memoizr:snitch-bootstrap:2.0.0")
-    implementation("io.github.memoizr:snitch-auth:2.0.0")
+    implementation("io.github.memoizr:snitch-bootstrap:4.0.0")
+    implementation("io.github.memoizr:snitch-auth:4.0.0")
 }
 ```
 
@@ -179,7 +179,7 @@ For a more customized setup using a different JSON library or web server, you ca
 
 ```kotlin
 dependencies {
-    implementation("io.github.memoizr:snitch-core:2.0.0")
+    implementation("io.github.memoizr:snitch-core:4.0.0")
     // Add your preferred JSON parser and server
 }
 ```

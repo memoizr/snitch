@@ -8,7 +8,7 @@ Add Snitch to your project dependencies:
 
 ```kotlin
 dependencies {
-    implementation("io.github.memoizr:snitch-bootstrap:2.0.0")
+    implementation("io.github.memoizr:snitch-bootstrap:4.0.0")
 }
 ```
 
