@@ -1,15 +1,24 @@
 package snitch.router
 
 import snitch.parameters.HeaderParameter
+import snitch.parameters.Parameter
 import snitch.parameters.PathParam
 import snitch.parameters.QueryParameter
-import snitch.parsing.Parser
 import snitch.request.Body
 import snitch.request.TypedRequestWrapper
 import snitch.response.HttpResponse
-import snitch.service.*
+import snitch.service.Condition
+import snitch.service.DecoratedWrapper
+import snitch.service.Endpoint
+import snitch.service.OpDescription
+import snitch.service.SnitchService
 import snitch.syntax.HttpMethodsSyntax
-import snitch.types.*
+import snitch.types.ContentType
+import snitch.types.EndpointBundle
+import snitch.types.EndpointResponse
+import snitch.types.HandlerResponse
+import snitch.types.Parser
+import snitch.types.StatusCodes
 import kotlin.reflect.full.starProjectedType
 
 class Router(
@@ -24,19 +33,14 @@ class Router(
 
     inline fun <B : Any, reified T : Any, S : StatusCodes> Endpoint<B>.addEndpoint(
         endpointResponse: HandlerResponse<B, T, S>
-    ): Endpoint<B> = apply {
+    ): Endpoint<B> = applyConditions().also {
         endpoints += EndpointBundle(
-            this,
+            it,
             EndpointResponse(endpointResponse.statusCodes, endpointResponse.type),
             endpointResponse as HandlerResponse<Any, Any, out StatusCodes>,
         ) { request ->
-            decorator(
-                DecoratedWrapper({
-                    endpointResponse.handler(
-                        TypedRequestWrapper(request)
-                    )
-                }, request)
-            ).next()
+            it.decorator(DecoratedWrapper({ endpointResponse.handler(TypedRequestWrapper(request)) }, request))
+                .next()
         }
     }
 
@@ -56,35 +60,50 @@ class Router(
     inline fun <reified T : Any> body(contentType: ContentType = ContentType.APPLICATION_JSON) =
         Body(T::class, contentType)
 
-    internal fun applyToAll_(routerConfig: Routes, action: Endpoint<*>.() -> Endpoint<*>) {
+    internal fun applyToAll_(routerConfig: Routes, action: Endpoint<*>.() -> Endpoint<*>): Router {
         val router = Router(config, service, pathParams, parser, path)
         router.routerConfig()
-
         endpoints += router.endpoints.map {
-            val endpoint = it.endpoint.action()
+            val endpoint = it.endpoint.action().applyConditions()
             EndpointBundle(
                 endpoint,
                 EndpointResponse(it.handlerResponse.statusCodes, it.handlerResponse.type),
                 it.handlerResponse,
             ) { request ->
-                endpoint.decorator(
-                    DecoratedWrapper({
-                        it.handlerResponse.handler(
-                            TypedRequestWrapper(request)
-                        )
-                    }, request)
-                ).next()
+                endpoint
+                    .decorator(DecoratedWrapper({ it.handlerResponse.handler(TypedRequestWrapper(request)) }, request))
+                    .next()
             }
         }
+        return router
     }
 }
 
-fun routes(routes: Routes) = routes
+fun routes(vararg tags: String, routes: Routes): Router.() -> Unit = {
+    val router = Router(config, service, pathParams, parser, path)
+    router.routes()
+    router.endpoints.replaceAll {
+        (it as EndpointBundle<Any>).copy(
+            endpoint = it.endpoint.copy(tags = it.endpoint.tags.orEmpty() + tags.toList())
+        )
+    }
+    endpoints.addAll(router.endpoints)
+}
 
 internal val String.leadingSlash get() = if (!startsWith("/")) "/$this" else this
 
-fun Router.decorateWith(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = transformEndpoints { decorated(decoration) }
+fun decorateWith(
+    vararg params: Parameter<*, *>,
+    decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>
+): Router.(Router.() -> Unit) -> Router =
+    transformEndpoints { with(params.asList()).decorated(decoration) }
+
 fun decoration(decoration: DecoratedWrapper.() -> HttpResponse<out Any, *>) = decoration
-fun Router.transformEndpoints(action: Endpoint<*>.() -> Endpoint<*>): (Routes) -> Unit =
-    { it: Routes -> applyToAll_(it, action) }
-fun Router.onlyIf(condition: Condition) = transformEndpoints { onlyIf(condition) }
+fun transformEndpoints(action: Endpoint<*>.() -> Endpoint<*>): Router.(Routes) -> Router =
+    { this.applyToAll_(it, action) }
+
+fun Router.only(condition: Condition, routes: Routes) = transformEndpoints { onlyIf(condition) }(routes)
+
+operator fun (Router.(Router.() -> Unit) -> Router).plus(
+    other: Router.(Router.() -> Unit) -> Router
+): Router.(Router.() -> Unit) -> Router = { this@plus({ other(it) }) }

@@ -1,32 +1,29 @@
 package snitch.example.api.users
 
-import snitch.parameters.PathParam
-import snitch.request.RequestWrapper
-import snitch.request.TypedRequestWrapper
-import snitch.request.handling
-import snitch.request.parsing
-import snitch.router.Router
-import snitch.router.decorateWith
-import snitch.router.decoration
-import snitch.router.routes
-import snitch.types.ErrorResponse
-import snitch.types.StatusCodes
-import org.jetbrains.exposed.sql.transactions.transaction
 import snitch.example.api.*
 import snitch.example.api.Paths.postId
 import snitch.example.api.Paths.userId
-import snitch.example.api.auth.authenticated
-import snitch.example.api.auth.hasAdminRole
-import snitch.example.api.auth.principal
-import snitch.example.api.auth.principalEquals
+import snitch.example.authenticated
 import snitch.example.database.PostgresErrorCodes
 import snitch.example.database.RepositoriesModule.postsRepository
 import snitch.example.database.RepositoriesModule.usersRepository
+import snitch.example.hasAdminRole
+import snitch.example.principal
+import snitch.example.principalEquals
 import snitch.example.security.JWTClaims
 import snitch.example.security.Role
 import snitch.example.security.SecurityModule.hasher
 import snitch.example.security.SecurityModule.jwt
 import snitch.example.types.*
+import snitch.example.withTransaction
+import snitch.parameters.PathParam
+import snitch.request.RequestWrapper
+import snitch.request.TypedRequestWrapper
+import snitch.request.handling
+import snitch.request.parsing
+import snitch.router.routes
+import snitch.types.ErrorResponse
+import snitch.types.StatusCodes
 
 val usersController = routes {
     withTransaction {
@@ -35,7 +32,6 @@ val usersController = routes {
 
         userId / "posts" / {
             authenticated {
-                GET() onlyIf principalEquals(userId) isHandledBy getPosts
                 GET() onlyIf principalEquals(userId) isHandledBy getPosts
                 POST() onlyIf principalEquals(userId) with body<CreatePostRequest>() isHandledBy createPost
 
@@ -46,10 +42,6 @@ val usersController = routes {
         }
     }
 }
-
-val Router.withTransaction get() = decorateWith { transaction { next() } }
-
-private val withExposedTransaction = decoration { transaction { next() } }
 
 private val updatePost by parsing<UpdatePostRequest>() handling {
     postsRepository().updatePost(

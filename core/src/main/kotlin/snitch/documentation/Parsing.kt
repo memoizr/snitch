@@ -41,7 +41,10 @@ private fun objectSchema(serializer: DocumentationSerializer, type: KType): Sche
             } else null
             serializer.serializeField(param, type.jvmErasure) to (toSchema(serializer, paramType ?: param.type)
                 .let { schema ->
-                    val desc = param.annotations.find { it is Description }?.let { (it as Description) }
+                    val desc = (param
+                        .annotations + param.type.annotations)
+                        .find { it is Description }
+                        ?.let { (it as Description) }
                     when (schema) {
                         is Schemas.ArraySchema -> schema.apply {
                             description = desc?.description

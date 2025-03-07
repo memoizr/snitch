@@ -1,25 +1,41 @@
 package snitch.example
 
-import snitch.parsers.GsonJsonParser.serialized
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import ro.kreator.aRandom
 import snitch.example.ApplicationModule.clock
 import snitch.example.ApplicationModule.now
-import snitch.example.api.*
+import snitch.example.api.CreatePostRequest
+import snitch.example.api.PostResponse
+import snitch.example.api.PostsResponse
+import snitch.example.api.UpdatePostRequest
+import snitch.example.api.UserViewResponse
+import snitch.example.database.DBModule.connectionConfig
+import snitch.example.database.DBModule.schema
 import snitch.example.database.RepositoriesModule.postsRepository
 import snitch.example.database.RepositoriesModule.usersRepository
 import snitch.example.security.JWTClaims
 import snitch.example.security.Role
 import snitch.example.security.SecurityModule.jwt
-import snitch.example.types.*
+import snitch.example.types.CreatePostAction
+import snitch.example.types.CreateUserAction
+import snitch.example.types.Hash
+import snitch.example.types.Post
+import snitch.example.types.User
+import snitch.example.types.UserView
+import snitch.exposed.ExposedModule.connection
+import snitch.exposed.testing.ExposedConfig
+import snitch.exposed.testing.ExposedTest
+import snitch.kofix.aRandom
+import snitch.parsers.GsonJsonParser.serialized
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset.UTC
 
-class PostsRoutesTest : BaseTest() {
+class PostsRoutesTest : BaseTest(), ExposedTest {
+    override val exposedConfig = ExposedConfig(connection(connectionConfig()), schema())
+
     val createPostRequest by aRandom<CreatePostRequest>()
     val updatePostRequest by aRandom<UpdatePostRequest>()
 
@@ -34,10 +50,10 @@ class PostsRoutesTest : BaseTest() {
 
     @BeforeEach
     fun setup() {
+        beforeEach()
         clock.override { Clock.fixed(Instant.now(), UTC) }
         userToken = user.create().let { jwt().newToken(JWTClaims(user.id, Role.USER)) }
         adminToken = admin.create().let { jwt().newToken(JWTClaims(admin.id, Role.ADMIN)) }
-
         otherUser.create()
     }
 
@@ -92,11 +108,13 @@ class PostsRoutesTest : BaseTest() {
 
     @Test
     fun `a logged in user can delete his own post`() {
-        post.create()
+        printTime {
+            post.create()
 
-        DELETE("/users/${user.id.value}/posts/${post.id}")
-            .withHeaders(mapOf("X-Access-Token" to userToken))
-            .expectCode(204)
+            DELETE("/users/${user.id.value}/posts/${post.id}")
+                .withHeaders(mapOf("X-Access-Token" to userToken))
+                .expectCode(204)
+        }
     }
 
     @Test

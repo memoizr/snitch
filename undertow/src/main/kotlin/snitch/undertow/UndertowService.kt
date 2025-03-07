@@ -11,10 +11,10 @@ import io.undertow.util.Methods.OPTIONS
 import io.undertow.util.Methods.PATCH
 import io.undertow.util.Methods.POST
 import io.undertow.util.Methods.PUT
-import snitch.parsing.Parser
 import snitch.request.RequestWrapper
 import snitch.response.ErrorHttpResponse
 import snitch.response.HttpResponse
+import snitch.response.RawHttpResponse
 import snitch.response.SuccessfulHttpResponse
 import snitch.router.Router
 import snitch.router.Routes
@@ -27,6 +27,7 @@ import snitch.types.ContentType
 import snitch.types.EndpointBundle
 import snitch.types.Format
 import snitch.types.HTTPMethods
+import snitch.types.Parser
 import java.nio.ByteBuffer
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
@@ -83,7 +84,7 @@ class UndertowSnitchService(
                 routingHandler.add(
                     endpointBundle.endpoint.httpMethod.toUndertow(),
                     path,
-                    endpointBundle.undertowHandler
+                    { endpointBundle.undertowHandler(it) }
                 )
             )
         }
@@ -145,6 +146,7 @@ class UndertowSnitchService(
         when (this) {
             is SuccessfulHttpResponse<*, *> -> dispatchSuccessfulResponse(exchange)
             is ErrorHttpResponse<*, *, *> -> dispatchFailedResponse(exchange)
+            is RawHttpResponse<*, *> -> dispatchRawResponse(exchange)
         }
     }
 
@@ -154,6 +156,7 @@ class UndertowSnitchService(
         exchange.responseHeaders.put(HttpString("content-type"), Format.Json.type)
         exchange.responseSender.send(this.details?.serialized)
     }
+
 
     private fun SuccessfulHttpResponse<*, *>.dispatchSuccessfulResponse(exchange: HttpServerExchange) {
         exchange.setStatusCode(this.statusCode.code)
@@ -167,6 +170,25 @@ class UndertowSnitchService(
             exchange.responseSender.send(value1.toString())
         } else {
             if (body!!::class == ByteArray::class) {
+                exchange.responseSender.send(ByteBuffer.wrap(body as ByteArray))
+            } else {
+                exchange.responseSender.send(body.toString())
+            }
+        }
+    }
+
+    private fun RawHttpResponse<*, *>.dispatchRawResponse(exchange: HttpServerExchange) {
+        exchange.setStatusCode(this.statusCode.code)
+        exchange.responseHeaders.put(HttpString("content-type"), this._format.type)
+        headers.forEach {
+            exchange.responseHeaders.put(HttpString(it.key), it.value)
+        }
+        if (this._format == Format.Json) {
+            val value1 = value(parser)!!
+
+            exchange.responseSender.send(value1.toString())
+        } else {
+            if (body::class == ByteArray::class) {
                 exchange.responseSender.send(ByteBuffer.wrap(body as ByteArray))
             } else {
                 exchange.responseSender.send(body.toString())

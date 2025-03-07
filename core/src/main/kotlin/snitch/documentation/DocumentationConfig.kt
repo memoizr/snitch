@@ -3,7 +3,7 @@ package snitch.documentation
 data class DocumentationConfig(
     val description: String = "",
     val title: String = "",
-    val host: String = "http://localhost:3000",
+    val host: String = "http://localhost",
     val port: Int = 3000,
     val basePath: String = "",
     val docPath: String = "swagger-spec",

@@ -1,71 +1,17 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-plugins {
-    kotlin("jvm") version "1.9.0"
-    `maven-publish`
-    `java-library`
-    jacoco
-}
-
-group = "snitch.core"
-version = "1.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-    jcenter()
-    maven("https://jitpack.io")
-    maven("https://dl.bintray.com/arrow-kt/arrow-kt/")
-    maven("https://oss.jfrog.org/artifactory/oss-snapshot-local/")
-}
-
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.21")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2")
-    implementation("org.yaml:snakeyaml:2.0")
+    // Main dependencies
+    implementation(project(":types"))
+    implementation(libs.kotlin.reflect)
+    implementation(libs.coroutines.core)
+    implementation(libs.snakeyaml)
 
-    testImplementation(kotlin("test-junit"))
+    // Test dependencies
+    testImplementation(project(":tests"))
     testImplementation(project(":undertow"))
     testImplementation(project(":gsonparser"))
-    testImplementation("com.github.memoizr:assertk-core:-SNAPSHOT")
-    testImplementation(project(":tests"))
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "snitch"
-            artifactId = "core"
-            version = "1.0"
-
-            from(components["java"])
-        }
-    }
-}
-
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-}
-tasks.jacocoTestReport {
-    dependsOn(tasks.test) // tests are required to run before generating the report
-}
-jacoco {
-    toolVersion = "0.8.8"
-    reportsDirectory.set(layout.buildDirectory.dir("customJacocoReportDir"))
-}
-tasks.jacocoTestReport {
-    reports {
-        xml.required.set(false)
-        csv.required.set(false)
-        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
-    }
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.mockk)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.assertj.core)
+    testImplementation(libs.assertk.core)
 }

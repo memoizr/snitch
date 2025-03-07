@@ -1,16 +1,16 @@
 package snitch.parameters
 
-import snitch.validation.ofNonEmptySingleLineString
-import snitch.validation.ofNonNegativeInt
+import org.junit.jupiter.api.Test
 import snitch.documentation.Visibility
 import snitch.dsl.InlineSnitchTest
 import snitch.parsers.GsonJsonParser.serialized
-import snitch.parsing.Parser
 import snitch.request.parsing
-import snitch.types.Sealed
 import snitch.types.ErrorResponse
+import snitch.types.Parser
+import snitch.types.Sealed
 import snitch.validation.Validator
-import org.junit.Test
+import snitch.validation.ofNonEmptySingleLineString
+import snitch.validation.ofNonNegativeInt
 import java.text.SimpleDateFormat
 import java.util.*
 

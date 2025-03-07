@@ -1,0 +1,37 @@
+.codesection {
+  background-image: linear-gradient(to right, rgba(255,170,238,1), rgba(113,55,200,1));
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.codecontainer {
+  width: 100%;
+  max-width: 1000px;
+  margin: 50px auto;
+  border-radius: 8px;
+}
+
+.codeblock {
+  margin: 0;
+  font-family: 'JMH', monospace;
+  background-color: transparent;
+  font-size: 2rem;
+  color: white;
+  text-align: left;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .codecontainer {
+    padding: 0;
+    max-width: 500px;
+    margin: 50px auto;
+  }
+  
+  .codeblock {
+    font-size: 0.8rem;
+  }
+}

@@ -6,8 +6,6 @@ import snitch.parameters.Parameter
 import snitch.parameters.PathParam
 import snitch.parameters.QueryParameter
 import snitch.request.Body
-import snitch.request.RequestWrapper
-import snitch.response.ErrorHttpResponse
 import snitch.response.HttpResponse
 import snitch.router.AfterAction
 import snitch.router.BeforeAction
@@ -28,12 +26,20 @@ data class Endpoint<B : Any>(
     val tags: List<String>? = emptyList(),
     val visibility: Visibility = Visibility.PUBLIC,
     val decorator: DecoratedWrapper.() -> DecoratedWrapper = { this },
+    val conditions: List<Condition> = emptyList(),
+    val security: String? = null
 ) {
+
     infix fun decorated(decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>): Endpoint<B> {
         val previousDecorator = this.decorator
         return copy(
             decorator = { DecoratedWrapper({ decoration(previousDecorator(this)) }, wrap) }
         )
+    }
+
+    infix fun decoratedPost(decoration: DecoratedWrapper.() -> HttpResponse<out Any, StatusCodes>): Endpoint<B> {
+        val previousDecorator = this.decorator
+        return copy(decorator = { previousDecorator(DecoratedWrapper({ decoration(this@copy) }, wrap)) })
     }
 
     infix fun withQuery(queryParameter: QueryParameter<*, *>) = copy(queryParams = queryParams + queryParameter)
@@ -51,9 +57,36 @@ data class Endpoint<B : Any>(
         tags,
         visibility,
         decorator,
+        conditions,
+        security,
     )
 
     infix fun inSummary(summary: String) = copy(summary = summary)
+
+    fun applyConditions(): Endpoint<B> =
+        copy(
+            summary = (summary ?: "")
+                    + if (conditions.isNotEmpty()) " "
+                    + conditions.map { it.description }.joinToString("") else "",
+        ).let {
+            conditions.foldRight(it) { condition, endpoint ->
+                condition.transform(endpoint) as Endpoint<B>
+            }
+        }.let {
+            if (it.conditions.isNotEmpty()) {
+                it.decoratedPost {
+                    val condition = conditions.reduce { condition, next ->
+                        condition and next
+                    }
+                    when (val result = condition.check(wrap)) {
+                        is ConditionResult.Successful -> next()
+                        is ConditionResult.Failed -> result.response
+                    }
+                }
+            } else {
+                it
+            }
+        }
 
     infix fun isDescribedAs(description: String) = copy(description = description)
 
@@ -78,28 +111,5 @@ data class Endpoint<B : Any>(
         next().also { action(wrap, it) }
     }
 
-    infix fun onlyIf(condition: Condition) = decorated {
-        when (val result = condition.check(wrap)) {
-            is ConditionResult.Successful -> next()
-            is ConditionResult.Failed -> result.response
-        }
-    }
-}
-
-interface Condition {
-    fun check(requestWrapper: RequestWrapper): ConditionResult
-    infix fun or(other: Condition): Condition = OrCondition(this, other)
-}
-
-class OrCondition(private val first: Condition, private val second: Condition) : Condition {
-    override fun check(requestWrapper: RequestWrapper) =
-        when (val result = first.check(requestWrapper)) {
-            is ConditionResult.Successful -> result
-            is ConditionResult.Failed -> second.check(requestWrapper)
-        }
-}
-
-sealed class ConditionResult {
-    class Successful : ConditionResult()
-    data class Failed(val response: ErrorHttpResponse<Any, out Any, StatusCodes.BAD_REQUEST>) : ConditionResult()
+    infix fun onlyIf(condition: Condition) = copy(conditions = conditions + condition)
 }

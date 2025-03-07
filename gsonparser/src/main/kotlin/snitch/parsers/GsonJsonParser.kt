@@ -1,11 +1,15 @@
 package snitch.parsers
 
-import com.google.gson.*
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import snitch.parsers.GsonJsonParser.serialized
-import snitch.parsing.Parser
-import snitch.parsing.ParsingException
+import snitch.types.Parser
 import snitch.types.Sealed
 import java.lang.reflect.Type
 

@@ -3,3 +3,5 @@
 build/
 .gradle/
 out
+
+/gradle-local.properties

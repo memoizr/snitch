@@ -5,7 +5,6 @@ import com.memoizr.assertk.of
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.junit.jupiter.api.Test
-import ro.kreator.aRandom
 import snitch.example.ApplicationModule.clock
 import snitch.example.ApplicationModule.now
 import snitch.example.security.Authentication
@@ -14,6 +13,7 @@ import snitch.example.security.JWTManager
 import snitch.example.security.Role
 import snitch.example.security.SecurityModule.privateKey
 import snitch.example.types.UserId
+import snitch.kofix.aRandom
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit

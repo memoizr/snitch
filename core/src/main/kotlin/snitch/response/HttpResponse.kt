@@ -1,6 +1,6 @@
 package snitch.response
 
-import snitch.parsing.Parser
+import snitch.types.Parser
 import snitch.types.StatusCodes
 
 sealed class HttpResponse<T, out S : StatusCodes> {
@@ -15,5 +15,6 @@ sealed class HttpResponse<T, out S : StatusCodes> {
     ): HttpResponse<Any, *> = when (this) {
         is SuccessfulHttpResponse -> this.success()
         is ErrorHttpResponse<T, *, S> -> this.failure()
+        is RawHttpResponse -> throw UnsupportedOperationException()
     }
 }

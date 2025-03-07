@@ -1,47 +1,35 @@
-plugins {
-    kotlin("jvm") version "1.9.0"
-}
-
-group = "me.user"
-version = "1.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-    maven(url = "https://jitpack.io")
-}
-
 dependencies {
+    // Project dependencies
     implementation(project(":core"))
     implementation(project(":undertow"))
     implementation(project(":gsonparser"))
+    implementation(project(":shank"))
 
-    implementation("org.postgresql:postgresql:42.6.0")
-    implementation("org.jetbrains.exposed:exposed-core:0.41.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")
-    implementation("org.jetbrains.exposed:exposed-java-time:0.41.1")
-    implementation("de.mkammerer:argon2-jvm:2.10")
-    implementation("io.mockk:mockk:1.12.0")
+    // Database
+    implementation(project(":exposed"))
+    implementation(project(":exposed-h2"))
+    implementation(project(":exposed-postgres"))
 
-    implementation("com.github.memoizr:shank:3.0.0")
-    implementation("io.jsonwebtoken:jjwt-api:0.11.2")
-    implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("net.logstash.logback:logstash-logback-encoder:6.6")
+    // Security & Utils
+    implementation(libs.argon2)
+    implementation(libs.mockk)
+//    implementation(libs.shank)
 
+    // JWT
+    implementation(libs.jwt.api)
+    runtimeOnly(libs.jwt.impl)
+    runtimeOnly(libs.jwt.gson)
 
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
-    runtimeOnly("io.jsonwebtoken:jjwt-gson:0.11.2")
+    // Logging
+    implementation(libs.logback.classic)
+    implementation(libs.logstash.encoder)
 
-    testImplementation("com.github.memoizr:momster:9b2fa3b998")
-
+    // Testing
     testImplementation(project(":tests"))
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
+    testImplementation(project(":kofix"))
+    testImplementation(project(":exposed-testing"))
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.assertj.core)
+    testImplementation(libs.assertk.core)
+    testImplementation(libs.junit.jupiter)
 }

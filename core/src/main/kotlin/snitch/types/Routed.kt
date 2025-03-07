@@ -1,7 +1,6 @@
 package snitch.types
 
 import snitch.parameters.PathParam
-import snitch.parsing.Parser
 import snitch.service.SnitchService
 
 interface Routed {

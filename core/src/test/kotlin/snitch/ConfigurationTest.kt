@@ -1,13 +1,14 @@
 package snitch
 
 import com.memoizr.assertk.expect
-import snitch.undertow.UndertowSnitchService
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import snitch.config.loadConfigFromFile
 import snitch.parsers.GsonJsonParser
 import snitch.tests.SnitchTest
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import snitch.config.loadConfigFromFile
+import snitch.undertow.UndertowSnitchService
 
 class ConfigurationTest : SnitchTest({
     UndertowSnitchService(
@@ -19,15 +20,6 @@ class ConfigurationTest : SnitchTest({
 }) {
     override val port = 3333
 
-    @Before
-    override fun before() {
-        super.before()
-    }
-
-    @After
-    override fun after() {
-        super.after()
-    }
 
     @Test
     fun `supports port from config`() {

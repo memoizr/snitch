@@ -2,13 +2,32 @@ package snitch.example
 
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import ro.kreator.aRandom
 import snitch.example.api.CreateUserRequest
 import snitch.example.api.LoginRequest
+import snitch.example.database.DBModule.connectionConfig
+import snitch.example.database.DBModule.schema
+import snitch.example.security.IPasswordHasher
+import snitch.example.security.SecurityModule.hasher
+import snitch.example.types.Hash
+import snitch.exposed.ExposedModule.connection
+import snitch.exposed.testing.ExposedConfig
+import snitch.exposed.testing.ExposedTest
+import snitch.kofix.aRandom
 
-class UsersRoutesTest : BaseTest() {
+class UsersRoutesTest : BaseTest(), ExposedTest {
+    override val exposedConfig = ExposedConfig(connection(connectionConfig()), schema())
+
     val createRequest by aRandom<CreateUserRequest> { copy(email = "foo@gmail.com") }
     val otherRequestSameEmail by aRandom<CreateUserRequest> { copy(email = createRequest.email) }
+
+    init {
+        hasher.override {
+            object : IPasswordHasher {
+                override fun hash(password: String): String = "foo"
+                override fun match(password: String, hash: Hash): Boolean = true
+            }
+        }
+    }
 
     @Test
     fun `when an user with same email does not exist creates user`() {

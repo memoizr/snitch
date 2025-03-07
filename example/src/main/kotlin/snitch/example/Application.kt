@@ -11,9 +11,10 @@ import snitch.config.SnitchConfig.Service
 import snitch.documentation.generateDocumentation
 import snitch.documentation.servePublicDocumenation
 import snitch.example.ApplicationModule.logger
-import snitch.example.database.DBModule.postgresDatabase
+import snitch.example.database.DBModule.connectionConfig
 import snitch.example.types.ForbiddenException
 import snitch.example.types.ValidationException
+import snitch.exposed.ExposedModule.database
 import snitch.parsers.GsonJsonParser
 import snitch.service.RoutedService
 import snitch.service.exceptionhandling.handleInvalidParameters
@@ -21,6 +22,7 @@ import snitch.service.exceptionhandling.handleParsingException
 import snitch.service.exceptionhandling.handleUnregisteredParameters
 import snitch.types.ErrorResponse
 import snitch.undertow.snitch
+import kotlin.time.measureTimedValue
 
 object Application {
     init {
@@ -38,21 +40,22 @@ object Application {
 
     fun setup(port: Int): RoutedService {
 
-        snitch.example.Application.setUpDatabase()
+        setUpDatabase()
 
         return snitch(GsonJsonParser, SnitchConfig(Service(port = port)))
-            .onRoutes(snitch.example.rootRouter)
+            .onRoutes(rootRouter)
             .handleExceptions()
     }
 
     private fun setUpDatabase() {
-        postgresDatabase().addMissingColumns()
+        database(connectionConfig()).createSchema()
+        database(connectionConfig()).addMissingColumns()
     }
 }
 
 fun main() {
-    postgresDatabase().createSchema()
-    postgresDatabase().addMissingColumns()
+    database(connectionConfig()).createSchema()
+    database(connectionConfig()).addMissingColumns()
     Application.setup(3000)
         .start()
         .generateDocumentation()
@@ -81,3 +84,17 @@ fun RoutedService.handleExceptions(): RoutedService =
         .handleException(Throwable::class) {
             ErrorResponse(500, "something went wrong").serverError()
         }
+
+fun <T> printTime(block: () -> T): T {
+    val stacktrace = Thread.currentThread().stackTrace.map {
+        "${it.className}.${it.methodName}(${it.fileName}:${it.lineNumber})"
+    }.drop(2).take(1).joinToString("\n")
+
+    val duration = measureTimedValue {
+        block()
+    }
+
+    val message = "took: ${duration.duration.inWholeMilliseconds}ms at $stacktrace"
+    println(message)
+    return duration.value
+}

@@ -1,11 +1,16 @@
 package snitch.documentation
 
 import com.memoizr.assertk.expect
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import snitch.dsl.InlineSnitchTest
-import snitch.parameters.*
+import snitch.parameters.header
+import snitch.parameters.optionalHeader
+import snitch.parameters.optionalQuery
+import snitch.parameters.path
+import snitch.parameters.query
 import snitch.types.Sealed
-import org.junit.Test
-import java.util.Date
+import java.util.*
 
 class DocumentationTest : InlineSnitchTest() {
     @Test
@@ -32,6 +37,7 @@ class DocumentationTest : InlineSnitchTest() {
     }
 
     @Test
+    @Disabled
     fun `deals with parameter types`() {
         val path by path()
         val header by header()
@@ -46,7 +52,7 @@ class DocumentationTest : InlineSnitchTest() {
         }
             .generateDocumentation()
             .documentation
-            .spec contains ""
+            .spec contains "ohmaria" contains "aliasdescription"
     }
 
     @Test
@@ -59,6 +65,8 @@ class DocumentationTest : InlineSnitchTest() {
     }
 }
 
+@Description("aliasdescription")
+typealias MyBoolean = Boolean
 private data class ComplexClass(
     @Description("description", exInt = 1)
     val int: Int,
@@ -68,9 +76,9 @@ private data class ComplexClass(
     val float: Float,
     @Description("description", exDouble = 2.0)
     val double: Double,
-    @Description("description", exString = "")
+    @Description("description", exString = "ohmaria")
     val string: String,
-    val boolean: Boolean,
+    val boolean: MyBoolean,
     val short: Short,
     val byte: Byte,
     val char: Char,

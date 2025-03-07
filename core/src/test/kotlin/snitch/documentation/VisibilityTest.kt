@@ -1,12 +1,10 @@
 package snitch.documentation
 
 import com.google.gson.internal.LinkedTreeMap
-import snitch.BaseTest
 import snitch.parameters.TestResult
 import snitch.parsers.GsonJsonParser.parseJson
 import snitch.testRoutes
-import org.junit.Test
-import snitch.documentation.Visibility
+import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
 
 class VisibilityTest : snitch.BaseTest(testRoutes {

@@ -1,6 +1,6 @@
 package snitch.validation
 
-import snitch.parsing.Parser
+import snitch.types.Parser
 
 interface Validator<T, R> {
     val regex: Regex

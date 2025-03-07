@@ -1,21 +1,13 @@
 package snitch.example
 
-import snitch.router.Router
-import snitch.router.decorateWith
-import snitch.router.routes
-import snitch.example.ApplicationModule.logger
+import snitch.etc.cors
 import snitch.example.api.health.healthController
 import snitch.example.api.users.usersController
-
-val Router.log get() = decorateWith {
-        logger().info("Begin Request: ${request.method.name} ${request.path}")
-        next().also {
-            logger().info("End Request: ${request.method.name} ${request.path} ${it.statusCode.code} ${it.value(parser)}")
-        }
-    }
+import snitch.router.plus
+import snitch.router.routes
 
 val rootRouter = routes {
-    log {
+    (logged + cors) {
         "health" / healthController
         "users" / usersController
     }
