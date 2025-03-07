@@ -11,9 +11,10 @@ import snitch.config.SnitchConfig.Service
 import snitch.documentation.generateDocumentation
 import snitch.documentation.servePublicDocumenation
 import snitch.example.ApplicationModule.logger
-import snitch.example.database.DBModule.postgresDatabase
+import snitch.example.database.DBModule.connectionConfig
 import snitch.example.types.ForbiddenException
 import snitch.example.types.ValidationException
+import snitch.exposed.ExposedModule.database
 import snitch.parsers.GsonJsonParser
 import snitch.service.RoutedService
 import snitch.service.exceptionhandling.handleInvalidParameters
@@ -39,7 +40,7 @@ object Application {
 
     fun setup(port: Int): RoutedService {
 
-        snitch.example.Application.setUpDatabase()
+        setUpDatabase()
 
         return snitch(GsonJsonParser, SnitchConfig(Service(port = port)))
             .onRoutes(snitch.example.rootRouter)
@@ -47,13 +48,14 @@ object Application {
     }
 
     private fun setUpDatabase() {
-        postgresDatabase().addMissingColumns()
+        database(connectionConfig()).createSchema()
+        database(connectionConfig()).addMissingColumns()
     }
 }
 
 fun main() {
-    postgresDatabase().createSchema()
-    postgresDatabase().addMissingColumns()
+    database(connectionConfig()).createSchema()
+    database(connectionConfig()).addMissingColumns()
     Application.setup(3000)
         .start()
         .generateDocumentation()

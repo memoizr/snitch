@@ -16,7 +16,8 @@ object ExposedModule : ShankModule {
             manager = config.manager
         )
     }
-    val postgresDatabase = single { config: DatabaseConnectionConfig ->
+
+    val database = single { config: DatabaseConnectionConfig ->
         ExposedDatabase(connection(config))
     }
 }

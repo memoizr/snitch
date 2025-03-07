@@ -27,6 +27,7 @@ dependencies {
     // Testing
     testImplementation(project(":tests"))
     testImplementation(project(":kofix"))
+    testImplementation(project(":exposed-testing"))
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.assertj.core)
     testImplementation(libs.assertk.core)

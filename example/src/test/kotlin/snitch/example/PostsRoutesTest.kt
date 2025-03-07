@@ -11,6 +11,8 @@ import snitch.example.api.PostResponse
 import snitch.example.api.PostsResponse
 import snitch.example.api.UpdatePostRequest
 import snitch.example.api.UserViewResponse
+import snitch.example.database.DBModule.connectionConfig
+import snitch.example.database.DBModule.schema
 import snitch.example.database.RepositoriesModule.postsRepository
 import snitch.example.database.RepositoriesModule.usersRepository
 import snitch.example.security.JWTClaims
@@ -22,13 +24,18 @@ import snitch.example.types.Hash
 import snitch.example.types.Post
 import snitch.example.types.User
 import snitch.example.types.UserView
+import snitch.exposed.ExposedModule.connection
+import snitch.exposed.testing.ExposedConfig
+import snitch.exposed.testing.ExposedTest
 import snitch.kofix.aRandom
 import snitch.parsers.GsonJsonParser.serialized
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset.UTC
 
-class PostsRoutesTest : BaseTest() {
+class PostsRoutesTest : BaseTest(), ExposedTest {
+    override val exposedConfig = ExposedConfig(connection(connectionConfig()), schema())
+
     val createPostRequest by aRandom<CreatePostRequest>()
     val updatePostRequest by aRandom<UpdatePostRequest>()
 
@@ -43,6 +50,7 @@ class PostsRoutesTest : BaseTest() {
 
     @BeforeEach
     fun setup() {
+        beforeEach()
         clock.override { Clock.fixed(Instant.now(), UTC) }
         userToken = user.create().let { jwt().newToken(JWTClaims(user.id, Role.USER)) }
         adminToken = admin.create().let { jwt().newToken(JWTClaims(admin.id, Role.ADMIN)) }
