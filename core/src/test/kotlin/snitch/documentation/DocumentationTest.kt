@@ -63,7 +63,19 @@ class DocumentationTest : InlineSnitchTest() {
             .generateDocumentation()
             .servePublicDocumenation()
     }
+
+    @Test
+    fun `works with generic types`() {
+        expect that given {
+            GET("x").isHandledBy { CollectionResponse(listOf(LineItem(""))).ok}
+        }.generateDocumentation()
+            .documentation
+            .spec contains "lineItem"
+    }
 }
+
+private data class LineItem(val lineItem: String)
+private data class CollectionResponse<T>(val items: List<T>)
 
 @Description("aliasdescription")
 typealias MyBoolean = Boolean

@@ -7,9 +7,10 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.jvmErasure
 
-internal fun toSchema(documentationSerializer: DocumentationSerializer, type: KType): Schemas {
+internal fun toSchema(documentationSerializer: DocumentationSerializer, type: KType, collectionType: KType? = null): Schemas {
     val klass = type.jvmErasure
     val schema = when {
         klass == String::class -> Schemas.StringSchema()
@@ -20,7 +21,7 @@ internal fun toSchema(documentationSerializer: DocumentationSerializer, type: KT
         klass == Boolean::class -> Schemas.BooleanSchema()
         klass == Date::class -> Schemas.DateSchema()
         klass == ByteArray::class -> Schemas.BinarySchema()
-        klass == List::class -> Schemas.ArraySchema(items = toSchema(documentationSerializer, type.arguments.first().type!!))
+        klass == List::class -> Schemas.ArraySchema(items = toSchema(documentationSerializer, collectionType ?: type.arguments.first().type!!))
         klass.java.isEnum -> Schemas.StringSchema(enum = klass.java.enumConstants.map { it.toString() })
         klass.isSealed && Sealed::class.java.isAssignableFrom(klass.java) -> sealedSchema(documentationSerializer, klass, type)
         klass.objectInstance != null -> Schemas.ObjectSchema()
@@ -34,11 +35,14 @@ internal fun toSchema(documentationSerializer: DocumentationSerializer, type: KT
 
 private fun objectSchema(serializer: DocumentationSerializer, type: KType): Schemas.ObjectSchema {
     val parameters: List<KParameter> = type.jvmErasure.primaryConstructor!!.parameters
+    val typeMap by lazy { type.jvmErasure.typeParameters.map { it.name }.zip(type.arguments).toMap() }
     return Schemas.ObjectSchema(
         properties = parameters.map { param ->
             val paramType = if (param.type.jvmErasure.java == Object::class.java) {
                 type.arguments.singleOrNull()?.type
-            } else null
+            } else if(param.type.arguments.find {it.type!!.javaType.typeName in typeMap.keys } != null) {
+                typeMap[param.type.arguments.first().type!!.javaType.typeName]!!.type
+            }else null
             serializer.serializeField(param, type.jvmErasure) to (toSchema(serializer, paramType ?: param.type)
                 .let { schema ->
                     val desc = (param

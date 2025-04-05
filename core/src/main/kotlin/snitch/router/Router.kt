@@ -20,6 +20,7 @@ import snitch.types.HandlerResponse
 import snitch.types.Parser
 import snitch.types.StatusCodes
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.typeOf
 
 class Router(
     override val config: snitch.config.SnitchConfig,
@@ -50,9 +51,9 @@ class Router(
 
     inline infix fun <B : Any, reified T : Any, reified S : StatusCodes> Endpoint<B>.isHandledBy(
         noinline handler: TypedRequestWrapper<B>.() -> HttpResponse<T, S>
-    ): Endpoint<B> = addEndpoint(
-        HandlerResponse(S::class.starProjectedType, T::class.starProjectedType, handler)
-    )
+    ): Endpoint<B> {
+        return addEndpoint(HandlerResponse(S::class.starProjectedType, typeOf<T>(), handler))
+    }
 
     fun queries(vararg queryParameter: QueryParameter<*, *>) = queryParameter.asList()
     fun headers(vararg headerParameter: HeaderParameter<*, *>) = headerParameter.asList()
