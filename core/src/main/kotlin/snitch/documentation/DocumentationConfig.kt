@@ -25,7 +25,8 @@ data class DocumentationConfig(
     val showExtensions: Boolean = true,
     val showCommonExtensions: Boolean = true,
     val operationsSorter: String = "alpha",
-    val tagsSorter: String = "alpha"
+    val tagsSorter: String = "alpha",
+    val includeOptions: Boolean = false,
 )
 
 data class ConfigContact(val name: String, val email: String, val url: String)

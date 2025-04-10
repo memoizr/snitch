@@ -11,11 +11,7 @@ data class SuccessfulHttpResponse<T, out S : StatusCodes>(
     override val value: context(Parser) () -> Any? = {
         when (_format) {
             Format.Json -> body?.serialized
-            Format.TextHTML -> body
-            Format.OctetStream -> body
-            Format.TextPlain -> body
-            Format.ImageJpeg -> body
-            Format.VideoMP4 -> body
+            else -> body
         }
     },
     override val headers: Map<String, String> = emptyMap(),

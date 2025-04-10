@@ -7,7 +7,7 @@ import javassist.util.proxy.ProxyFactory
 import javassist.util.proxy.ProxyObject
 import org.apache.commons.lang3.RandomStringUtils
 import java.io.File
-import java.lang.reflect.Array.*
+import java.lang.reflect.Array.newInstance
 import java.lang.reflect.Method
 import java.lang.reflect.TypeVariable
 import java.security.MessageDigest
@@ -15,11 +15,17 @@ import java.time.Duration.ofDays
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
-import java.util.Collections.*
+import java.util.Collections.emptySet
 import kotlin.collections.set
-import kotlin.reflect.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
+import kotlin.reflect.KProperty
+import kotlin.reflect.KType
+import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.full.staticFunctions
 import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.internal.ReflectProperties
 import kotlin.reflect.jvm.isAccessible
@@ -27,6 +33,7 @@ import kotlin.reflect.jvm.javaMethod
 import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.jvmErasure
 import kotlin.reflect.jvm.jvmName
+import kotlin.reflect.typeOf
 
 
 typealias Token = Long
@@ -311,6 +318,10 @@ internal object CreationLogic {
         if (constructors.isEmpty() && klass.constructors.any { it.parameters.any { (it.type.jvmErasure == klass) } }) throw CyclicException()
         val defaultConstructor = constructors[pseudoRandom(token).int(constructors.size)] as KFunction<*>
         if (!defaultConstructor.isAccessible) {
+            val defaultFactory = klass.staticFunctions.find {it.valueParameters.isEmpty() && it.returnType.jvmErasure == klass}
+            if (defaultFactory!= null) {
+                return defaultFactory.call()
+            }
             defaultConstructor.isAccessible = true
         }
         val constructorTypeParameters by lazy {

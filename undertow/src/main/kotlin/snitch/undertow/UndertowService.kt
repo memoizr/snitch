@@ -39,7 +39,7 @@ fun snitch(
 
 @Suppress("UNCHECKED_CAST")
 class UndertowSnitchService(
-    private val parser: Parser,
+    override val parser: Parser,
     override val config: snitch.config.SnitchConfig = snitch.config.SnitchConfig()
 ) : SnitchService {
 

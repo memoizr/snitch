@@ -7,6 +7,8 @@ import com.memoizr.assertk.isEqualTo
 import com.memoizr.assertk.isInstance
 import com.memoizr.assertk.notNull
 import com.memoizr.assertk.of
+import org.junit.Before
+import org.junit.Test
 import snitch.kofix.CreationException
 import snitch.kofix.JavaClassWithList
 import snitch.kofix.Seed
@@ -33,11 +35,10 @@ import snitch.kofix.fixtures.SealedClass
 import snitch.kofix.fixtures.SimpleClass
 import snitch.kofix.fixtures.SimpleCompoundClass
 import snitch.kofix.fixtures.TheEnum
-import org.junit.Before
-import org.junit.Test
 import java.io.File
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -372,5 +373,13 @@ class RandomGenerationTest {
         expect that users.map { it.id.value }.toSet().size isEqualTo users.size
         expect that user.username.value contains "user_username"
         expect that user.id.value contains "user_id"
+    }
+
+    data class FactoryOnly(val date: LocalDate)
+    val factoryOnly by aRandom<FactoryOnly>()
+    
+    @Test
+    fun `works factory only classes`() {
+        expect that factoryOnly.date _is notNull
     }
 }

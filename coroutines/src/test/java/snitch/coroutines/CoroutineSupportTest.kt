@@ -10,6 +10,7 @@ import snitch.service.RoutedService
 import snitch.tests.Ported
 import snitch.tests.TestMethods
 import snitch.types.HandlerResponse
+import snitch.types.Parser
 import snitch.types.StatusCodes
 import snitch.undertow.UndertowSnitchService
 import java.util.*
@@ -41,6 +42,8 @@ class CoroutineSupportTest : InlineSnitchTest() {
             assertNear(time, 100L, 30)
         }
     }
+
+    override val parser: Parser = GsonJsonParser
 }
 
 fun assertNear(value: Long, target: Long, marginPercent: Int) {

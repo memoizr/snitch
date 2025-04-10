@@ -26,6 +26,7 @@ internal fun toSchema(documentationSerializer: DocumentationSerializer, type: KT
         klass.isSealed && Sealed::class.java.isAssignableFrom(klass.java) -> sealedSchema(documentationSerializer, klass, type)
         klass.objectInstance != null -> Schemas.ObjectSchema()
         klass.primaryConstructor == null -> Schemas.StringSchema()
+        klass.isValue -> toSchema(documentationSerializer, klass.primaryConstructor!!.parameters.first().type) as Schemas.BaseSchema<out Any>
         else -> objectSchema(documentationSerializer, type)
     }
     return schema.apply {

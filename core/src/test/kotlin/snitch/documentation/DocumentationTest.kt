@@ -72,7 +72,19 @@ class DocumentationTest : InlineSnitchTest() {
             .documentation
             .spec contains "lineItem"
     }
+
+    @Test
+    fun `supports inline types`() {
+        expect that given {
+            GET("inline").isHandledBy { InlineResponse(InlineItem("me")).ok}
+        }.generateDocumentation()
+            .documentation
+            .spec contains "inlineItem" doesNotContain "value"
+    }
 }
+@JvmInline
+value class InlineItem(val value: String)
+data class InlineResponse(val inlineItem: InlineItem)
 
 private data class LineItem(val lineItem: String)
 private data class CollectionResponse<T>(val items: List<T>)

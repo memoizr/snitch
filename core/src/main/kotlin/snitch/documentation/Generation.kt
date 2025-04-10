@@ -6,7 +6,8 @@ import snitch.service.RoutedService
 import snitch.types.ContentType
 import snitch.types.EndpointBundle
 import snitch.types.Format.Json
-import snitch.types.Format.TextHTML
+import snitch.types.Format.TextHtml
+import snitch.types.HTTPMethods
 import snitch.types.StatusCodes
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.jvmErasure
@@ -23,7 +24,9 @@ fun RoutedService.generateDocumentation(
     return router.endpoints
         .groupBy { it.endpoint.path }
         .map { entry ->
-            entry.key to entry.value.foldRight(Path()) { bundle: EndpointBundle<*>, path ->
+            entry.key to entry.value
+                .filter { if (documentationConfig.includeOptions) true else it.endpoint.httpMethod != HTTPMethods.OPTIONS }
+                .foldRight(Path()) { bundle: EndpointBundle<*>, path ->
                 path.withOperation(
                     bundle.endpoint.httpMethod,
                     Operation(
@@ -132,7 +135,7 @@ fun DocumentedService.servePublicDocumenation(): DocumentedService {
         val path = "/"// config.publicDocumentationPath.ensureLeadingSlash()
         val docPath = "/spec.json"//.ensureLeadingSlash()
         GET(path).isHandledBy {
-            index(docPath).ok.format(TextHTML)
+            index(docPath).ok.format(TextHtml)
         }
         GET(docPath).isHandledBy {
             documentation.spec.ok.format(Json).serializer { it }
